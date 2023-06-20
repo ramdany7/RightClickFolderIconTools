@@ -1,4 +1,3 @@
-
 @ECHO off
 chcp 65001 >nul
 set name=RCFI Tools
@@ -1822,7 +1821,6 @@ REM Save current config to config.ini
 	echo Extension="%Extension%"
 	echo Template="%Template%"
 	echo GenerateSample="%GenerateSample%"
-	echo TemplateSampleImage="%TemplateSampleImage%"
 	echo TemplateForICO="%TemplateForICO%"
 	echo TemplateForPNG="%TemplateForPNG%"
 	echo TemplateForJPG="%TemplateForJPG%"
@@ -1845,7 +1843,6 @@ set "Keyword=%Keyword:"=%"
 set "Extension=%Extension:"=%"
 set "Template=%Template:"=%"
 set "GenerateSample=%GenerateSample:"=%"
-set "TemplateSampleImage=%TemplateSampleImage:"=%"
 set "TemplateForICO=%TemplateForICO:"=%"
 set "TemplateForPNG=%TemplateForPNG:"=%"
 set "TemplateForJPG=%TemplateForJPG:"=%"
@@ -1862,7 +1859,6 @@ EXIT /B
 	echo Extension=".png"
 	echo Template="%rcfi%\template\(none).bat"
 	echo GenerateSample="Yes"
-	echo TemplateSampleImage="%rcfi%\img\test.png"
 	echo TemplateForICO="drive:\path\to\the template.bat"
 	echo TemplateForPNG="drive:\path\to\the template.bat"
 	echo TemplateForJPG="drive:\path\to\the template.bat"
@@ -1915,7 +1911,7 @@ set "RCFI=%RCFI:\_.=%"
 set "RCFID=%rcfi%\uninstall.cmd"
 set "montage=%rcfi%\resources\montage.exe"
 set "ImageSupport=.jpg,.png,.ico,.webp,.jpeg,.bmp,.tiff,.heic,.heif,.wbmp,.tga,.svg"
-if not exist "%TemplateSampleImage%" set "TemplateSampleImage=%RCFI%\img\test.png"
+set "TemplateSampleImage=%RCFI%\img\- test.png"
 
 rem Define some variables for MKV Tools
 set "mkvpropedit=%rcfi%\resources\mkvpropedit.exe"
@@ -2100,7 +2096,7 @@ rem Generating setup_*.reg
 	:REG-FI-IMAGE-Set.As.Folder.Icon
 	echo [%RegExShell%\RCFI.IMG-Set.As.Folder.Icon]
 	echo "MUIVerb"="Set as Folder Icon"
-	echo "Icon"="shell32.dll,-16801"
+	echo "Icon"="shell32.dll,-16805"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG-Set.As.Folder.Icon\command]
 	echo @="%cmd% set \"Context=IMG-Set.As.Folder.Icon\"%RCFIexe% \"%%1\""
@@ -2115,14 +2111,14 @@ rem Generating setup_*.reg
 
 	:REG-FI-IMAGE-FI.Template.Samples
 	echo [%RegExShell%\RCFI.IMG.Template.Samples]
-	echo "MUIVerb"="Template samples"
-	echo "Icon"="imageres.dll,-5308"
+	echo "MUIVerb"="Generate Template Samples"
+	echo "Icon"="imageres.dll,-1003"
 	echo [%RegExShell%\RCFI.IMG.Template.Samples\command]
 	echo @="%cmd% set \"Context=IMG.Template.Samples\"%RCFIexe% \"%%1\""	
 	
 	:REG-FI-IMAGE-Convert
 	echo [%RegExShell%\RCFI.IMG-Convert]
-	echo "MUIVerb"="Convert"
+	echo "MUIVerb"="Convert Image"
 	echo "Icon"="shell32.dll,-236"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG-Convert\command]
@@ -2130,7 +2126,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-IMAGE-Resize
 	echo [%RegExShell%\RCFI.IMG-Resize]
-	echo "MUIVerb"="Resize"
+	echo "MUIVerb"="Resize Image"
 	echo "Icon"="shell32.dll,-236"
 	echo [%RegExShell%\RCFI.IMG-Resize\command]
 	echo @="%SCMD% set \"Context=IMG-Resize\"%SRCFIexe% \"%%1\""
@@ -2434,3 +2430,8 @@ echo %g_%MKV Tools detected%gg_%✓%g_%
 
 )>>"%Setup_Write%"
 exit /b
+
+
+:Colour
+start "Colour options" cmd /c "D:\Documents\Scripts\Text color in batch\Tes colour.bat"
+goto options
