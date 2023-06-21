@@ -15,6 +15,8 @@ set "display-movieinfo=no"
 set "Show-Rating=yes"
 set "Show-Genre=yes"
 set "genre-characters-limit=26"
+set "show-clearArt=no"
+set "use-Logo-instead-folderName=no"
 set "FolderNameShort-characters-limit=11"
 set "FolderNameLong-characters-limit=40"
 ::------ Image source -------
@@ -114,7 +116,7 @@ if exist "*discart.png" (
 set DISC-IMAGE-CODE= ( "%discart%" ^
 	 -scale 300x300! ^
 	 -background none ^
-	 -extent 512x512-205-120 ^
+	 -extent 512x512-170-203 ^
 	 ( +clone -background BLACK -shadow 100x1.3+2+2 ) ^
 	 +swap -background none -layers merge -extent 512x512 ^
 	 ) -compose Over -composite
@@ -126,7 +128,8 @@ if /i not "%display-discimage%"=="yes" set "DISC-IMAGE-CODE="
 if defined rating set STAR-IMAGE-CODE= ( ^
 	 "%star-image%" ^
 	 -scale 75x75! ^
-	 -extent 512x512-44-428 ^
+	 -gravity Northwest ^
+	 -geometry +45+434 ^
 	 ( +clone -background BLACK% ^
 	 -shadow 40x1.2+1.8+3 ) ^
 	 +swap -background none -layers merge -extent 512x512 ^
@@ -142,7 +145,8 @@ if defined RATING set RATING-CODE= ( ^
 	 -fill BLACK ^
 	 -pointsize 26 ^
 	 label:"%rating%" ^
-	 -extent 512x512-61-457 ^
+	 -gravity Northwest ^
+	 -geometry +64+463 ^
 	 ( +clone -background black -shadow 0x1.3+2+3.5 ) ^
 	 +swap -background none -layers merge -extent 512x512 ^
 	 ) -compose Over -composite 
@@ -157,7 +161,7 @@ if defined GENRE set GENRE-CODE= ( ^
 	 -fill BLACK ^
 	 -pointsize 25 ^
 	 -gravity Northwest ^
-	 -geometry +110+465 ^
+	 -geometry +110+470 ^
 	 label:"%genre%" ^
 	 ( +clone -background ORANGE -shadow 70x1+0.6+0.6 ) +swap -background none -layers merge ^
 	 ( +clone -background YELLOW -shadow 70x1-0.6-0.6 ) +swap -background none -layers merge ^
@@ -178,12 +182,44 @@ set POSTER-SIDE-CODE= ( ^
 	 ( "%foldervertical-sidefx%" -scale 512x512! ) -compose over -composite
    
 
+:LAYER-LOGO_IMAGE
+if exist "*Logo.png" (
+	for %%D in (*Logo.png) do set "Logo=%%~fD"
+) else set "Logo="
+set Logo-IMAGE-CODE= ( "%Logo%" ^
+	 -scale 160x50! ^
+	 -background none ^
+	 -gravity Northwest ^
+	 -geometry +420+60 ^
+	 -rotate 90 ^
+	 ) -compose Over -composite
+if not defined Logo set "Logo-IMAGE-CODE="
+if /i not "%use-Logo-instead-folderName%"=="yes" set "Logo-IMAGE-CODE="
+
+:LAYER-CLEARART_IMAGE
+if exist "*clearart.png" (
+	for %%D in (*clearart.png) do set "clearart=%%~fD"
+) else set "clearart="
+set CLEARART-IMAGE-CODE= ( "%clearart%" ^
+	 -scale 380x ^
+	 -background none ^
+	 -gravity SouthWest ^
+	 -geometry -250-320 ^
+	 ( +clone -background BLACK -shadow 40x40+10+10 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 40x40-10-10 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 40x40-10+10 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 40x40+10-10 ) +swap -background none -layers merge ^
+	 ) -compose Over -composite
+if not defined clearart set "CLEARART-IMAGE-CODE="
+if /i not "%show-clearArt%"=="yes" set "CLEARART-IMAGE-CODE="
+
 :LAYER-FOLDER_NAME
 set FOLDER-NAME-SHORT-CODE= ^
 	 ( ^
 	 -font Arial-Bold ^
 	 -fill white ^
-	 -pointsize 27 ^
+	 -density 400 ^
+	 -pointsize 5 ^
 	 -gravity Northwest ^
 	 -geometry +398+30 ^
 	 label:"%FolNamShort%" ^
@@ -197,14 +233,19 @@ set FOLDER-NAME-LONG-CODE= ^
 	 ( ^
 	 -font Arial-Bold  ^
 	 -fill white ^
-	 -pointsize 17 ^
+	 -density 400 ^
+	 -pointsize 3 ^
 	 -kerning 2 ^
 	 -gravity Northwest ^
-	 -geometry +416+45 ^
+	 -geometry +376+5 ^
 	 label:"%FolNamLong%" ^
+	 ( +clone -background BLACK -shadow 10x5+0.2+0.2 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 10x5-0.2-0.2 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 10x5-0.2+0.2 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 10x5+0.2-0.2 ) +swap -background none -layers merge ^
 	 -rotate 90 ) -composite
 if %FolNamShortCount% LEQ %FolNamShortLimit% set "FOLDER-NAME-LONG-CODE="
-
+if defined Logo-IMAGE-CODE set "FOLDER-NAME-LONG-CODE=" &set "FOLDER-NAME-SHORT-CODE="
 
 :LAYER-SIDE-POSTER-SHADOW
 set POSTER-SIDE-SHADOW-CODE= ( "%foldervertical-sideshadow%" -scale 512x512! ) -compose over -composite
@@ -229,9 +270,11 @@ set POSTER-MAIN-CODE= ( ^
   %POSTER-SIDE-CODE% ^
   %FOLDER-NAME-SHORT-CODE% ^
   %FOLDER-NAME-LONG-CODE% ^
+  %Logo-IMAGE-CODE% ^
   %DISC-IMAGE-CODE% ^
   %POSTER-SIDE-SHADOW-CODE% ^
   %POSTER-MAIN-CODE% ^
+  %CLEARART-IMAGE-CODE% ^
   %STAR-IMAGE-CODE% ^
   %RATING-CODE% ^
   %GENRE-CODE% ^

@@ -15,6 +15,8 @@ set "display-movieinfo=no"
 set "Show-Rating=yes"
 set "Show-Genre=yes"
 set "genre-characters-limit=26"
+set "show-clearArt=no"
+set "use-Logo-instead-folderName=no"
 set "FolderNameShort-characters-limit=10"
 set "FolderNameLong-characters-limit=38"
 ::------ Image source -------
@@ -114,7 +116,8 @@ if exist "*discart.png" (
 set DISC-IMAGE-CODE= ( "%discart%" ^
 	 -scale 300x300! ^
 	 -background none ^
-	 -extent 512x512-205-120 ^
+	 -gravity Northwest ^
+	 -geometry +110+74 ^
 	 ( +clone -background BLACK -shadow 100x1.3+2+2 ) ^
 	 +swap -background none -layers merge -extent 512x512 ^
 	 ) -compose Over -composite
@@ -126,7 +129,8 @@ if /i not "%display-discimage%"=="yes" set "DISC-IMAGE-CODE="
 if defined rating set STAR-IMAGE-CODE= ( ^
 	 "%star-image%" ^
 	 -scale 75x75! ^
-	 -extent 512x512-44-428 ^
+	 -gravity Northwest ^
+	 -geometry +5+382 ^
 	 ( +clone -background BLACK% ^
 	 -shadow 40x1.2+1.8+3 ) ^
 	 +swap -background none -layers merge -extent 512x512 ^
@@ -142,7 +146,8 @@ if defined RATING set RATING-CODE= ( ^
 	 -fill BLACK ^
 	 -pointsize 26 ^
 	 label:"%rating%" ^
-	 -extent 512x512-61-457 ^
+	 -gravity Northwest ^
+	 -geometry +23+411 ^
 	 ( +clone -background black -shadow 0x1.3+2+3.5 ) ^
 	 +swap -background none -layers merge -extent 512x512 ^
 	 ) -compose Over -composite 
@@ -157,7 +162,7 @@ if defined GENRE set GENRE-CODE= ( ^
 	 -fill BLACK ^
 	 -pointsize 25 ^
 	 -gravity Northwest ^
-	 -geometry +110+465 ^
+	 -geometry +67+418 ^
 	 label:"%genre%" ^
 	 ( +clone -background ORANGE -shadow 70x1+0.6+0.6 ) +swap -background none -layers merge ^
 	 ( +clone -background YELLOW -shadow 70x1-0.6-0.6 ) +swap -background none -layers merge ^
@@ -168,6 +173,31 @@ if defined GENRE set GENRE-CODE= ( ^
 if /i not "%Show-Genre%" EQU "yes" set "GENRE-CODE="
 if /i not "%display-movieinfo%" EQU "yes" set "GENRE-CODE="
 
+:LAYER-LOGO_IMAGE
+if exist "*Logo.png" (
+	for %%D in (*Logo.png) do set "Logo=%%~fD"
+) else set "Logo="
+set Logo-IMAGE-CODE= ( "%Logo%" ^
+	 -scale 160x55! ^
+	 -background none ^
+	 -gravity Northwest ^
+	 -geometry +51+86 ^
+	 ) -compose Over -composite
+if not defined Logo set "Logo-IMAGE-CODE="
+if /i not "%use-Logo-instead-folderName%"=="yes" set "Logo-IMAGE-CODE="
+
+:LAYER-CLEARART_IMAGE
+if exist "*clearart.png" (
+	for %%D in (*clearart.png) do set "clearart=%%~fD"
+) else set "clearart="
+set CLEARART-IMAGE-CODE= ( "%clearart%" ^
+	 -scale 248x ^
+	 -background none ^
+	 -gravity Northwest ^
+	 -geometry +223+3 ^
+	 ) -compose Over -composite
+if not defined clearart set "CLEARART-IMAGE-CODE="
+if /i not "%show-clearArt%"=="yes" set "CLEARART-IMAGE-CODE="
 
 :LAYER-POSTER_TOP
 set POSTER-TOP-CODE= ( ^
@@ -183,7 +213,8 @@ set FOLDER-NAME-SHORT-CODE= ^
 	( ^
 	 -font Arial-Bold ^
 	 -fill white ^
-	 -pointsize 30 ^
+	 -density 420 ^
+	 -pointsize 5 ^
 	 -gravity Northwest ^
 	 -geometry +20+44 ^
 	 label:"%FolNamShort%" ^
@@ -197,14 +228,19 @@ set FOLDER-NAME-LONG-CODE= ^
 	 ( ^
 	 -font Arial-Bold  ^
 	 -fill white ^
-	 -pointsize 19 ^
+	 -density 450 ^
+	 -pointsize 3 ^
 	 -kerning 2 ^
 	 -gravity Northwest ^
-	 -geometry +35+120 ^
+	 -geometry -10+80 ^
 	 label:"%FolNamLong%" ^
+	 ( +clone -background BLACK -shadow 10x5+0.2+0.2 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 10x5-0.2-0.2 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 10x5-0.2+0.2 ) +swap -background none -layers merge ^
+	 ( +clone -background BLACK -shadow 10x5+0.2-0.2 ) +swap -background none -layers merge ^
 	 ) -composite
 if %FolNamShortCount% LEQ %FolNamShortLimit% set "FOLDER-NAME-LONG-CODE="
-     
+if defined Logo-IMAGE-CODE set "FOLDER-NAME-LONG-CODE=" &set "FOLDER-NAME-SHORT-CODE="
 	 
 :LAYER-TOP-POSTER-SHADOW
 set POSTER-TOP-SHADOW-CODE= ( "%folderhorizontal-TOPshadow%" -scale 512x512! ) -compose over -composite
@@ -230,7 +266,9 @@ set POSTER-MAIN-CODE= ( ^
   %POSTER-TOP-CODE% ^
   %FOLDER-NAME-SHORT-CODE% ^
   %FOLDER-NAME-LONG-CODE% ^
+  %Logo-IMAGE-CODE% ^
   %DISC-IMAGE-CODE% ^
+  %CLEARART-IMAGE-CODE% ^
   %POSTER-TOP-SHADOW-CODE% ^
   %POSTER-MAIN-CODE% ^
   %STAR-IMAGE-CODE% ^
