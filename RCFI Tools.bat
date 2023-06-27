@@ -95,7 +95,7 @@ if /i "%Command%"=="on"			set "refreshopen=index"	&goto FI-Activate
 if /i "%Command%"=="off"			set "refreshopen=index"	&goto FI-Deactivate
 if /i "%Command%"=="copy"			goto CopyFolderIcon
 if /i "%Command%"=="refresh"		echo %TAB%%cc_%Refreshing icon cache..%_%&set "act=RefreshNR"	&start "" "%~f0" &goto options
-if /i "%Command%"=="refreshforce"	echo %TAB%%cc_%Refreshing icon cache..%_%&set "act=Refresh"		&start "" "%~f0" &goto options
+if /i "%Command%"=="refreshforce"	echo %TAB%%cc_%Refreshing icon cache..%_%&set "act=Refresh"	&start "" "%~f0" &goto options
 if /i "%Command%"=="rf"			echo %TAB%%cc_%Refreshing icon cache..%_%&set "act=RefreshNR"	&start "" "%~f0" &goto options
 if /i "%Command%"=="rff"			echo %TAB%%cc_%Refreshing icon cache..%_%&set "act=Refresh"		&start "" "%~f0" &goto options
 if /i "%Command%"=="template"	goto FI-Template
@@ -130,50 +130,52 @@ goto Input-Error
 title %name% %version% ^| %1
 cls &echo. &echo. &echo.
 REM Selected Image
-if /i "%Context%"=="IMG-Actions"					goto IMG-Actions
-if /i "%Context%"=="IMG-Set.As.Folder.Icon"		%Dir1% &set "input=%SelectedThing%"&set "RefreshOpen=Select" &goto DirectInput
-if /i "%Context%"=="IMG.Choose.Template"			set img=%1&goto FI-Template
+if /i "%Context%"=="IMG-Actions"				goto IMG-Actions
+if /i "%Context%"=="IMG-Set.As.Folder.Icon"	%Dir1% &set "input=%SelectedThing%"&set "RefreshOpen=Select" &goto DirectInput
+if /i "%Context%"=="IMG.Choose.Template"		set img=%1&goto FI-Template
 if /i "%Context%"=="IMG.Template.Samples"		set img=%1&goto FI-Template-Sample-All
 if /i "%Context%"=="IMG-Set.As.Cover"			set img=%1&goto IMG-Set_as_MKV_cover
-if /i "%Context%"=="IMG-Convert"					set img=%1&goto IMG-Convert
+if /i "%Context%"=="IMG-Convert"				set img=%1&goto IMG-Convert
 if /i "%Context%"=="IMG-Resize"					set img=%1&goto IMG-Resize
 REM Selected Dir	
-if /i "%Context%"=="OpenHere"						%Dir% &call :Config-Save 			&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
-if /i "%Context%"=="DIR.Choose.Template"			goto FI-Template
+if /i "%Context%"=="OpenHere"					%Dir% &call :Config-Save	&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
+if /i "%Context%"=="DIR.Choose.Template"		goto FI-Template
 if /i "%Context%"=="FI.Search.Folder.Icon"		goto FI-Search
 if /i "%Context%"=="FI.Search.Poster"			goto FI-Search
 if /i "%Context%"=="FI.Search.Folder.Icon.Here"	goto FI-Search
-if /i "%Context%"=="Scan"							set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
+if /i "%Context%"=="Scan"						set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
 if /i "%Context%"=="DefKey"						goto FI-Keyword
 if /i "%Context%"=="GenKey"						set "input=Generate"											&set "cdonly=true" &goto FI-Generate
 if /i "%Context%"=="GenJPG"						set "input=Generate"		&set "Target=*.jpg" 				&set "cdonly=true" &goto FI-Generate
 if /i "%Context%"=="GenPNG"						set "input=Generate"		&set "Target=*.png" 				&set "cdonly=true" &goto FI-Generate
-if /i "%Context%"=="GenPosterJPG"					set "input=Generate"		&set "Target=*Poster*.jpg" 		&set "cdonly=true" &goto FI-Generate
-if /i "%Context%"=="GenLandscapeJPG"				set "input=Generate"		&set "Target=*Landscape*.jpg"	&set "cdonly=true" &goto FI-Generate
-if /i "%Context%"=="ActivateFolderIcon"			set "RefreshOpen=Select"	&goto FI-Activate
+if /i "%Context%"=="GenPosterJPG"				set "input=Generate"		&set "Target=*Poster*.jpg" 		&set "cdonly=true" &goto FI-Generate
+if /i "%Context%"=="GenLandscapeJPG"			set "input=Generate"		&set "Target=*Landscape*.jpg"	&set "cdonly=true" &goto FI-Generate
+if /i "%Context%"=="ActivateFolderIcon"		set "RefreshOpen=Select"	&goto FI-Activate
 if /i "%Context%"=="DeactivateFolderIcon"		set "RefreshOpen=Select"	&goto FI-Deactivate
 if /i "%Context%"=="RemFolderIcon"				set "delete=confirm"		&set "cdonly=true"				&goto FI-Remove
 REM Background Dir	                         	
 if /i "%Context%"=="DIRBG.Choose.Template"		goto FI-Template
 if /i "%Context%"=="Scan.Here"					%Dir% &set "input=Scan" 			&goto FI-Scan
-if /i "%Context%"=="GenKey.Here"					%Dir% &set "input=Generate"											&set "cdonly=false" &goto FI-Generate
-if /i "%Context%"=="GenJPG.Here"					%Dir% &set "input=Generate"		&set "Target=*.jpg" 				&set "cdonly=false" &goto FI-Generate
-if /i "%Context%"=="GenPNG.Here"					%Dir% &set "input=Generate"		&set "Target=*.png" 				&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenKey.Here"				%Dir% &set "input=Generate"											&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenJPG.Here"				%Dir% &set "input=Generate"		&set "Target=*.jpg" 				&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenPNG.Here"				%Dir% &set "input=Generate"		&set "Target=*.png" 				&set "cdonly=false" &goto FI-Generate
 if /i "%Context%"=="GenPosterJPG.Here"			%Dir% &set "input=Generate"		&set "Target=*Poster*.jpg" 		&set "cdonly=false" &goto FI-Generate
 if /i "%Context%"=="GenLandscapeJPG.Here"		%Dir% &set "input=Generate"		&set "Target=*Landscape*.jpg"	&set "cdonly=false" &goto FI-Generate
 if /i "%Context%"=="ActivateFolderIcon.Here"	%Dir% &goto FI-Activate
-if /i "%Context%"=="DeactivateFolderIcon.Here"	%Dir% &goto FI-Deactivate
-if /i "%Context%"=="RemFolderIcon.Here"			%Dir% &set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
-if /i "%Context%"=="Open.Dir"		echo %TAB%%_%Opening..   &echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &goto options
+if /i "%Context%"=="DeactivateFolderIcon.Here" %Dir% &goto FI-Deactivate
+if /i "%Context%"=="RemFolderIcon.Here"		%Dir% &set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
+if /i "%Context%"=="Open.Dir"					echo %TAB%%_%Opening..   		&echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &goto options
 REM Other
 if /i "%Context%"=="MKV.Cover-Delete"		goto MKV-Cover-Delete
 if /i "%Context%"=="MKV.Subtitle-Merge"	goto MKV-Subtitle-Merge
-if /i "%Context%"=="MP4.to.MKV"	goto MKV-Convert
-if /i "%Context%"=="AVI.to.MKV"	goto MKV-Convert
-if /i "%Context%"=="TS.to.MKV"	goto MKV-Convert
-if /i "%Context%"=="SRT.Rename"	goto SUB-Rename
-if /i "%Context%"=="ASS.Rename"	goto SUB-Rename
-if /i "%Context%"=="FI.Deactivate" set "Setup=Deactivate" &goto Setup
+if /i "%Context%"=="MKV.Extract"			goto MKV-Extract
+if /i "%Context%"=="MP4.to.MKV"				goto MKV-Convert
+if /i "%Context%"=="AVI.to.MKV"				goto MKV-Convert
+if /i "%Context%"=="TS.to.MKV"				goto MKV-Convert
+if /i "%Context%"=="SRT.Rename"				goto SUB-Rename
+if /i "%Context%"=="ASS.Rename"				goto SUB-Rename
+if /i "%Context%"=="XML.Rename"				goto SUB-Rename
+if /i "%Context%"=="FI.Deactivate" 			set "Setup=Deactivate" &goto Setup
 goto Input-Error
 
 
@@ -181,7 +183,7 @@ goto Input-Error
 echo %TAB%%TAB%%r_% Invalid input.  %_%
 echo.
 if defined Context echo %ESC%%TAB%%TAB%%i_%%r_%%Context%%_%
-if not defined Context echo %ESC%%TAB%%TAB%%i_%%r_%%Input%%_%
+if not defined Context echo %ESC%%TAB%%TAB%%i_%%r_%%Command%%_%
 echo.
 echo %TAB%%g_%The command, file path, or directory path is unavailable. 
 echo %TAB%Use %gn_%Help%g_% to see available commands.
@@ -340,7 +342,7 @@ PUSHD "%location%"
 			if "%newline%"=="yes" echo.
 			echo %TAB%%ESC%%r_%📁 %yy_%%foldername%%ESC%
 			set /a R_result+=1
-			echo %TAB%%ESC%Folder icon:%c_%%iconresource%%ESC%%r_%%i_%Not Found!%-%
+			echo %TAB%%ESC%Folder icon:%r_%%iconresource% %_%(Not Found!)%ESC%
 			echo %TAB%%g_% This folder previously had a folder icon, but the icon file is missing.%_%
 			echo %TAB%%g_% The icon will be replaced by the selected image.%_%
 			call :FI-Scan-Find_Target
@@ -388,7 +390,7 @@ set "success_result=0"
 set "fail_result=0"
 if not defined Command (
 	echo %TAB%%TAB%%w_%%i_%  Generating folder icon..  %-%
-	echo %TAB%Target    :%ESC%%target%%ESC%
+	echo %TAB%Keyword   :%ESC%%target%%ESC%
 	if exist "%Template%" for %%T in ("%Template%") do (
 	echo %TAB%Template  :%ESC%%cc_%%%~nT%ESC% 
 	)
@@ -485,10 +487,10 @@ if not defined Selected (
 	
 	rem Check icon size, if icon size is less then 10kB then it's fail.
 	if exist "foldericon(%FI-ID%).ico" for %%S in ("foldericon(%FI-ID%).ico") do (
-		if %%~zS GTR 10000 echo %TAB%%ESC%%g_%Convert success - foldericon(%FI-ID%).ico (%%~zS Bytes) %r_%
-		if %%~zS LSS 10000 (
+		if %%~zS GTR 200 echo %TAB%%ESC%%g_%Convert success - foldericon(%FI-ID%).ico (%%~zS Bytes) %r_%
+		if %%~zS LSS 200 (
 			echo %r_%"%Filename%"
-			echo %r_%Convert error - "foldericon(%FI-ID%).ico"%ESC%%g_%(%pp_%%%~zS Bytes%g_%)%ESC% 
+			echo %r_%Convert error. Icon is less than 200 Bytes. -^> "foldericon(%FI-ID%).ico"%ESC%%g_%(%pp_%%%~zS Bytes%g_%)%ESC% 
 			echo %r_%Deleting "foldericon(%FI-ID%).ico" ..
 			del /q "foldericon(%FI-ID%).ico" >nul
 			)
@@ -507,8 +509,8 @@ if not defined Selected (
 	rem Hiding "desktop.ini" and "foldericon.ico"
 	if exist "desktop.ini" if exist "foldericon(%FI-ID%).ico" (
 		ren "Desktop.ini" "desktop.ini"
-		attrib +s +h "desktop.ini"
-		attrib +s +h "foldericon(%FI-ID%).ico"
+		attrib +h "desktop.ini"
+		attrib +h "foldericon(%FI-ID%).ico"
 		attrib |exit /b
 		echo %TAB% %i_%%g_%  Done!  %-% 
 		set /a "success_result+=1"
@@ -681,11 +683,14 @@ Call "%Template%"
 POPD
 if %ERRORLEVEL% NEQ 0 echo   %r_%%i_%   error ^(%ERRORLEVEL%^)   %-%
 if exist "%outputFile%" for %%C in ("%outputFile%") do (
-	if %%~zC GTR 10000 (echo %g_%Done! &if not "%testmode%"=="yes" explorer.exe "%outputFile%")
-	if %%~zC LSS 10000 (echo %ESC%%r_%%TAB%Convert error - %c_%%%~nxC %_%(%pp_%%%~zC Bytes%_%)%ESC%
+	if %%~zC GTR 200 (echo %g_%Done! &if not "%testmode%"=="yes" explorer.exe "%outputFile%")
+	if %%~zC LSS 200 (
+		echo %TAB%    %r_%Convert error:%ESC%%c_%%%~nxS%_% (%pp_%%%~zS Bytes%_%)
+		echo %TAB%    %g_%Icon should not less than 200 bytes.
 		del /q "%outputFile%" >nul
 		pause>nul
-		goto options)
+		goto options
+	)
 )
 exit /b
 
@@ -738,11 +743,15 @@ PUSHD "%TSamplePath%"
 POPD
 if exist "%outputfile%" (
 	for %%S in ("%outputfile%") do (
-		if %%~zS GTR 10000 (
+		if %%~zS GTR 200 (
 		rem	echo %TAB%    %ESC%%_%Convert success 
 			echo %TAB%    %ESC%%c_%%%~nxS%g_% (%pp_%%%~zS Bytes%g_%)%_%
 		)
-		if %%~zS LSS 10000 echo %TAB%%ESC%    %r_%Convert error: %c_%%%~nxS%_% (%pp_%%%~zS Bytes%_%) &del /q %outputfile% >nul
+		if %%~zS LSS 200 (
+		echo %TAB%    %r_%Convert error:%ESC%%c_%%%~nxS%_% (%pp_%%%~zS Bytes%_%)
+		echo %TAB%    %g_%Icon should not less than 200 bytes.
+		del /q "%outputfile%" >nul
+		)
 	)
 ) else (echo %TAB%    %r_%%i_% Convert failed. %_%)
 echo.
@@ -1086,6 +1095,7 @@ if "%startexplorer%"=="fail" (
 	)
 if /i "%RefreshOpen%"=="Select" (explorer.exe /select, "%cd%") else explorer.exe "%cd%"
 echo %TAB%%TAB%%cc_%%i_%    Done!   %-%
+if /i "%cdonly%"=="true" set "cdonly="&cd /d ..
 call :FI-Refresh-NoRestart
 if /i "%act%"=="Refresh" exit /b
 goto options
@@ -1478,8 +1488,16 @@ if "%display%"=="MKV" (
 exit /b
 
 :MKV-Subtitle-Merge
+set MKVMergeSeparator=echo %_%-------------------------------------------------------------------------%_%
 echo %TAB%    %i_%  Merging subtitle into MKV..  %_%
 echo.
+REM Detecting font..
+for %%S in (%xSelected%) do (set "MKVpath=%%~dpS")
+cd /d "%MKVpath%"
+call :MKV-Subtitle-Font
+echo.
+
+REM Get MKV List
 for %%S in (%xSelected%) do (
 	if /i "%%~xS"==".mkv" (
 		set "MKVname=%%~nS"
@@ -1494,8 +1512,8 @@ goto options
 
 :MKV-Subtitle-merge_proccess
 set "MKVDisplay=yes"
-set MKVfileDisplay=%TAB% %c_%🎞%ESC%%c_%%MKVname%.mkv%_% %pp_%%size% %g_%(%size_B% Bytes)%ESC%
-set MKVfileDisplay_=%TAB% %c_%🎞%ESC%%c_%%MKVname%.mkv%_% %pp_%%size% %g_%(%size_B% Bytes)%ESC%
+set MKVfileDisplay=%c_%🎞%ESC%%c_%%MKVname%.mkv%_% %pp_%%size% %g_%(%size_B% Bytes)%ESC%
+set MKVfileDisplay_=%c_%🎞%ESC%%c_%%MKVname%.mkv%_% %pp_%%size% %g_%(%size_B% Bytes)%ESC%
 PUSHD "%MKVdir:\__=%" || echo %i_%%r_% PUSH DIRECTORY FAIL! -^>%_%"%MKVdir%"
 
 REM Search subtitle
@@ -1530,25 +1548,38 @@ for %%X in (%SubtitleSupport%) do (
 )
 
 if %Found% LSS 1 (
+	%MKVMergeSeparator%
 	echo %MKVfileDisplay_%
-	echo %TAB% %r_%📄 %g_%No subtitles matched the MKV file name.%_%
+	echo %r_%📄 %g_%No subtitles matched the MKV file name.%_%
+	%MKVMergeSeparator%
 	echo.&echo.
 	POPD&exit /b
 )
-echo %TAB% Subtitle found ^(%gn_%%Found%%_%^), %_%Adding subtitle into MKV ..%gg_%
-start /wait "" "%MKVMERGE%" -o "%MKVname%_subs.mkv" "%MKVname%.mkv" %subtitleSet%
+
+echo %_%Subtitle found ^(%gn_%%Found%%_%^), %_%Adding subtitle into MKV ..%g_%
+"%MKVMERGE%" -o "%MKVname%_subs.mkv" "%MKVname%.mkv" %subtitleSet%
+if exist "%MKVname%.xml" (
+	echo %_%Chapters found: "%MKVname%.xml"
+	set AddFonts=%AddFonts% --chapters "%MKVname%.xml"
+	)
+if exist "%MKVname%_subs.mkv" if defined AddFonts (
+	echo %_%Fonts found ^(%gn_%%FontFound%%_%^), Adding fonts and chapters into MKV ..%g_%
+	"%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts%
+)
+
 if exist "%MKVname%_subs.mkv" (
 	for %%O in ("%MKVname%_subs.mkv") do (
 		set "size_B=%%~zO" 
 		call :FileSize
 	)
 )
-if exist "%MKVname%_subs.mkv" echo %TAB% %gn_%Success:%c_%🎞%ESC%%c_%%MKVname%%c_%_subs%c_%.mkv%_% %pp_%%size% %g_%(%size_B% Bytes)%ESC%
-if not exist "%MKVname%_subs.mkv" echo %TAB% %r_%Fail!%_% %g_%Make sure it has a valid "name" and a valid "language id".%_%
+if exist "%MKVname%_subs.mkv" echo %cc_%Success: %cc_%🎞%ESC%%cc_%%MKVname%%cc_%_subs%cc_%.mkv%_% %pp_%%size% %g_%(%size_B% Bytes)%ESC%
+if not exist "%MKVname%_subs.mkv" echo %r_%Fail!%_% %g_%Make sure it has a valid "name" and a valid "language id".%_%
 echo.&echo.
 POPD&exit /b
 
 :MKV-Subtitle-display_sub
+%MKVMergeSeparator%
 for %%F in ("%subFound%") do (
 	set "size_B=%%~zF"
 	call :FileSize
@@ -1556,8 +1587,9 @@ for %%F in ("%subFound%") do (
 if /i "%MKVDisplay%"=="yes" if found GEQ 1 echo %MKVfileDisplay%
 if /i "%MKVDisplay%"=="yes" if found LSS 1 echo %MKVfileDisplay_%
 set "MKVDisplay=no"
-echo %TAB% %yy_%📄%ESC%%yy_%%subFound%%_% %pp_%%size% %g_%(%size_B% Bytes)%_%%ESC%
-echo %TAB%%ESC%%g_%Name:%w_%%SubName%	%g_%Language:%w_%%subLang%	%g_%Default:%w_%%SubSetAsDefault%	%g_%Force:%w_%%SubForcedDisplay%%ESC%
+echo %yy_%📄%ESC%%yy_%%subFound%%_% %pp_%%size% %g_%(%size_B% Bytes)%_%%ESC%
+echo %ESC%  %g_%Name:%w_%%SubName%	%g_%Language:%w_%%subLang%	%g_%Default:%w_%%SubSetAsDefault%	%g_%Force:%w_%%SubForcedDisplay%%ESC%
+%MKVMergeSeparator%
 exit /b
 
 :MKV-Subtitle-get_language
@@ -1569,6 +1601,60 @@ set subtitleSet= %subtitleSet%^
 	--default-track	0:"%SubSetAsDefault%" ^
 	"%subFound%"
 exit /b
+
+:MKV-Subtitle-Font
+set "FontFound=0"
+if exist "fonts" (
+	PUSHD "fonts"
+		for %%F in (*.ttf,*.otf) do (
+			set /a FontFound+=1
+			set "Font=%%~fF"
+			call :MKV-Subtitle-Font-Collect
+		)
+	POPD
+)
+if %FontFound% GEQ 1 (
+	echo %_%Fonts detected%ESC%(%gg_%%FontFound%%_%).%ESC%
+	echo Fonts will be added into MKV.
+)
+exit /b
+
+:MKV-Subtitle-Font-Collect
+set AddFonts=%AddFonts% --add-attachment "%Font%"
+exit /b
+
+
+
+:MKV-Extract
+echo %TAB%    %i_%  Extracting MKV..  %_%
+echo.
+for %%S in (%xSelected%) do (set "MKVpath=%%~dpS")
+cd /d "%MKVpath%"
+echo.
+
+REM Get MKV List
+for %%S in (%xSelected%) do (
+	if /i "%%~xS"==".mkv" (
+		set "MKVname=%%~nS"
+		set "MKVdir=%%~dpS__"
+		set "MKVpath=%%~fS"
+		set "size_B=%%~zS"
+		call :FileSize
+		call :MKV-Extract-Info
+	)
+)
+echo       %_%%i_%   Done!   %_%
+goto options
+
+:MKV-Extract-Info
+echo %TAB%%ESC%%c_% %MKVname%.mkv %g_%(%pp_%%size%%g_%)%ESC%
+for /f "tokens=1,2,3,4 delims=:" %%C in ('call "%MKVinfo%" "%MKVpath%"') do (
+	echo "[C]"%%C "[D]"%%D "[E]"%%E "[F]"%%F
+)
+echo.
+exit /b
+
+
 
 :SUB-Rename
 cd /d "%~dp1"
@@ -1899,7 +1985,7 @@ set "p_=[35m"
 set "pp_=[95m"
 set "ntc_=%_%%i_%%w_% %_%%-%"
 set "TAB=   "
-set "ESC=[30m"[0m"
+set ESC=[30m"[0m
 set "AST=%r_%*%_%"                         
 set p1=ping localhost -n 1 ^>nul
 set p2=ping localhost -n 2 ^>nul
@@ -1916,13 +2002,15 @@ set "TemplateSampleImage=%RCFI%\img\- test.png"
 rem Define some variables for MKV Tools
 set "mkvpropedit=%rcfi%\resources\mkvpropedit.exe"
 set "mkvmerge=%rcfi%\resources\mkvmerge.exe"
+set "mkvextract=%rcfi%\resources\mkvextract.exe"
+set "mkvinfo=%rcfi%\resources\mkvinfo.exe"
 set "ffmpeg=%rcfi%\resources\ffmpeg.exe"
 set "VideoSupport=.mp4,.avi,.ts"
 set "SubtitleSupport=srt,sub,ass"
 set "SubLanguage=ID"
 set "SubName=Bahasa Indonesia"
 set "SubSetAsDefault=Yes"
-set "SubForcedDisplay=Yes"
+set "SubForcedDisplay=No"
 
 rem Load some variables from Config.ini
 call :Config-Load
@@ -2036,10 +2124,9 @@ del /q "%~dp0Setup_%Setup_action%.reg"
 
 if /i "%setup_select%"=="1" (
 	echo cd /d "%%~dp0">"%RCFID%"
-	echo set "Setup=Deactivate">>"%RCFID%" ^&call "%name% %version%" ^|^|pause^>nul >>"%RCFID%"
+	echo set "Setup=Deactivate">>"%RCFID%" ^&call "%name%" ^|^|pause^>nul >>"%RCFID%"
 	echo %w_%%name% %version%  %cc_%Activated%_%
 	echo %g_%Folder Icon Tools has been added to the right-click menus. %_%
-	%p5%
 	if not defined input (goto intro)
 )
 if /i "%setup_select%"=="2" (
@@ -2047,7 +2134,7 @@ if /i "%setup_select%"=="2" (
 	if exist "%RCFID%" del /q "%RCFID%"
 	echo %w_%%name% %version%  %r_%Deactivated%_%
 	echo %g_%Folder Icon Tools have been removed from the right-click menus.%_%
-	if /i "%Setup%"=="Deactivate" %p5%&exit
+	if /i "%Setup%"=="Deactivate" %p5%&%p3%&exit
 )
 goto options
 
@@ -2070,9 +2157,9 @@ rem Escaping the slash using slash
 
 rem Multi Select, Separate instance
 	set cmd=cmd.exe /c
-	set RCFIexe=^&call \"%curdir%\\%name% %version%.bat\"
+	set RCFIexe=^&call \"%curdir%\\%name%.bat\"
 	set SCMD=\"%curdir%\\resources\\SingleInstanceAccumulator.exe\" \"-c:cmd /c
-	set SRCFIexe=^^^&set xSelected=$files^^^&call \"\"%curdir%\\%name% %version%.bat\"\"\"
+	set SRCFIexe=^^^&set xSelected=$files^^^&call \"\"%curdir%\\%name%.bat\"\"\"
 
 
 rem Define registry root
@@ -2086,6 +2173,7 @@ rem Define registry root
 	set RegExAVI=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.avi\shell
 	set RegExSRT=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.srt\shell
 	set RegExASS=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.ass\shell
+	set RegExXML=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.xml\shell
 	set RegExTS=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.ts\shell
 
 
@@ -2385,15 +2473,21 @@ if not exist "%rcfi%\resources\mkvmerge.exe" exit /b
 echo %g_%MKV Tools detected%gg_%✓%g_%
 (
 
-	:REG-Context_Menu-MKV
-	echo [%RegExMKV%\RCFI.MKV.Cover-Delete]
+	:REG-Context_Menu-MKV-Extract_Subtitle
+	echo [%RegExMKV%\RCFI.MKV.Extract]
+	echo "MUIVerb"="Extract MKV"
+	echo [%RegExMKV%\RCFI.MKV.Extract\command]
+	echo @="%SCMD% set \"Context=MKV.Extract\"%SRCFIexe% \"%%1\""
+
+	:REG-Context_Menu-MKV-Cover_Remove
+	echo [%RegExMKV%\RCFI.MKV.RemoveCover-Delete]
 	echo "MUIVerb"="Remove MKV Cover"
-	echo [%RegExMKV%\RCFI.MKV.Cover-Delete\command]
+	echo [%RegExMKV%\RCFI.MKV.RemoveCover-Delete\command]
 	echo @="%SCMD% set \"Context=MKV.Cover-Delete\"%SRCFIexe% \"%%1\""
 	
 	:REG-Context_Menu-MKV-Merge_Subtitle
 	echo [%RegExMKV%\RCFI.MKV.Subtitle-Merge]
-	echo "MUIVerb"="Merge subtitle into MKV"
+	echo "MUIVerb"="Merge files into MKV"
 	echo [%RegExMKV%\RCFI.MKV.Subtitle-Merge\command]
 	echo @="%SCMD% set \"Context=MKV.Subtitle-Merge\"%SRCFIexe% \"%%1\""
 
@@ -2428,10 +2522,11 @@ echo %g_%MKV Tools detected%gg_%✓%g_%
 	echo [%RegExASS%\RCFI.ASS.Rename\command]
 	echo @="%CMD% set \"Context=ASS.Rename\"%RCFIexe% \"%%1\""
 
+	:REG-Context_Menu-XML_Rename
+	echo [%RegExXML%\RCFI.XML.Rename]
+	echo "MUIVerb"="Rename XML to video"
+	echo [%RegExXML%\RCFI.XML.Rename\command]
+	echo @="%CMD% set \"Context=XML.Rename\"%RCFIexe% \"%%1\""
+	
 )>>"%Setup_Write%"
 exit /b
-
-
-:Colour
-start "Colour options" cmd /c "D:\Documents\Scripts\Text color in batch\Tes colour.bat"
-goto options
