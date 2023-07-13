@@ -1,4 +1,4 @@
-@ECHO off
+@echo off
 chcp 65001 >nul
 set name=RCFI Tools
 set version=v0.01
@@ -7,8 +7,6 @@ title %name%   "%cd%"
 :Start                            
 set "SelectedThing=%~f1"
 set "SelectedThingPath=%~dp1"
-set Dir=cd /d "%~f1"
-set Dir1=cd /d "%~dp1"
 call :Config-Varset
 call :Config-Startup
 call :Setup
@@ -17,8 +15,8 @@ if defined Context goto Input-Context
 :Intro                            
 echo. 
 if not defined OpenFrom echo                        %i_% %name% %version% %_%%-%&echo.
-echo %TAB%       %pp_%Drag and drop%_%%g_% an %c_%image%g_% to  this  Terminal screen
-echo %TAB%       then  press  Enter  %_%to change  the folder icon.%_%
+echo %TAB%       %pp_%Drag and drop%_%%g_% an %c_%image%g_% to  this  window then
+echo %TAB%       press %u_%Enter%_%  %_%to change  the folder icon.%_%
 echo.
 if not defined OpenFrom echo %ESC%%u_%%gg_%Template:%_%%cc_% %TemplateName%%gg_%     %u_%Keyword:%_% %printTagFI%%ESC%
 goto Options-Input
@@ -39,27 +37,30 @@ goto Options-Input
 echo.&echo.&echo.&echo.
 set "Already="
 set "referer="
+call :timer-end
+if defined timestart set "processingtime=The proccess took %ExecutionTime% ^|"
+set "timestart="
 if /i "%Context%"=="refresh.NR" exit
 if defined Context (
 	if %exitwait% GTR 99 (
 		echo.&echo.
-		echo %TAB%%g_% Press Any Key to Close this window. 
+		echo %TAB%%g_%%processingtime% Press Any Key to Close this window. 
 		pause>nul&exit
 	)
 	echo. &echo.
 	if /i "%input%"=="Scan" (
-		echo %TAB%%TAB%%g_%Press any key to close this window.
+		echo %TAB%%TAB%%g_%%processingtime% Press any key to close this window.
 		pause >nul &exit
 	)
 	if /i "%cdonly%"=="true" (
-		echo %TAB%%g_%This window will close in %ExitWait% sec.
+		echo %TAB%%g_%%processingtime% This window will close in %ExitWait% sec.
 		ping localhost -n %ExitWait% >nul&exit
 	)
 	if /i "%input%"=="Generate" (
-		echo %TAB%%TAB%%g_%Press any key to close this window.
+		echo %TAB%%TAB%%g_%%processingtime% Press any key to close this window.
 		pause >nul &exit
 	)
-	echo %TAB%%g_%This window will close in %ExitWait% sec.
+	echo %TAB%%g_%%processingtime% This window will close in %ExitWait% sec.
 	ping localhost -n %ExitWait% >nul&exit
 )
 
@@ -106,8 +107,8 @@ if /i "%Command%"=="s"			goto Status
 if /i "%Command%"=="help"		goto Help
 if /i "%Command%"=="cd.."		cd /d .. &echo %TAB% Changing to the parent directory. &goto options
 if /i "%Command%"==".."			cd /d .. &echo %TAB% Changing to the parent directory. &goto options
-if /i "%Command%"=="o"			echo %TAB%%_%Opening..   &echo %TAB%%i_%%cd%%-% &explorer.exe "%cd%" &goto options
-if /i "%Command%"=="rcfi"		echo %TAB%%_%Opening..   &echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &goto options
+if /i "%Command%"=="o"			echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%cd%%ESC% &explorer.exe "%cd%" &goto options
+if /i "%Command%"=="rcfi"		echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%~dp0%ESC% &echo. &explorer.exe "%~dp0" &goto options
 if /i "%Command%"=="cls"			cls&goto options
 if /i "%Command%"=="r"			start "" "%~f0" &exit
 if /i "%Command%"=="tc"			goto Colour
@@ -116,29 +117,37 @@ if /i "%Command%"=="sr"			set "Context=FI.Search.Folder.Icon.Here"&echo %TAB%Ope
 if /i "%Command%"=="setup"		goto Setup-Options
 if /i "%Command%"=="Activate"	set "Setup_Select=1" &goto Setup-Choice
 if /i "%Command%"=="Deactivate"	set "Setup_Select=2" &goto Setup-Choice
+if /i "%Command%"=="uninstall"	set "Setup_Select=2" &goto Setup-Choice
 if /i "%Command%"=="Act"			set "Setup_Select=1" &goto Setup-Choice
 if /i "%Command%"=="Dct"			set "Setup_Select=2" &goto Setup-Choice
 if /i "%Command%"=="Deact"		set "Setup_Select=2" &goto Setup-Choice
 if /i "%Command%"=="config"		goto config
 if /i "%Command%"=="cfg"			goto config
 if /i "%Command%"=="cmd"			cls&cmd.exe
-if exist "%Command%" set "input=%command%"&goto directInput
+if exist "%Command%" set "input=%command:"=%"&goto directInput
 goto Input-Error
 
 
 :Input-Context                    
-title %name% %version% ^| %1
+title %name% %version% ^| "%SelectedThing%"
+set Dir=cd /d "%SelectedThing%"
+set SetIMG=set "img=%SelectedThing%"
 cls &echo. &echo. &echo.
 REM Selected Image
 if /i "%Context%"=="IMG-Actions"				goto IMG-Actions
-if /i "%Context%"=="IMG-Set.As.Folder.Icon"	%Dir1% &set "input=%SelectedThing%"&set "RefreshOpen=Select" &goto DirectInput
-if /i "%Context%"=="IMG.Choose.Template"		set img=%1&goto FI-Template
-if /i "%Context%"=="IMG.Template.Samples"		set img=%1&goto FI-Template-Sample-All
-if /i "%Context%"=="IMG-Set.As.Cover"			set img=%1&goto IMG-Set_as_MKV_cover
-if /i "%Context%"=="IMG-Convert"				set img=%1&goto IMG-Convert
-if /i "%Context%"=="IMG-Resize"					set img=%1&goto IMG-Resize
+if /i "%Context%"=="IMG-Set.As.Folder.Icon"	cd /d "%SelectedThingPath%" &set "input=%SelectedThing%"&set "RefreshOpen=Select" &goto DirectInput
+if /i "%Context%"=="IMG-Choose.and.Set.As"		cd /d "%SelectedThingPath%" &set "input=%SelectedThing%"&set "RefreshOpen=Select" &goto DirectInput
+
+if /i "%Context%"=="IMG.Choose.Template"		%setIMG%&goto FI-Template
+if /i "%Context%"=="IMG.Edit.Template"			start "" notepad.exe "%template%"&exit
+if /i "%Context%"=="IMG.Template.Samples"		%setIMG%&goto FI-Template-Sample-All
+if /i "%Context%"=="IMG.Generate.icon"			goto IMG-Generate_icon
+if /i "%Context%"=="IMG.Generate.PNG"			goto IMG-Generate_icon
+if /i "%Context%"=="IMG-Set.As.Cover"			%setIMG%&goto IMG-Set_as_MKV_cover
+if /i "%Context%"=="IMG-Convert"				goto IMG-Convert
+if /i "%Context%"=="IMG-Resize"					goto IMG-Resize
 REM Selected Dir	
-if /i "%Context%"=="OpenHere"					%Dir% &call :Config-Save	&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
+if /i "%Context%"=="Change.Folder.Icon"		%Dir% &call :Config-Save	&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
 if /i "%Context%"=="DIR.Choose.Template"		goto FI-Template
 if /i "%Context%"=="FI.Search.Folder.Icon"		goto FI-Search
 if /i "%Context%"=="FI.Search.Poster"			goto FI-Search
@@ -164,7 +173,8 @@ if /i "%Context%"=="GenLandscapeJPG.Here"		%Dir% &set "input=Generate"		&set "Ta
 if /i "%Context%"=="ActivateFolderIcon.Here"	%Dir% &goto FI-Activate
 if /i "%Context%"=="DeactivateFolderIcon.Here" %Dir% &goto FI-Deactivate
 if /i "%Context%"=="RemFolderIcon.Here"		%Dir% &set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
-if /i "%Context%"=="Open.Dir"					echo %TAB%%_%Opening..   		&echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &goto options
+if /i "%Context%"=="Edit.Config"				start "" notepad.exe "%rcfi%\config.ini"&exit
+if /i "%Context%"=="Ver.Context.Click"			echo %TAB%%_%Opening..   		&echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &%p3%&exit
 REM Other
 if /i "%Context%"=="MKV.Cover-Delete"		goto MKV-Cover-Delete
 if /i "%Context%"=="MKV.Subtitle-Merge"	goto MKV-Subtitle-Merge
@@ -191,7 +201,6 @@ goto options
 
 :DirectInput                      
 set "cdonly=true"
-set "input=%input:"=%"
 PUSHD "%input%" 2>nul &&goto directInput-folder ||goto directInput-file
 POPD&goto options
 :DirectInput-Folder               
@@ -211,7 +220,7 @@ for %%I in ("%input%") do (
 		for %%X in (%ImageSupport%) do if "%%X"=="%%~xI" goto DirectInput-Generate
 		)
 echo %TAB%%r_%File format not supported.%-%
-echo %TAB%%g_%^(supported file: *.ico, *.jpg, *.png, *.bmp, *.tiff^)
+echo %TAB%%g_%^(supported file: %ImageSupport%^)
 goto options
 :DirectInput-Generate             
 for %%D in ("%cd%") do set "foldername=%%~nD%%~xD" &set "folderpath=%%~dpD"
@@ -240,6 +249,8 @@ set "ReplaceThis=%iconresource%"
 attrib -s -h "%filepath%%filename%"
 attrib |exit /b
 if /i "%AlwaysAskTemplate%"=="Yes" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
+if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
+call :timer-start
 call :FI-Generate-Folder_Icon
 goto options
 
@@ -279,6 +290,7 @@ echo %TAB%%TAB%%cc_%%i_%  Scanning folder.. %-%
 Echo %TAB%Target    : %target%
 echo %TAB%Directory :%ESC%%cd%%ESC%
 echo %TAB%%w_%==============================================================================%_%
+call :timer-start
 call :FI-GetDir
 echo %TAB%%w_%==============================================================================%_%
 set /a "result=%yy_result%+%y_result%+%g_result%+%r_result%"
@@ -388,16 +400,17 @@ set "g_result=0"
 set "r_result=0"
 set "success_result=0"
 set "fail_result=0"
-if not defined Command (
+
 	echo %TAB%%TAB%%w_%%i_%  Generating folder icon..  %-%
+	echo.
 	echo %TAB%Keyword   :%ESC%%target%%ESC%
 	if exist "%Template%" for %%T in ("%Template%") do (
 	echo %TAB%Template  :%ESC%%cc_%%%~nT%ESC% 
 	)
 	echo %TAB%Directory :%ESC%%cd%%ESC%
 	echo %TAB%%w_%==============================================================================%_%
-)
 if /i "%AlwaysAskTemplate%"=="Yes" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
+call :timer-start
 call :FI-GetDir
 echo %TAB%%w_%==============================================================================%_%
 set /a "result=%yy_result%+%y_result%+%g_result%+%r_result%"
@@ -435,8 +448,7 @@ IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folder already has an i
 IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folder can't be processed.%ESC%%g_%(couldn't find "%c_%%Target%%g_%" inside the folder.)%ESC%
 IF /i %YY_result%		LSS 1 IF /i %success_result%	LSS 1 echo.&echo %TAB% ^(No folders to be procced.^)
 IF /i %fail_result%	GTR 0 echo %TAB%%fail_s%%r_%%fail_result%%_% Folder icon failed to generate.
-IF /i %success_result%	GTR 1 echo %TAB%%success_s%%cc_%%success_result%%_% Folder icon generated.
-
+IF /i %success_result%	GTR 1 echo %TAB%%success_s%%cc_%%success_result%%_% Folder icon generated. 
 echo %TAB%------------------------------------------------------------------------------
 goto options
 
@@ -462,22 +474,22 @@ if not defined Selected (
 	
 	rem Executing "specified template" to convert and edit the selected image
 	if /i "%fileExt%"==".ICO" if exist "%TemplateForICO%" (
-		for %%T in ("%TemplateForICO%") do echo %TAB%%ESC%%g_%File extension is %c_%.ico%g_%, Template is %cc_%%%~nT%_%.%ESC%%r_%
+		for %%T in ("%TemplateForICO%") do echo %TAB%%ESC%%g_%Image extension is %c_%.ico%g_%, TemplateForICO: %cc_%%%~nT%g_%.%ESC%%r_%
 		call "%TemplateForICO%"
 		if not exist "%outputfile%" echo %TAB%"TemplateForICO" Fail to generate icon.
 		)
 	if /i "%fileExt%"==".PNG" if exist "%TemplateForPNG%" (
-		for %%T in ("%TemplateForPNG%") do echo %TAB%%ESC%%g_%File extension is %c_%.png%g_%, Template is %cc_%%%~nT%_%.%ESC%%r_%
+		for %%T in ("%TemplateForPNG%") do echo %TAB%%ESC%%g_%Image extension is %c_%.png%g_%, TemplateForPNG: %cc_%%%~nT%g_%.%ESC%%r_%
 		call "%TemplateForPNG%"
 		if not exist "%outputfile%" echo %TAB%"TemplateForPNG" Fail to generate icon.
 		)
 	if /i "%fileExt%"==".JPG" if exist "%TemplateForJPG%" (
-		for %%T in ("%TemplateForJPG%") do echo %TAB%%ESC%%g_%File extension is %c_%.jpg%g_%, Template is %cc_%%%~nT%_%.%ESC%%r_%
+		for %%T in ("%TemplateForJPG%") do echo %TAB%%ESC%%g_%Image extension is %c_%.jpg%g_%, TemplateForJPG: %cc_%%%~nT%g_%.%ESC%%r_%
 		call "%TemplateForJPG%"
 		if not exist "%outputfile%" echo %TAB%"TemplateForJPG" Fail to generate icon.
 		)
 	if /i "%fileExt%"==".JPEG" if exist "%TemplateForJPG%" (
-		for %%T in ("%TemplateForJPG%") do echo %TAB%%ESC%%g_%File extension is %c_%.jpg%g_%, Template is %cc_%%%~nT%_%.%ESC%%r_%
+		for %%T in ("%TemplateForJPG%") do echo %TAB%%ESC%%g_%Image extension is %c_%.jpg%g_%, TemplateForJPG: %cc_%%%~nT%g_%.%ESC%%r_%
 		call "%TemplateForJPG%"
 		if not exist "%outputfile%" echo %TAB%"TemplateForJPG" Fail to generate icon.
 		)
@@ -508,7 +520,8 @@ if not defined Selected (
 	
 	rem Hiding "desktop.ini" and "foldericon.ico"
 	if exist "desktop.ini" if exist "foldericon(%FI-ID%).ico" (
-		ren "Desktop.ini" "desktop.ini"
+		ren "Desktop.ini" "desktop.ini.temp"
+		ren "desktop.ini.temp" "desktop.ini"
 		attrib +h "desktop.ini"
 		attrib +h "foldericon(%FI-ID%).ico"
 		attrib |exit /b
@@ -534,7 +547,7 @@ EXIT /B
 
 :FI-Template                      
 if /i not	"%referer%"=="FI-Generate" if defined Context cls &echo.&echo.&echo.&echo.
-if /i		"%referer%"=="FI-Generate" echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%
+if /i		"%referer%"=="FI-Generate" echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&echo %TAB% %g_%^(This will not be saved to the configurations^)%_%
 if /i not	"%referer%"=="FI-Generate" (
 echo %TAB%%TAB%%i_%%cc_%     Template     %-%
 echo.
@@ -544,7 +557,7 @@ if /i not "%referer%"=="FI-Generate" (
 	for %%I in ("%Template%") do (
 		set "TName=%%~nI"
 		echo %TAB%%w_%%u_%Current Template%_%:%ESC%%cc_%%%~nI%ESC%
-		for /f "usebackq tokens=1,2 delims=#" %%I in ("%Template%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
+		for /f "usebackq tokens=1,2 delims=`" %%I in ("%Template%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
 		echo %TAB%%_%
 		echo.
 	)
@@ -567,7 +580,7 @@ POPD
 
 rem Get sample image to test the template
 if /i "%Context%"=="IMG.Choose.Template" (
-	for %%I in (%img%) do (
+	for %%I in ("%img%") do (
 		set "TemplateSampleImage=%%~fI"
 		set "TSampleName=%%~nxI"
 		set "TSamplePath=%%~dpI"
@@ -587,7 +600,7 @@ if /i "%Context%"=="IMG.Choose.Template" (
 	)
 )
 if /i "%Context%"=="IMG.Choose.Template" (
-	echo %TAB%%TAB%%gn_% S%_% ^> %w_%See all sample icons, using:%ESC%%c_%%TSampleName%%_% (%pp_%%size%%_%)%ESC%
+	echo %TAB%%TAB%%gn_% S%_% ^> %w_%See all sample icons, using:%ESC%%c_%%TSampleName%%g_% (%pp_%%size%%g_%)%ESC%
 ) else (echo %TAB%%TAB%%gn_% S%_% ^> %w_%See all sample icons%_%)
 echo.
 echo %g_%%TAB%%TAB%to select, insert the number assosiated to the options, then hit Enter.%_%
@@ -624,7 +637,7 @@ call :Config-UpdateVar
 if /i "%referer%"=="FI-Generate" (
 	set "Already=Asked"
 	echo.&echo.
-	if defined Context (cls &goto Input-Context) else (if defined Command (set "Direct=Confirm"&goto DirectInput) else goto FI-Generate)
+	if defined Context (cls &goto Input-Context) else (if exist "%input%" (set "Direct=Confirm"&goto DirectInput) else goto FI-Generate)
 ) else (
 	call :Config-Save
 )
@@ -647,12 +660,12 @@ if /i "%TSelector%"=="Select" (
 		echo.
 		echo   %_%%ESC%%cc_%  %TName%%_% selected.%ESC%
 		%p1%
-		for /f "usebackq tokens=1,2 delims=#" %%I in ("%TFullPath%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
+		for /f "usebackq tokens=1,2 delims=`" %%I in ("%TFullPath%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
 		%p2%
 	)
-	if /i not "%GenerateSample%"=="no" call :FI-Template-Sample
+	if /i not "%AlwaysGenerateSample%"=="no" call :FI-Template-Sample
 	set "TemplateChoice=Selected"
-	call :Config-Save
+	REM call :Config-Save
 	)
 	if /i "%testmode%"=="yes" (
 	set "Ttest="
@@ -670,9 +683,11 @@ call :Config-UpdateVar
 if not exist "%rcfi%\template\sample" md "%rcfi%\template\sample"
 set "inputfile=%TemplateSampleImage%"
 set "outputfile=%rcfi%\Template\sample\%TName%.ico"
-if exist "%outputFile%" del /q "%outputFile%"
-if /i "%Context%"=="IMG.Choose.Template" set "img=%img:"=%"
 if /i "%Context%"=="IMG.Choose.Template" set "inputfile=%img%"
+if /i "%testmode%"=="yes" set "AlwaysGenerateSample=No"
+
+if exist "%outputFile%" del /q "%outputFile%"
+
 echo.&echo.
 echo %i_%%g_%  Generating sample preview.. %-%
 echo %g_%Selected Template:%ESC%%cc_%%TName%%ESC%%r_%
@@ -683,7 +698,10 @@ Call "%Template%"
 POPD
 if %ERRORLEVEL% NEQ 0 echo   %r_%%i_%   error ^(%ERRORLEVEL%^)   %-%
 if exist "%outputFile%" for %%C in ("%outputFile%") do (
-	if %%~zC GTR 200 (echo %g_%Done! &if not "%testmode%"=="yes" explorer.exe "%outputFile%")
+	if %%~zC GTR 200 (
+		echo %g_%Done! 
+		if /i not "%AlwaysGenerateSample%"=="No" explorer.exe "%outputFile%"
+	)
 	if %%~zC LSS 200 (
 		echo %TAB%    %r_%Convert error:%ESC%%c_%%%~nxS%_% (%pp_%%%~zS Bytes%_%)
 		echo %TAB%    %g_%Icon should not less than 200 bytes.
@@ -696,7 +714,7 @@ exit /b
 
 :FI-Template-Sample-All           
 if /i "%Context%"=="IMG.Template.Samples" (
-	for %%I in (%img%) do (
+	for %%I in ("%img%") do (
 		set "FITSA=%%~fI"
 		set "TSampleName=%%~nxI"
 		set "TSamplePath=%%~dpI"
@@ -731,7 +749,7 @@ if /i "%Context%"=="IMG.Template.Samples" (
 "%montage%" -pointsize 3 -label "%%f" -density 300 -tile 4x0 -geometry +3+2 -border 1 -bordercolor rgba^(210,210,210,0.3^) -background rgba^(255,255,255,0.4^) "%rcfi%\template\sample\*.ico" "%~dpn1-Folder_Samples.png"
 explorer.exe "%~dpn1-Folder_Samples.png"
 ) else explorer.exe "%rcfi%\template\sample\"
-pause>nul&exit
+goto options
 
 :FI-Template-Sample-All-Generate  
 set "inputfile=%FITSA%"
@@ -881,13 +899,14 @@ if "%newKeyword%"=="*" set "newKeyword=%Keyword%"
 set "Keyword=%newKeyword%"
 set "Keyword=%Keyword: =*%"
 echo. &echo. &echo.
-echo Keyword>"%rcfi%\_Keyword_%Keyword%"
-for %%I in ("%rcfi%\_Keyword_%Keyword%") do (
+set "KeywordFile=%appdata%\%name%\_Keyword_%Keyword%"
+echo Keyword>"%KeywordFile%"
+for %%I in ("%KeywordFile%") do (
 	for %%X in (%ImageSupport%) do (
 		if "%%X"=="%%~xI" (
 			call set "Keyword=%%Keyword:%%~xI=%%"
 			set "Extension=%%~xI"
-			del /q "%rcfi%\_Keyword_%Keyword%"
+			del /q "%KeywordFile%"
 			goto FI-Keyword-Selected
 		)
 	)
@@ -1042,6 +1061,7 @@ FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
 EXIT /B
 
 :FI-Remove-Act                    
+call :timer-start
 if /i not "%delete%"=="confirm" (
 	if exist "%iconresource%" (
 		set /a result+=1
@@ -1073,6 +1093,7 @@ if exist "%iconresource%" (
 EXIT /B
 
 :FI-Refresh                       
+call :timer-start
 if exist "%RCFI%\refresh." (if defined Context exit else goto options) else (echo    refreshing .. >>"%RCFI%\refresh.")
 if /i not "%Context%"=="" echo.&echo.&echo.
 echo %_%%g_%%TAB%Note: In case if the process gets stuck and explorer doesn't come back.
@@ -1120,7 +1141,7 @@ for %%F in (.) do (
 		ren "desktop.ini" "DESKTOP INI"
 		ren "DESKTOP INI" "desktop.ini"
 		attrib +r "%cd%"
-		attrib +s +h 		"desktop.ini"
+		attrib +h 		"desktop.ini"
 		attrib |exit /b
 		set /a refreshCount+=1
 	) else (
@@ -1143,7 +1164,7 @@ if /i not "%cdonly%"=="true" FOR /f "tokens=*" %%R in ('dir /b /a:d') do (
 			ren "desktop.ini" "DESKTOP INI"
 			ren "DESKTOP INI" "desktop.ini"
 			attrib +r "%%~fR"
-			attrib +s +h 		"desktop.ini"
+			attrib +h 		"desktop.ini"
 			attrib |exit /b
 			set /a refreshCount+=1
 		) else (
@@ -1173,8 +1194,8 @@ exit
 
 :FI-ID                            
 set "digit=6"
-set "string=256789256789BCDFGHJKLMNPQRSTVWXYZ256789"
-set "string_lenght=39"
+set "string=C2DF5GHJ7KL8QRST9VXZ"
+set "string_lenght=20"
 set "digit_count=" &set "get_ID="
 
 :FI-ID-get                        
@@ -1184,7 +1205,68 @@ if not "%digit_count%"=="%digit%" goto FI-ID-get
 set "FI-ID=%get_ID%"
 exit /b
 
+:IMG-Generate_icon
+call :timer-start
+if /i "%AlwaysAskTemplate%"=="Yes" if /i not "%already%"=="Asked" set "referer=FI-Generate"&goto FI-Template
+FOR %%T in ("%Template%") do set "TName=%%~nT"
+echo %TAB%       %i_%%w_%    Generating Icon..    %_%
+echo.
+echo %TAB%Template:%ESC%%cc_%%Tname%%ESC%
+echo %TAB%%_%----------------------------------------------------%_%
+FOR %%I in (%xSelected%) do (
+	set "IMGpath=%%~dpI"
+	set "IMGfullpath=%%~fI"
+	set "IMGname=%%~nI"
+	set "IMGext=%%~xI"
+	set "Size_B=%%~zI"
+	call :FileSize
+	Call :IMG-Generate_icon-Display	
+	call :IMG-Generate_icon-Act
+	call :IMG-Generate_icon-Done
+)
+echo %TAB%%_%----------------------------------------------------%_%
+echo.
+echo %TAB%%g_%%i_%  Done!  %_%
+goto options
+
+:IMG-Generate_icon-Display
+if "%IMGext%"==".ico" set "IMGext=%y_%%IMGext%"
+echo %_%%TAB%-%ESC%%c_%%IMGname%%bb_%%IMGext% %g_%(%pp_%%size%%g_%)%ESC%%r_%
+exit /b
+
+:IMG-Generate_icon-Act
+set /a filenum+=1
+set "InputFile=%IMGfullpath%"
+set "OutputFile=%IMGpath%%IMGname%.ico"
+if "%Context%"=="IMG.Generate.PNG" set "OutputFile=%IMGpath%%IMGname%.png"
+
+if exist "%outputfile%" (
+	if not exist "%IMGpath%%IMGname%_(%filenum%).ico" (
+		set "outputfile=%IMGpath%%IMGname%_(%filenum%).ico"
+	) else (
+		goto IMG-Generate_icon-Act
+	)
+)
+PUSHD "%IMGpath%"
+	call "%Template%"
+POPD
+exit /b
+
+:IMG-Generate_icon-Done
+if exist "%outputfile%" (
+		for %%G in ("%outputfile%") do (
+			set "Size_B=%%~zG"
+			set "IMGname=%%~nG"
+			set "IMGext=%%~xG"
+			set "Size_B=%%~zG"
+			call :FileSize
+			call :IMG-Generate_icon-Display
+		)
+	) else (echo %TAB%%r_%Generate icon fail!)
+exit /b
+
 :IMG-Convert                      
+call :timer-start
 echo %TAB%       %i_%%w_%    IMAGE CONVERTER    %_%
 rem echo %TAB%%w_%==============================================================================%_%
 if /i "%Action%"=="Start" (
@@ -1402,6 +1484,7 @@ if /i "%ImgSizeInput%"=="8" (
 )
 if /i "%ImgSizeInput%"=="9" echo %TAB%  %w_%%i_%  CANCELED  %_%&goto options
 set "ImgResizeCode=%ImgResizeCode:"=%"
+call :timer-start
 set "Action=Start" &cls&goto IMG-Resize
 
 :IMG-Resize-Action                
@@ -1429,6 +1512,7 @@ exit /b
 
 
 :MKV-Cover-Delete
+call :timer-start
 echo %TAB%    %i_%  Deleting MKV Cover..  %_%
 echo.
 FOR %%K in (%xSelected%) do (
@@ -1447,6 +1531,7 @@ echo %TAB%   %i_%%cc_%  Done!  %_%
 goto options
 
 :MKV-Convert
+call :timer-start
 echo %TAB%    %i_%  Converting to MKV..  %_%
 echo.
 for %%M in (%xSelected%) do (
@@ -1560,11 +1645,15 @@ echo %_%Subtitle found ^(%gn_%%Found%%_%^), %_%Adding subtitle into MKV ..%g_%
 "%MKVMERGE%" -o "%MKVname%_subs.mkv" "%MKVname%.mkv" %subtitleSet%
 if exist "%MKVname%.xml" (
 	echo %_%Chapters found: "%MKVname%.xml"
-	set AddFonts=%AddFonts% --chapters "%MKVname%.xml"
+	set AddChapters=--chapters "%MKVname%.xml"
 	)
 if exist "%MKVname%_subs.mkv" if defined AddFonts (
 	echo %_%Fonts found ^(%gn_%%FontFound%%_%^), Adding fonts and chapters into MKV ..%g_%
-	"%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts%
+	"%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts% %AddChapters%
+	if defined AddFonts1 "%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts1% >nul
+	if defined AddFonts2 "%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts2% >nul
+	if defined AddFonts3 "%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts3% >nul
+	if defined AddFonts4 "%MKVPROPEDIT%" "%MKVname%_subs.mkv" %AddFonts4% >nul
 )
 
 if exist "%MKVname%_subs.mkv" (
@@ -1620,6 +1709,22 @@ if %FontFound% GEQ 1 (
 exit /b
 
 :MKV-Subtitle-Font-Collect
+if %fontfound% GEQ 200 (
+	set AddFonts4=%AddFonts4% --add-attachment "%Font%"
+	exit /b
+	)
+if %fontfound% GEQ 150 (
+	set AddFonts3=%AddFonts3% --add-attachment "%Font%"
+	exit /b
+	)
+if %fontfound% GEQ 100 (
+	set AddFonts2=%AddFonts2% --add-attachment "%Font%"
+	exit /b
+	)
+if %fontfound% GEQ 50 (
+	set AddFonts1=%AddFonts1% --add-attachment "%Font%"
+	exit /b
+	)
 set AddFonts=%AddFonts% --add-attachment "%Font%"
 exit /b
 
@@ -1657,7 +1762,7 @@ exit /b
 
 
 :SUB-Rename
-cd /d "%~dp1"
+cd /d "%SelectedThingPath%"
 For %%V in (*.mkv, *.mp4) do (
 	set /a "MKVcount+=1"
 	set "VidN=%%~nV"
@@ -1784,6 +1889,37 @@ if %size_B% GEQ 1024000 set size=%size_MB% MB
 if %size_B% GEQ 1024000000 set size=%size_GB% GB
 exit /b
 
+:Timer-start
+set timestart=%time%
+exit /b
+
+:Timer-end
+set timeend=%time%
+set options="tokens=1-4 delims=:.,"
+for /f %options% %%a in ("%timestart%") do set start_h=%%a&set /a start_m=100%%b %% 100&set /a start_s=100%%c %% 100&set /a start_ms=100%%d %% 100
+for /f %options% %%a in ("%timeend%") do set end_h=%%a&set /a end_m=100%%b %% 100&set /a end_s=100%%c %% 100&set /a end_ms=100%%d %% 100
+ 
+set /a hours=%end_h%-%start_h%
+set /a mins=%end_m%-%start_m%
+set /a secs=%end_s%-%start_s%
+set /a ms=%end_ms%-%start_ms%
+if %ms% lss 0 set /a secs = %secs% - 1 & set /a ms = 100%ms%
+if %secs% lss 0 set /a mins = %mins% - 1 & set /a secs = 60%secs%
+if %mins% lss 0 set /a hours = %hours% - 1 & set /a mins = 60%mins%
+if %hours% lss 0 set /a hours = 24%hours%
+if 1%ms% lss 100 set ms=0%ms%
+ 
+:: Mission accomplished
+set /a totalsecs = %hours%*3600 + %mins%*60 + %secs%
+if %mins% lss 1 set "show_mins="
+if %mins% gtr 0 set "show_mins=%mins%m "
+if %hours% lss 1 set "show_hours="
+if %hours% gtr 0 set "show_hours=%hours%h " 
+set ExecutionTime=%show_hours%%show_mins%%secs%.%ms%s
+exit /b
+
+
+
 :Config                      
 call :config-load
 echo %TAB%       %i_%%pp_% RCFI Tools Configuration %_%
@@ -1825,10 +1961,10 @@ if exist "%Template%" for %%I in ("%Template%") do (
 	echo %TAB%"%converter%" %r_%doesn't exist.%_%
 )
 echo.
-echo %TAB%%yy_%GenerateSample%_%
-echo %TAB%"%GenerateSample%"
-echo %TAB%%g_%If the  value is "YES", RCFI Tools will  generate a sample image every
-echo %TAB%%g_%time  you  select  a  template.
+echo %TAB%%yy_%AlwaysGenerateSample%_%
+echo %TAB%"%AlwaysGenerateSample%"
+echo %TAB%%g_%If the  value is not "NO", RCFI Tools will  generate a sample image every
+echo %TAB%%g_%time  you  select  a  template via "choose template" menu.
 echo.
 if exist "%TemplateForICO%" for %%I in ("%TemplateForICO%") do (
 	echo %TAB%%yy_%TemplateForICO%_%
@@ -1899,56 +2035,71 @@ goto options
 
 :Config-Save                      
 REM Save current config to config.ini
+if exist "%Template%"        (for %%T in ("%Template%")        do set "Template=%%~nT")       else (set "Template=%rcfi%\template\(none).bat")
+if exist "%TemplateForICO%"	(for %%T in ("%TemplateForICO%") do set "TemplateForICO=%%~nT") else (set "TemplateForICO=(none)")
+if exist "%TemplateForPNG%"	(for %%T in ("%TemplateForPNG%") do set "TemplateForPNG=%%~nT") else (set "TemplateForPNG=insert a template name to use for .png files")
+if exist "%TemplateForJPG%"	(for %%T in ("%TemplateForJPG%") do set "TemplateForJPG=%%~nT") else (set "TemplateForJPG=insert a template name to use for .jpg files")
 (
 	echo         [RCFI TOOLS CONFIGURATION]
-	echo Converter="%Converter%"
 	echo DrivePath="%cd%"
 	echo Keyword="%Keyword%"
 	echo Extension="%Extension%"
 	echo Template="%Template%"
-	echo GenerateSample="%GenerateSample%"
 	echo TemplateForICO="%TemplateForICO%"
 	echo TemplateForPNG="%TemplateForPNG%"
 	echo TemplateForJPG="%TemplateForJPG%"
 	echo AlwaysAskTemplate="%AlwaysAskTemplate%"
+	echo AlwaysGenerateSample="%AlwaysGenerateSample%"
 	echo RunAsAdmin="%RunAsAdmin%"
 	echo ExitWait="%ExitWait%"
 	
 )>"%~dp0config.ini"
+set "Template=%rcfi%\template\%Template:"=%.bat"
+set "TemplateForICO=%rcfi%\template\%TemplateForICO:"=%.bat"
+set "TemplateForPNG=%rcfi%\template\%TemplateForPNG:"=%.bat"
+set "TemplateForJPG=%rcfi%\template\%TemplateForJPG:"=%.bat"
 EXIT /B
 
 :Config-Load                      
 REM Load Config from config.ini
-if not exist "%~dp0config.ini" call :Config-GetDefault &%p3%
+if not exist "%~dp0config.ini" call :Config-GetDefault
 if exist "%~dp0config.ini" (
 	for /f "usebackq tokens=1,2 delims==" %%C in ("%~dp0config.ini") do (set "%%C=%%D")
-) else (echo.&echo.&echo.&echo.&echo.       %w_%Couldn't load %r_%config.ini%_%.&pause>nul&exit)
-set "Converter=%Converter:"=%"
+) else (
+	echo.&echo.&echo.&echo.
+	echo       %w_%Couldn't load config.ini.   %r_%Access is denied.
+	echo       %w_%Try Run As Admin.%_%
+	%P5%&%p5%&exit
+)
+if exist %Template% (for %%T in (%Template%) do set Template="%%~nT")       
+if exist %TemplateForICO%	(for %%T in (%TemplateForICO%) do set TemplateForICO="%%~nT")
+if exist %TemplateForPNG%	(for %%T in (%TemplateForPNG%) do set TemplateForPNG="%%~nT")
+if exist %TemplateForJPG%	(for %%T in (%TemplateForJPG%) do set TemplateForJPG="%%~nT")
 set "DrivePath=%DrivePath:"=%"
 set "Keyword=%Keyword:"=%"
 set "Extension=%Extension:"=%"
-set "Template=%Template:"=%"
-set "GenerateSample=%GenerateSample:"=%"
-set "TemplateForICO=%TemplateForICO:"=%"
-set "TemplateForPNG=%TemplateForPNG:"=%"
-set "TemplateForJPG=%TemplateForJPG:"=%"
+set "Template=%rcfi%\template\%Template:"=%.bat"
+set "TemplateForICO=%rcfi%\template\%TemplateForICO:"=%.bat"
+set "TemplateForPNG=%rcfi%\template\%TemplateForPNG:"=%.bat"
+set "TemplateForJPG=%rcfi%\template\%TemplateForJPG:"=%.bat"
 set "AlwaysAskTemplate=%AlwaysAskTemplate:"=%"
+set "AlwaysGenerateSample=%AlwaysGenerateSample:"=%"
 set "RunAsAdmin=%RunAsAdmin:"=%"
 set "ExitWait=%ExitWait:"=%"
 EXIT /B
 
 :Config-GetDefault                
+cd /d "%~dp0"
 (
-	echo Converter="%rcfi%\resources\Convert.exe"
 	echo DrivePath="%cd%"
 	echo Keyword="*"
 	echo Extension=".png"
-	echo Template="%rcfi%\template\(none).bat"
-	echo GenerateSample="Yes"
-	echo TemplateForICO="drive:\path\to\the template.bat"
-	echo TemplateForPNG="drive:\path\to\the template.bat"
-	echo TemplateForJPG="drive:\path\to\the template.bat"
+	echo Template="(none)"
+	echo TemplateForICO="(none)"
+	echo TemplateForPNG="insert a template name to use for .png files"
+	echo TemplateForJPG="insert a template name to use for .jpg files"
 	echo AlwaysAskTemplate="No"
+	echo AlwaysGenerateSample="No"
 	echo RunAsAdmin="No"
 	echo ExitWait="100"
 )>"%~dp0config.ini"
@@ -1995,6 +2146,7 @@ set p5=ping localhost -n 5 ^>nul
 set "RCFI=%~dp0_."
 set "RCFI=%RCFI:\_.=%"
 set "RCFID=%rcfi%\uninstall.cmd"
+set "Converter=%rcfi%\resources\Convert.exe"
 set "montage=%rcfi%\resources\montage.exe"
 set "ImageSupport=.jpg,.png,.ico,.webp,.jpeg,.bmp,.tiff,.heic,.heif,.wbmp,.tga,.svg"
 set "TemplateSampleImage=%RCFI%\img\- test.png"
@@ -2014,33 +2166,39 @@ set "SubForcedDisplay=No"
 
 rem Load some variables from Config.ini
 call :Config-Load
+if /i "%Setup%"=="Deactivate" (echo.&echo.&echo.&>"%RCFI%\Deactivating" echo Deactivating)
 
 rem initiate 'Run As Admin'
-if /i "%Setup%"=="Deactivate" (echo.&echo.&echo.&>"%RCFI%\Deactivating" echo Deactivating)
-if /i "%RunAsAdmin%"=="yes" (
-	IF "%PROCESSOR_ARCHITECTURE%" EQU "amd64" (
-		>nul 2>&1 "%SYSTEMROOT%\SysWOW64\cacls.exe" "%SYSTEMROOT%\SysWOW64\config\system"
-	) ELSE (
-		>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
-	)
-)
-if /i "%RunAsAdmin%"=="yes" (
-	if '%errorlevel%' NEQ '0' (
-		echo Requesting administrative privileges...
-		echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-		set params = %*:"=""
-		echo UAC.ShellExecute "cmd.exe", "/c ""%~s0"" %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
-		"%temp%\getadmin.vbs"
-		del "%temp%\getadmin.vbs"
-		exit
-	)
-)
+if /i "%RunAsAdmin%"=="yes" call :Config-RunAsAdmin
+if exist "%temp%\rcfi.getAdmin" (for /f "usebackq tokens=*" %%A in ("%temp%\rcfi.getAdmin") do %%A&del "%temp%\rcfi.getAdmin")
 
 rem Updating / reset some variables
 if exist "%DrivePath%" (cd /d "%DrivePath%") else (cd /d "%~dp0")
 call :Config-UpdateVar
-
 EXIT /B
+
+:Config-RunAsAdmin
+IF "%PROCESSOR_ARCHITECTURE%" EQU "amd64" (
+	>nul 2>&1 "%SYSTEMROOT%\SysWOW64\cacls.exe" "%SYSTEMROOT%\SysWOW64\config\system"
+) ELSE (
+	>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+)
+set params=%*:"=""
+if '%errorlevel%' NEQ '0' (
+	(
+	echo set "SelectedThing=%SelectedThing%"
+	echo set "SelectedThingPath=%SelectedThingPath%"
+	echo set xSelected=%xSelected%
+	)> "%temp%\rcfi.getAdmin"
+	echo Requesting administrative privileges...
+	echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+	echo UAC.ShellExecute "cmd.exe", "/c set ""context=%context%""&set ""errorlevel=0""&""%~s0""", "", "runas", 1 >> "%temp%\getadmin.vbs"
+	"%temp%\getadmin.vbs"
+	del "%temp%\getadmin.vbs"
+	exit
+)
+exit /b
+
 
 :Config-Startup                   
 if /i "%act%"=="Refresh"		goto FI-Refresh
@@ -2083,8 +2241,18 @@ goto Options-Input
 :Setup                            
 if /i "%setup%" EQU "Deactivate" set "setup_select=2" &goto Setup-Choice
 if exist "%RCFI%\Deactivating." set "Setup=Deactivate" &set "setup_select=2" &goto Setup-Choice
-if exist "%RCFID%" (exit /b) else echo.&echo.&echo.&set "setup_select=1" &goto Setup-Choice
+if exist "%RCFID%" (
+	for /f "useback tokens=1,2 delims=:" %%S in ("%RCFID%") do set /a "InstalledRelease=%%T" 2>nul
+	call :Setup-Update
+	exit /b
+) else echo.&echo.&echo.&set "setup_select=1" &goto Setup-Choice
 echo.&echo.&echo.
+Goto Setup-Options
+
+:Setup-Update
+set /a "CurrentRelease=%version:v0.=%"
+if %CurrentRelease% GTR %InstalledRelease% echo Need to update!
+exit /b
 
 :Setup-Options                    
 echo.&echo.
@@ -2122,13 +2290,16 @@ echo %g_%Updating shell extension menu ..%_%
 regedit.exe /s "%~dp0Setup_%Setup_action%.reg" ||goto Setup_error
 del /q "%~dp0Setup_%Setup_action%.reg"
 
+REM installing -> create "uninstall.bat"
 if /i "%setup_select%"=="1" (
 	echo cd /d "%%~dp0">"%RCFID%"
-	echo set "Setup=Deactivate">>"%RCFID%" ^&call "%name%" ^|^|pause^>nul >>"%RCFID%"
+	echo set "Setup=Deactivate" ^&call "%name%" ^|^|pause^>nul :%version:v0.=%>>"%RCFID%"
 	echo %w_%%name% %version%  %cc_%Activated%_%
 	echo %g_%Folder Icon Tools has been added to the right-click menus. %_%
 	if not defined input (goto intro)
 )
+
+REM uninstalling -> delete "uninstall.bat"
 if /i "%setup_select%"=="2" (
 	del /q "%RCFI%\Deactivating." 2>nul
 	if exist "%RCFID%" del /q "%RCFID%"
@@ -2157,9 +2328,10 @@ rem Escaping the slash using slash
 
 rem Multi Select, Separate instance
 	set cmd=cmd.exe /c
-	set RCFIexe=^&call \"%curdir%\\%name%.bat\"
+	set "RCFITools=%~f0"
+	set RCFIexe=^&call \"%RCFITools:\=\\%\"
 	set SCMD=\"%curdir%\\resources\\SingleInstanceAccumulator.exe\" \"-c:cmd /c
-	set SRCFIexe=^^^&set xSelected=$files^^^&call \"\"%curdir%\\%name%.bat\"\"\"
+	set SRCFIexe=^^^&set xSelected=$files^^^&call \"\"%RCFITools:\=\\%\"\"\"
 
 
 rem Define registry root
@@ -2168,6 +2340,7 @@ rem Define registry root
 	set RegExImage=%HKEY%_CLASSES_ROOT\SystemFileAssociations\image\shell
 	set RegExShell=%HKEY%_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell
 	set RegExICNS=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.icns\shell
+	set RegExSVG=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.svg\shell
 	set RegExMKV=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.mkv\shell
 	set RegExMP4=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.mp4\shell
 	set RegExAVI=%HKEY%_CLASSES_ROOT\SystemFileAssociations\.avi\shell
@@ -2188,8 +2361,15 @@ rem Generating setup_*.reg
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG-Set.As.Folder.Icon\command]
 	echo @="%cmd% set \"Context=IMG-Set.As.Folder.Icon\"%RCFIexe% \"%%1\""
+	
+	:REG-FI-IMAGE-Choose.and.Set.As
+	echo [%RegExShell%\RCFI.IMG-Choose.and.Set.As]
+	echo "MUIVerb"="Choose and Set as Folder Icon"
+	echo "Icon"="shell32.dll,-270"
+	echo [%RegExShell%\RCFI.IMG-Choose.and.Set.As\command]
+	echo @="%cmd% set \"Context=IMG-Choose.and.Set.As\"%RCFIexe% \"%%1\""
 
-	:REG-FI-IMAGE-FI.Choose.Template
+	:REG-FI-IMAGE-Choose.Template
 	echo [%RegExShell%\RCFI.IMG.Choose.Template]
 	echo "MUIVerb"="Choose Template"
 	echo "Icon"="shell32.dll,-270"
@@ -2197,17 +2377,40 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.IMG.Choose.Template\command]
 	echo @="%cmd% set \"Context=IMG.Choose.Template\"%RCFIexe% \"%%1\""
 
-	:REG-FI-IMAGE-FI.Template.Samples
+	:REG-FI-IMAGE-Edit.Template
+	echo [%RegExShell%\RCFI.IMG.Edit.Template]
+	echo "MUIVerb"="Edit current template"
+	echo "Icon"="imageres.dll,-102"
+	echo [%RegExShell%\RCFI.IMG.Edit.Template\command]
+	echo @="%SCMD% set \"Context=IMG.Edit.Template\"%SRCFIexe% \"%%1\""
+
+	:REG-FI-IMAGE-Generate.Icon
+	echo [%RegExShell%\RCFI.IMG.Generate.Icon]
+	echo "MUIVerb"="Generate Icon"
+	echo "Icon"="imageres.dll,-1003"
+	echo "CommandFlags"=dword:00000020
+	echo [%RegExShell%\RCFI.IMG.Generate.Icon\command]
+	echo @="%SCMD% set \"Context=IMG.Generate.Icon\"%SRCFIexe% \"%%1\""
+	
+	:REG-FI-IMAGE-Generate.PNG
+	echo [%RegExShell%\RCFI.IMG.Generate.PNG]
+	echo "MUIVerb"="Generate PNG"
+	echo "icon"="imageres.dll,-1003"
+	echo [%RegExShell%\RCFI.IMG.Generate.PNG\command]
+	echo @="%SCMD% set \"Context=IMG.Generate.PNG\"%SRCFIexe% \"%%1\""
+
+
+	:REG-FI-IMAGE-Template.Samples
 	echo [%RegExShell%\RCFI.IMG.Template.Samples]
 	echo "MUIVerb"="Generate Template Samples"
 	echo "Icon"="imageres.dll,-1003"
 	echo [%RegExShell%\RCFI.IMG.Template.Samples\command]
-	echo @="%cmd% set \"Context=IMG.Template.Samples\"%RCFIexe% \"%%1\""	
-	
+	echo @="%cmd% set \"Context=IMG.Template.Samples\"%RCFIexe% \"%%1\""
+		
 	:REG-FI-IMAGE-Convert
 	echo [%RegExShell%\RCFI.IMG-Convert]
 	echo "MUIVerb"="Convert Image"
-	echo "Icon"="shell32.dll,-236"
+	echo "Icon"="shell32.dll,-16826"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG-Convert\command]
 	echo @="%SCMD% set \"Context=IMG-Convert\"%SRCFIexe% \"%%1\""
@@ -2215,18 +2418,18 @@ rem Generating setup_*.reg
 	:REG-FI-IMAGE-Resize
 	echo [%RegExShell%\RCFI.IMG-Resize]
 	echo "MUIVerb"="Resize Image"
-	echo "Icon"="shell32.dll,-236"
+	echo "Icon"="shell32.dll,-16826"
 	echo [%RegExShell%\RCFI.IMG-Resize\command]
 	echo @="%SCMD% set \"Context=IMG-Resize\"%SRCFIexe% \"%%1\""
 
 
 	REM Selected_Dir
-	:REG-FI-Open
-	echo [%RegExShell%\RCFI.OpenHere]
+	:REG-FI-Change.Folder.Icon
+	echo [%RegExShell%\RCFI.Change.Folder.Icon]
 	echo "MUIVerb"="Change Folder Icon"
 	echo "Icon"="shell32.dll,-16801"
-	echo [%RegExShell%\RCFI.OpenHere\command]
-	echo @="%cmd% set \"Context=OpenHere\"%RCFIexe% \"%%V\""
+	echo [%RegExShell%\RCFI.Change.Folder.Icon\command]
+	echo @="%cmd% set \"Context=Change.Folder.Icon\"%RCFIexe% \"%%V\""
 	
 	:REG-FI.Search.Folder.Icon
 	echo [%RegExShell%\RCFI.Search.Folder.Icon]
@@ -2258,21 +2461,21 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.Refresh\command]
 	echo @="%cmd% set \"Context=Refresh\"%RCFIexe% \"%%V\""
 	
-	:REG-FI-Refresh_No_Restart
+	:REG-FI-Refresh-No.Restart
 	echo [%RegExShell%\RCFI.RefreshNR]
 	echo "MUIVerb"="Refresh Icon Cache (Without Restart)"
 	echo "Icon"="shell32.dll,-16739"
 	echo [%RegExShell%\RCFI.RefreshNR\command]
 	echo @="%cmd% set \"Context=RefreshNR\"%RCFIexe% \"%%V\""
 	
-	:REG-FI-Choose_Template
+	:REG-FI-Choose.Template
 	echo [%RegExShell%\RCFI.DIR.Choose.Template]
 	echo "MUIVerb"="Choose Template"
 	echo "Icon"="shell32.dll,-270"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.DIR.Choose.Template\command]
 	echo @="%Scmd% set \"Context=DIR.Choose.Template\"%SRCFIexe% \"%%V\""
-	
+		
 	:REG-FI-Scan
 	echo [%RegExShell%\RCFI.Scan]
 	echo "MUIVerb"="Scan"
@@ -2281,7 +2484,7 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.Scan\command]
 	echo @="%Scmd% set \"Context=Scan\"%SRCFIexe% \"%%V\""
 	
-	:REG-FI-Define_Keyword
+	:REG-FI-Define.Keyword
 	echo [%RegExShell%\RCFI.DefKey]
 	echo "MUIVerb"="Define keyword"
 	echo "Icon"="shell32.dll,-242"
@@ -2436,37 +2639,45 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.Deactivate\command]
 	echo @="%cmd% set \"Context=FI.Deactivate\"%RCFIexe%"		
 	
-	:REG-FI-Open.Dir
-	echo [%RegExShell%\RCFI.Open.Dir]
+	:REG-FI-Edit.Config
+	echo [%RegExShell%\RCFI.Edit.Config]
+	echo "MUIVerb"="RCFI Tools Configuration"
+	echo "Icon"="imageres.dll,-69"
+	echo "CommandFlags"=dword:00000020
+	echo [%RegExShell%\RCFI.Edit.Config\command]
+	echo @="%cmd% set \"Context=Edit.Config\"%RCFIexe%"
+	
+	:REG-FI-Ver.Context.Click
+	echo [%RegExShell%\RCFI.Ver.Context.Click]
 	echo "MUIVerb"="                 %name% %version%"
 	echo "CommandFlags"=dword:00000020
-	echo [%RegExShell%\RCFI.Open.Dir\command]
-	echo @="%cmd% set \"Context=Open.Dir\"%RCFIexe%"		
+	echo [%RegExShell%\RCFI.Ver.Context.Click\command]
+	echo @="%cmd% set \"Context=Ver.Context.Click\"%RCFIexe%"
 	
 	:REG-Context_Menu-FI-Folder
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.OpenHere;RCFI.RefreshNR;RCFI.Refresh;RCFI.DIR.Choose.Template;RCFI.Search.Poster;RCFI.Search.Folder.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.GenLandscapeJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
+	echo "SubCommands"="RCFI.Change.Folder.Icon;RCFI.RefreshNR;RCFI.Refresh;RCFI.DIR.Choose.Template;RCFI.Search.Poster;RCFI.Search.Folder.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.GenLandscapeJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
 	
 	:REG-Context_Menu-FI-Background
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.OpenHere;RCFI.RefreshNR.Here;RCFI.Refresh.Here;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon.Here;RCFI.Scan.Here;RCFI.DefKey;RCFI.GenKey.Here;RCFI.GenJPG.Here;RCFI.GenPNG.Here;RCFI.GenPosterJPG.Here;RCFI.GenLandscapeJPG.Here;RCFI.ActivateFolderIcon.Here;RCFI.DeactivateFolderIcon.Here;RCFI.RemFolderIcon.Here;RCFI.Open.Dir"
+	echo "SubCommands"="RCFI.RefreshNR.Here;RCFI.Refresh.Here;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon.Here;RCFI.Scan.Here;RCFI.DefKey;RCFI.GenKey.Here;RCFI.GenJPG.Here;RCFI.GenPNG.Here;RCFI.GenPosterJPG.Here;RCFI.GenLandscapeJPG.Here;RCFI.ActivateFolderIcon.Here;RCFI.DeactivateFolderIcon.Here;RCFI.RemFolderIcon.Here;RCFI.Edit.Config;RCFI.Ver.Context.Click;"
 	
 	:REG-Context_Menu-Images
-	echo [%RegExImage%\RCFI]
+	echo [%RegExImage%\RCFI.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG.Choose.Template;RCFI.IMG.Template.Samples;RCFI.IMG-Convert;RCFI.IMG-Resize;"
+	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Resize;"
 	
-	:REG-Context_Menu-ICNS
-	echo [%RegExICNS%\RCFI]
+	:REG-Context_Menu-Images-SVG
+	echo [%RegExSVG%\RCFI.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG.Choose.Template;RCFI.IMG.Template.Samples;RCFI.IMG-Convert;RCFI.IMG-Resize;"
-		
+	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Resize;"
+	
 )>"%Setup_Write%"
 if not exist "%rcfi%\resources\mkvpropedit.exe" exit /b
 if not exist "%rcfi%\resources\mkvmerge.exe" exit /b
