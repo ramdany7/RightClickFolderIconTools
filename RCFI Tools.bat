@@ -66,7 +66,7 @@ if defined Context (
 :Options-Input                    
 if not defined OpenFrom echo %_%%GG_%Keyword%G_%^|%GG_%Scan%G_%^|%GG_%Template%G_%^|%GG_%Generate%G_%^|%GG_%Refresh%G_%^|%GG_%RefreshFc%G_%^|%GG_%Search%G_%^|%GG_%ON%G_%^|^
 %GG_%OFF%G_%^|%GG_%Remove%G_%^|%GG_%Config%G_%^|%GG_%Setup%G_%^|%GG_%RCFI%G_%^|%GG_%O%G_%^|%GG_%S%G_%^|%GG_%Help%G_%^|..
-if defined OpenFrom if /i not "%AlwaysAskTemplate%"=="yes" echo %g_%Template:%ESC%%cc_%%TemplateName%%ESC%
+if defined OpenFrom if /i not "%TemplateAlwaysAsk%"=="yes" echo %g_%Template:%ESC%%cc_%%TemplateName%%ESC%
 echo %g_%--------------------------------------------------------------------------------------------------
 title %name% %version%   "%cd%"
 call :Config-Save
@@ -249,7 +249,7 @@ IF "%ERRORLEVEL%"=="1" if defined Context cls &echo.&set "Direct=Confirm"&echo.&
 set "ReplaceThis=%iconresource%"
 attrib -s -h "%filepath%%filename%"
 attrib |exit /b
-if /i "%AlwaysAskTemplate%"=="Yes" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
+if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
 if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
 call :timer-start
 call :FI-Generate-Folder_Icon
@@ -498,7 +498,7 @@ set "fail_result=0"
 	)
 	echo %TAB%Directory :%ESC%%cd%%ESC%
 	echo %TAB%%w_%==============================================================================%_%
-if /i "%AlwaysAskTemplate%"=="Yes" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
+if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" set "referer=FI-Generate"&call :FI-Template
 call :timer-start
 call :FI-GetDir
 echo %TAB%%w_%==============================================================================%_%
@@ -752,14 +752,13 @@ if /i "%TSelector%"=="Select" (
 		for /f "usebackq tokens=1,2 delims=`" %%I in ("%TFullPath%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
 		%p2%
 	)
-	if /i not "%AlwaysGenerateSample%"=="no" call :FI-Template-Sample
 	set "TemplateChoice=Selected"
-	REM call :Config-Save
 	)
-	if /i "%testmode%"=="yes" (
+	if /i "%TemplateTestMode%"=="yes" (
 	set "Ttest="
 	set "referer=FI-Template"
-	if exist "%outputfile%" del /q "%outputfile%" >nul
+	set "inputfile=%TemplateSampleImage%"
+	set "outputfile=%rcfi%\Template\sample\%TName%.ico"
 	cls
 	goto FI-Template-TestMode
 	)
@@ -773,7 +772,7 @@ if not exist "%rcfi%\template\sample" md "%rcfi%\template\sample"
 set "inputfile=%TemplateSampleImage%"
 set "outputfile=%rcfi%\Template\sample\%TName%.ico"
 if /i "%Context%"=="IMG.Choose.Template" set "inputfile=%img%"
-if /i "%testmode%"=="yes" set "AlwaysGenerateSample=No"
+REM if /i "%testmode%"=="yes" set "AlwaysGenerateSample=No"
 
 if exist "%outputFile%" del /q "%outputFile%"
 
@@ -873,13 +872,14 @@ exit /b
 :FI-Template-TestMode
 if /i "%referer%"=="FI-Generate" exit /b
 echo.&echo.&echo.
-if /i not "%TestMode-Auto-Execute%"=="yes" set /a "TestCount+=1"
+if /i not "%TemplateTestMode-AutoExecute%"=="yes" set /a "TestCount+=1"
 echo %gn_%%i_% %_%%w_% This is Test Mode%_%
 echo   %g_%executed(%_%%TestCount%%g_%)%r_%
 echo.
-if /i not "%TestMode-Auto-Execute%"=="yes" (
+if /i not "%TemplateTestMode-AutoExecute%"=="yes" (
 	PUSHD "%TSamplePath%"
 		call "%Template%"
+		if exist "%outputfile%" for %%I in ("%outputfile%") do (if %%~zI LSS 100 del /q "%outputfile%")
 		if exist "%outputfile%" (explorer.exe "%outputfile%") else echo %r_%%i_%Error: Fail to convert.%_%
 	POPD
 	)
@@ -898,14 +898,20 @@ echo  %_%Sample image  :%ESC%%c_%%TSampleName%%g_% (%pp_%%size%%g_%)%ESC%
 echo %ESC%%g_%%inputfile%%ESC%
 
 if exist "%outputfile%" for %%I in ("%outputfile%") do (
-	set "fname=%%~nxI"
-	set "size_b=%%~zI"
-	call :FileSize
-	) else (set size=%r_%Error: file not found!%_%)
+	if %%~zI GTR 100 (
+		set "fname=%%~nxI"
+		set "size_b=%%~zI"
+		call :FileSize
+	) else (
+		call :FileSize
+		del /q "%outputfile%" 
+		set "fname=%r_%Fail to generate."
+	)
+) else set "size="
 echo  %_%Generated icon:%ESC%%c_%%fname%%g_% (%pp_%%size%%g_%)%ESC%
 echo %ESC%%g_%%outputfile%%ESC%
 echo %w_%----------------------------------------------------------------------------------------
-if /i "%TestMode-Auto-Execute%"=="yes" cls&set "TestModeAuto=Execute"&set "TdateX=%Tdate%"&goto FI-Template-TestMode-Auto
+if /i "%TemplateTestMode-AutoExecute%"=="yes" cls&set "TestModeAuto=Execute"&set "TdateX=%Tdate%"&goto FI-Template-TestMode-Auto
 echo %g_%Press Any Key to re-execute the template. %_%&pause>nul
 if exist "%outputfile%" del /q "%outputfile%" >nul
 echo.&echo.&echo.
@@ -946,7 +952,7 @@ echo %w_%-----------------------------------------------------------------------
 PUSHD "%TPath%"
 	for /f "delims=" %%i in ('"forfiles /m "%TnameX%" /c "cmd /c echo @ftime""') do set "Tdate=%%i"
 POPD
-if /i not "%TestMode-Auto-Execute%"=="yes" goto FI-Template-TestMode
+if /i not "%TemplateTestMode-AutoExecute%"=="yes" goto FI-Template-TestMode
 if /i "%error%"=="detected" echo %i_%Error Detected! Auto execution is PAUSED. Press any key to continue.%_%&pause>nul&set "Error="
 if "%TdateX%"=="%Tdate%" echo The template will be automatically executed when a file modification is detected.&%p2%&cls&goto FI-Template-TestMode-Auto
 set "TdateX=%Tdate%"
@@ -1302,7 +1308,7 @@ exit /b
 
 :IMG-Generate_icon
 call :timer-start
-if /i "%AlwaysAskTemplate%"=="Yes" if /i not "%already%"=="Asked" set "referer=FI-Generate"&goto FI-Template
+if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%already%"=="Asked" set "referer=FI-Generate"&goto FI-Template
 FOR %%T in ("%Template%") do set "TName=%%~nT"
 echo %TAB%       %i_%%w_%    Generating Icon..    %_%
 echo.
@@ -2076,11 +2082,11 @@ if exist "%Template%" for %%I in ("%Template%") do (
 	echo %TAB%"%converter%" %r_%doesn't exist.%_%
 )
 echo.
-echo %TAB%%yy_%AlwaysGenerateSample%_%
-echo %TAB%"%AlwaysGenerateSample%"
-echo %TAB%%g_%If the  value is not "NO", RCFI Tools will  generate a sample image every
-echo %TAB%%g_%time  you  select  a  template via "choose template" menu.
-echo.
+REM echo %TAB%%yy_%AlwaysGenerateSample%_%
+REM echo %TAB%"%AlwaysGenerateSample%"
+REM echo %TAB%%g_%If the  value is not "NO", RCFI Tools will  generate a sample image every
+REM echo %TAB%%g_%time  you  select  a  template via "choose template" menu.
+REM echo.
 if exist "%TemplateForICO%" for %%I in ("%TemplateForICO%") do (
 	echo %TAB%%yy_%TemplateForICO%_%
 	echo %TAB%"%TemplateForICO%"%_%
@@ -2120,8 +2126,8 @@ if exist "%TemplateForJPG%" for %%I in ("%TemplateForJPG%") do (
 	)
 )
 echo.
-echo %TAB%%yy_%AlwaysAskTemplate%_%
-echo %TAB%"%AlwaysAskTemplate%"%_%
+echo %TAB%%yy_%TemplateAlwaysAsk%_%
+echo %TAB%"%TemplateAlwaysAsk%"%_%
 echo %TAB%%g_%If the  value is "YES", RCFI Tools will  ask for choosing the template
 echo %TAB%%g_%every  time  you  generate  a  folder icon. 
 echo.
@@ -2154,6 +2160,7 @@ if exist "%Template%"        (for %%T in ("%Template%")        do set "Template=
 if exist "%TemplateForICO%"	(for %%T in ("%TemplateForICO%") do set "TemplateForICO=%%~nT") else (set "TemplateForICO=(none)")
 if exist "%TemplateForPNG%"	(for %%T in ("%TemplateForPNG%") do set "TemplateForPNG=%%~nT") else (set "TemplateForPNG=insert a template name to use for .png files")
 if exist "%TemplateForJPG%"	(for %%T in ("%TemplateForJPG%") do set "TemplateForJPG=%%~nT") else (set "TemplateForJPG=insert a template name to use for .jpg files")
+if not defined TemplateIconSize set "TemplateIconSize=Auto"
 (
 	echo         [RCFI TOOLS CONFIGURATION]
 	echo DrivePath="%cd%"
@@ -2163,9 +2170,10 @@ if exist "%TemplateForJPG%"	(for %%T in ("%TemplateForJPG%") do set "TemplateFor
 	echo TemplateForICO="%TemplateForICO%"
 	echo TemplateForPNG="%TemplateForPNG%"
 	echo TemplateForJPG="%TemplateForJPG%"
-	echo AlwaysAskTemplate="%AlwaysAskTemplate%"
-	echo AlwaysGenerateSample="%AlwaysGenerateSample%"
-	echo RunAsAdmin="%RunAsAdmin%"
+	echo TemplateAlwaysAsk="%TemplateAlwaysAsk%"
+	echo TemplateTestMode="%TemplateTestMode%"
+	echo TemplateTestMode-AutoExecute="%TemplateTestMode-AutoExecute%"
+	echo TemplateIconSize="%TemplateIconSize%"
 	echo ExitWait="%ExitWait%"
 	
 )>"%~dp0config.ini"
@@ -2197,9 +2205,12 @@ set "Template=%rcfi%\template\%Template:"=%.bat"
 set "TemplateForICO=%rcfi%\template\%TemplateForICO:"=%.bat"
 set "TemplateForPNG=%rcfi%\template\%TemplateForPNG:"=%.bat"
 set "TemplateForJPG=%rcfi%\template\%TemplateForJPG:"=%.bat"
-set "AlwaysAskTemplate=%AlwaysAskTemplate:"=%"
-set "AlwaysGenerateSample=%AlwaysGenerateSample:"=%"
-set "RunAsAdmin=%RunAsAdmin:"=%"
+set "TemplateAlwaysAsk=%TemplateAlwaysAsk:"=%"
+set "TemplateTestMode=%TemplateTestMode:"=%"
+set "TemplateTestMode-AutoExecute=%TemplateTestMode-AutoExecute:"=%"
+if /i "%TemplateIconSize%"==""Auto"" (set "TemplateIconSize=") else (set "TemplateIconSize=%TemplateIconSize:"=%")
+REM "AlwaysGenerateSample=%AlwaysGenerateSample:"=%"
+rem set "RunAsAdmin=%RunAsAdmin:"=%"
 set "ExitWait=%ExitWait:"=%"
 EXIT /B
 
@@ -2211,11 +2222,13 @@ cd /d "%~dp0"
 	echo Extension=".png"
 	echo Template="(none)"
 	echo TemplateForICO="(none)"
-	echo TemplateForPNG="insert a template name to use for .png files"
-	echo TemplateForJPG="insert a template name to use for .jpg files"
-	echo AlwaysAskTemplate="No"
-	echo AlwaysGenerateSample="No"
-	echo RunAsAdmin="No"
+	echo TemplateForPNG="insert the template name to use for .png files"
+	echo TemplateForJPG="insert the template name to use for .jpg files"
+	echo TemplateAlwaysAsk="No"
+	echo TemplateTestMode="No"
+	echo TemplateTestMode-AutoExecute="No"
+	echo TemplateIconSize="Auto"
+rem	echo RunAsAdmin="No"
 	echo ExitWait="100"
 )>"%~dp0config.ini"
 EXIT /B
