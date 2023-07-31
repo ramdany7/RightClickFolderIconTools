@@ -14,9 +14,9 @@ if defined Context goto Input-Context
 
 :Intro                            
 echo. 
-if not defined OpenFrom echo                        %i_% %name% %version% %_%%-%&echo.
-echo %TAB%       %pp_%Drag and drop%_%%g_% an %c_%image%g_% to  this  window then
-echo %TAB%       press %u_%Enter%_%  %_%to change  the folder icon.%_%
+if not defined OpenFrom echo                         %i_% %name% %version% %_%%-%&echo.
+echo %TAB%          %pp_%Drag and  drop%_%%g_%  an %c_%image%g_%  to  this  window
+echo %TAB%          then press Enter to change the folder icon.%_%
 echo.
 if not defined OpenFrom echo %ESC%%u_%%gg_%Template:%_%%cc_% %TemplateName%%gg_%     %u_%Keyword:%_% %printTagFI%%ESC%
 goto Options-Input
@@ -74,8 +74,10 @@ call :Config-UpdateVar
 call :Config-Load
 
 :Input-Command                    
+for %%F in ("%cd%") do set "FolderName=%%~nxF"
+if not defined OpenFrom set "FolderName=%cd%"
 set "Command=(none)"
-set /p "Command=%_%%w_%%cd%%_%%gn_%>"
+set /p "Command=%_%%w_%%FolderName%%_%%gn_%>"
 set "Command=%Command:"=%"
 echo %-% &echo %-% &echo %-%
 if /i "%Command%"=="keyword"		goto FI-Keyword
@@ -132,7 +134,8 @@ goto Input-Error
 title %name% %version% ^| "%SelectedThing%"
 set Dir=cd /d "%SelectedThing%"
 set SetIMG=set "img=%SelectedThing%"
-cls &echo. &echo. &echo.
+cls 
+echo. &echo. &echo.
 REM Selected Image
 if /i "%Context%"=="IMG-Actions"				goto IMG-Actions
 if /i "%Context%"=="IMG-Set.As.Folder.Icon"	cd /d "%SelectedThingPath%" &set "input=%SelectedThing%"&set "RefreshOpen=Select" &goto DirectInput
@@ -148,7 +151,19 @@ if /i "%Context%"=="IMG-Convert"				goto IMG-Convert
 if /i "%Context%"=="IMG-Resize"					goto IMG-Resize
 REM Selected Dir	
 if /i "%Context%"=="Change.Folder.Icon"		%Dir% &call :Config-Save	&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
-if /i "%Context%"=="Select.And.Change.Folder.Icon" goto FI-Selected_folder
+
+if /i "%Context%"=="Select.And.Change.Folder.Icon" (
+	if /i "%TemplateAlwaysAsk%"=="yes" (
+		cls
+		echo %g_%%i_% %_%%g_%'%r_%TemplateAlwaysAsk%g_%' feature is not available yet in this menu.%_%
+		echo %g_%%i_% %_%%g_%so it will use "%cc_%%TemplateName%%g_%" as the template.%_%
+		echo.
+		echo.
+		echo.
+	)
+	goto FI-Selected_folder
+)
+
 if /i "%Context%"=="DIR.Choose.Template"		goto FI-Template
 if /i "%Context%"=="FI.Search.Folder.Icon"		goto FI-Search
 if /i "%Context%"=="FI.Search.Poster"			goto FI-Search
@@ -267,6 +282,8 @@ for %%S in (%xSelected%) do (
 )
 echo %TAB% %_%--------------------------------------------------------------------%_%
 echo %TAB% %g_%Template:%ESC%%cc_%%TemplateName%%ESC%
+echo.
+echo %g_%press %gn_%1%g_% then hit enter to change them separatly in each different window.%_%
 for %%S in (%xSelected%) do (
 	PUSHD "%%~fS" 2>nul &&for %%F in (%%S) do (
 		set "FolderPath=%%~fF"
@@ -281,11 +298,11 @@ set "context=FI-Selected_folder"
 goto options
 
 :FI-Selected_folder-input
-echo.
 if not exist "%input%" echo %g_%to enter the image path you can drag and drop the image here. then press enter. ^
- &echo %g_%-------------------------------------------------------------------------------------------------- ^
+ &echo %g_%------------------------------------------------------------------------------- ^
  &set /p "Input=%_%%w_%Enter the image path:%_%%c_%"
 set "Input=%Input:"=%"
+if "%input%"=="1" goto FI-Selected_folder-Separate
 if not exist "%Input%" (
 	echo.
 	echo.
@@ -298,7 +315,6 @@ if not exist "%Input%" (
 )
 set "RefreshOpen=Select"
 set "Selected="
-if not defined timestart call :Timer-start
 for %%I in ("%input%") do (
 	set "filename=%%~nxI"
 	set "filepath=%%~dpI"
@@ -328,6 +344,7 @@ for %%X in (%ImageSupport%) do (
 				)
 				set "ReplaceThis=%iconresource%"
 			)
+			if not defined timestart call :Timer-start
 			call :FI-Generate-Folder_Icon
 		
 		set "iconresource="
@@ -342,7 +359,14 @@ set "input="
 call :FI-Selected_folder-input
 exit /b
 
-
+:FI-Selected_folder-Separate
+for %%S in (%xSelected%) do (
+	PUSHD "%%~fS" 2>nul &&(
+		start "" cmd.exe /c set "Context=Change.Folder.Icon"^&call "%~f0" "%%~fS"
+	)
+	POPD
+)
+exit
 
 :FI-GetDir                        
 set "locationCheck=Start"
@@ -591,7 +615,7 @@ if not defined Selected (
 	
 	rem Check icon size, if icon size is less then 10kB then it's fail.
 	if exist "foldericon(%FI-ID%).ico" for %%S in ("foldericon(%FI-ID%).ico") do (
-		if %%~zS GTR 200 echo %TAB%%ESC%%g_%Convert success - foldericon(%FI-ID%).ico (%%~zS Bytes) %r_%
+		if %%~zS GTR 200 echo %TAB%%ESC%%g_%Convert success - foldericon(%FI-ID%).ico (%%~zS Bytes)%ESC%%r_%
 		if %%~zS LSS 200 (
 			echo %r_%"%Filename%"
 			echo %r_%Convert error. Icon is less than 200 Bytes. -^> "foldericon(%FI-ID%).ico"%ESC%%g_%(%pp_%%%~zS Bytes%g_%)%ESC% 
@@ -618,7 +642,7 @@ if not defined Selected (
 		attrib +h "desktop.ini"
 		attrib +h "foldericon(%FI-ID%).ico"
 		attrib |exit /b
-		echo %TAB% %i_%%g_%  Done!  %-% 
+		echo %TAB% %i_%%g_%  Success!  %-% 
 		set /a "success_result+=1"
 		if defined ReplaceThis if exist "%ReplaceThis%" for %%R in ("%ReplaceThis%") do (
 			if /i "%%~dpR"=="%cd%\" if /i "%%~xR"==".ico" del "%ReplaceThis%">nul&set "ReplaceThis="
@@ -637,6 +661,12 @@ if not exist "%Template%" (
 	goto options
 )
 EXIT /B
+
+
+:FI-Template-AlwaysAsk             
+
+
+
 
 :FI-Template                      
 if /i not	"%referer%"=="FI-Generate" if defined Context cls &echo.&echo.&echo.&echo.
@@ -1175,7 +1205,6 @@ FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
 EXIT /B
 
 :FI-Remove-Act                    
-if not defined timestart call :timer-start
 if /i not "%delete%"=="confirm" (
 	if exist "%iconresource%" (
 		set /a result+=1
@@ -1186,6 +1215,7 @@ if /i not "%delete%"=="confirm" (
 if exist "%iconresource%" (
 	set /a result+=1
 	if /i "%delete%"=="confirm" (
+		if not defined timestart call :timer-start
 		echo %ESC%%TAB%%w_%📁 %_%%foldername%%ESC%
 		echo %TAB% %g_%Folder icon:%ESC%%c_%%iconresource%%ESC%
 		for %%I in ("%iconresource%") do (
@@ -2575,8 +2605,8 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Select.And.Change.Folder.Icon
 	echo [%RegExShell%\RCFI.Select.And.Change.Folder.Icon]
-	echo "MUIVerb"="Select and Change Folder Icon"
-	echo "Icon"="imageres.dll,-5382"
+	echo "MUIVerb"="Change Folder Icon"
+	echo "Icon"="imageres.dll,-148"
 	echo [%RegExShell%\RCFI.Select.And.Change.Folder.Icon\command]
 	echo @="%Scmd% set \"Context=Select.And.Change.Folder.Icon\"%SRCFIexe% \"%%V\""
 	
@@ -2680,7 +2710,7 @@ rem Generating setup_*.reg
 	:REG-FI-Activate_Folder_Icon
 	echo [%RegExShell%\RCFI.ActivateFolderIcon]
 	echo "MUIVerb"="Activate Folder Icon"
-	echo "Icon"="shell32.dll,-210"
+	echo "Icon"="imageres.dll,-166"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.ActivateFolderIcon\command]
 	echo @="%Scmd% set \"Context=ActivateFolderIcon\"%SRCFIexe% \"%%V\""
@@ -2688,7 +2718,7 @@ rem Generating setup_*.reg
 	:REG-FI-Deactivate_Folder_Icon
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon]
 	echo "MUIVerb"="Deactivate Folder Icon"
-	echo "Icon"="shell32.dll,-4"
+	echo "Icon"="imageres.dll,-4"
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon\command]
 	echo @="%Scmd% set \"Context=DeactivateFolderIcon\"%SRCFIexe% \"%%V\""
 	
@@ -2763,7 +2793,7 @@ rem Generating setup_*.reg
 	:REG-FI-Activate_Folder_Icon_here
 	echo [%RegExShell%\RCFI.ActivateFolderIcon.Here]
 	echo "MUIVerb"="Activate Folder Icons"
-	echo "Icon"="shell32.dll,-210"
+	echo "Icon"="imageres.dll,-166"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.ActivateFolderIcon.Here\command]
 	echo @="%cmd% set \"Context=ActivateFolderIcon.Here\"%RCFIexe% \"%%V\""
@@ -2771,7 +2801,7 @@ rem Generating setup_*.reg
 	:REG-FI-Deactivate_Folder_Icon_here
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon.Here]
 	echo "MUIVerb"="Deactivate Folder Icons"
-	echo "Icon"="shell32.dll,-4"
+	echo "Icon"="imageres.dll,-3"
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon.Here\command]
 	echo @="%cmd% set \"Context=DeactivateFolderIcon.Here\"%RCFIexe% \"%%V\""
 	
@@ -2809,7 +2839,7 @@ rem Generating setup_*.reg
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.Change.Folder.Icon;RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.Refresh;RCFI.DIR.Choose.Template;RCFI.Search.Poster;RCFI.Search.Folder.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
+	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.Refresh;RCFI.DIR.Choose.Template;RCFI.Search.Poster;RCFI.Search.Folder.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
 	
 	:REG-Context_Menu-FI-Background
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
