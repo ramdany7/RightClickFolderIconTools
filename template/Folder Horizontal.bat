@@ -234,7 +234,7 @@ if %FolNamShortCount% LEQ %FolNamShortLimit% exit /b
 set CODE-FOLDER-NAME-LONG= ^
 	 ( ^
 	 -font Arial-Bold  ^
-	 -fill white ^
+	 -fill rgba(255,255,255,0.9) ^
 	 -density 400 ^
 	 -pointsize 3.5 ^
 	 -kerning 2 ^
