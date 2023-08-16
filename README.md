@@ -47,7 +47,7 @@ Here's some samples of the template i've made.
 <br>
 
 To give you an idea of how it looks and how you can use it,<br>
-I've made a video that you can watch it ![**Here**](https://www.youtube.com/watch?v=MT7BZlhRWfI).<br>
+I've made a video that you can watch it [**Here**](https://www.youtube.com/watch?v=MT7BZlhRWfI).<br>
 [![Youtube](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/86f4ecdb-d141-4ce6-893f-e08031796113)](https://www.youtube.com/watch?v=MT7BZlhRWfI)
 
 <br><br>
@@ -102,10 +102,10 @@ Here are the available configuration options:
 # Credits
 _In the end, I'm just an average person on the internet. My role involves is just bringing together the work and ideas of others to bring this project to happed. <br>_
 
-- This project was inspired by ![Anime Icon Matcher 2018](http://www.mediafire.com/?nv3m231s8h9be) by serenity !29TgfcZgPU, which I used a lots in the past.
-- This project owes its existence to ![ImageMagick](https://github.com/ImageMagick/ImageMagick), the tool that is use to process and edit images.
-- I utilize the ![SingleInstanceAccumulator](https://github.com/Beej126/SingleInstanceAccumulator) by Beej126 to accumulate the selected items in Explorer so it doesn't make a new instance for each selected items.
-- I use PSD templates by ![em1l](https://www.deviantart.com/em1l), ![saikuro](https://www.deviantart.com/saikuro), ![mauricioestrella](https://www.deviantart.com/mauricioestrella) and ![90scomics.com](http://www.90scomics.com) to create all available folder icon templates.
-- While working on this project, I also drew some inspiration from ![FolderIco](http://folderico.com) and ![Raticon](http://jamedjo.github.io/Raticon) by Jamedjo.<br>
+- This project was inspired by [Anime Icon Matcher 2018](http://www.mediafire.com/?nv3m231s8h9be) by serenity !29TgfcZgPU, which I used a lots in the past.
+- This project owes its existence to [ImageMagick](https://github.com/ImageMagick/ImageMagick), the tool that is use to process and edit images.
+- I utilize the [SingleInstanceAccumulator](https://github.com/Beej126/SingleInstanceAccumulator) by Beej126 to accumulate the selected items in Explorer so it doesn't make a new instance for each selected items.
+- I use PSD templates by [em1l](https://www.deviantart.com/em1l), [saikuro](https://www.deviantart.com/saikuro), [mauricioestrella](https://www.deviantart.com/mauricioestrella) and [90scomics.com](http://www.90scomics.com) to create all available folder icon templates.
+- While working on this project, I also drew some inspiration from [FolderIco](http://folderico.com) and [Raticon](http://jamedjo.github.io/Raticon) by Jamedjo.<br>
 
 **_A big thank you to all mentioned above for their contributions._**
