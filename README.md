@@ -1,6 +1,9 @@
 # RCFI TOOLS
 Adds "Folder Icon Tools" to your right-click menus, allowing you to easily customize folder icons with a simple right-click. 
 
+## ![Download Count](https://img.shields.io/github/downloads/ramdany7/RightClickFolderIconTools/total) ![Code Size](https://img.shields.io/github/languages/code-size/ramdany7/RightClickFolderIconTools) ![Repo Size](https://img.shields.io/github/repo-size/ramdany7/rightclickfoldericontools)   ![License](https://img.shields.io/github/license/ramdany7/RightClickFolderIconTools)
+
+
 |![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Folder Right-click ![RCFI-Folder_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8703384d-3c81-45fc-87cb-befa5891718c)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Background Right-click ![RCFI-Background_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/253aea77-5c6d-4fdd-bbf7-4819cf2270a8)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Image Right-click ![RCFI-Image_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/52230ba6-cee8-4bf7-903b-6e5751acc207)|
 |     :---      |     :---      |     :---      |
 
@@ -15,12 +18,20 @@ Adds "Folder Icon Tools" to your right-click menus, allowing you to easily custo
 <br><br>
 
 # Features
-- Set images as folder icons directly by right-clicking on them.
+- Batch generate and change folder icons for each folder.
+- Batch generate and change multiple folders at once.
+- Set image as folder icon directly by right-clicking on them.
 - Use keywords to automatically set the matched file inside a folder as the folder icon.
 - Supports a wide range of image extensions (`*.jpg`, `*.png`, `*.ico`, `*.webp`, `*.jpeg`, `*.bmp`, `*.tiff`, `*.heic`, `*.heif`, `*.wbmp`, `*.tga`, `*.svg`).
-- Automatically edits, converts, and sets images as folder icons.
+- Automatically edit, convert, and set image as folder icon.
 - Provides several available templates to choose from, eliminating the need for manual editing.
-- Achieve everything with just a few clicks, making it easy and fast.
+- Generate `*.ico` files using template with multiple icon size resources included.
+- Generate `*.png` files using template.
+- Convert and Resize images.
+- Activate or Deactivate folders icons.
+- Search for folder icon by folder name.
+- Search for poster image by folder name.
+- Achieve everything with just a few clicks, making it fast and easy.
 
 <br><br>
 
@@ -100,7 +111,7 @@ Here are the available configuration options:
 <br><br>
 
 # Credits
-_In the end, I'm just an average person on the internet. My role involves is just bringing together the work and ideas of others to bring this project to happed. <br>_
+_In the end, My role involves is just bringing together the work and ideas of others to bring this project to happend. <br>_
 
 - This project was inspired by [Anime Icon Matcher 2018](http://www.mediafire.com/?nv3m231s8h9be) by serenity !29TgfcZgPU, which I used a lots in the past.
 - This project owes its existence to [ImageMagick](https://github.com/ImageMagick/ImageMagick), the tool that is use to process and edit images.
