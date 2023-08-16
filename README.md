@@ -48,7 +48,7 @@ Here's some samples of the template i've made.
 
 To give you an idea of how it looks and how you can use it,<br>
 I've made a video that you can watch it [**Here**](https://www.youtube.com/watch?v=MT7BZlhRWfI).<br>
-[![Youtube](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/86f4ecdb-d141-4ce6-893f-e08031796113)](https://www.youtube.com/watch?v=MT7BZlhRWfI)
+[![Youtube](https://github-production-user-asset-6210df.s3.amazonaws.com/113004105/260920450-86f4ecdb-d141-4ce6-893f-e08031796113.png)](https://www.youtube.com/watch?v=MT7BZlhRWfI)
 
 <br><br>
 
