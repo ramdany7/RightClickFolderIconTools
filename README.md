@@ -40,24 +40,61 @@ You can access '**Folder Icon Tools**' via the right-click menu in Windows Explo
 # Usage
 It's simple and easy to use. Once installed, you can generate a folder icon by right-clicking on a folder, an image, or the folder background.
 You can choose the template you want to generate the folder icon, it will automatically edit the image using ImageMagick. 
-<br><br>Here's some samples of the template i've made.
-
 <br>
-<b>      Folder and addtional files.</b>
-
-|Folder<br> ![Folder](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/b2ab9d18-9faa-47e6-ab7f-bfc7d1aadf11)|Files inside the folder<br> ![Files](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/e0c20a52-5caf-4ec6-abc8-34d5122191e5)|
-|     :---      |     :---      |
-
 <br>
-<b>      Generated icon using default template settings.</b>
+Here's some samples of the template i've made.
 
-|![(none)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/832f2530-6b3b-41e9-a80a-692bc52e6ebd)<br>(none)          |![(Shadow Only)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/13045086-4646-44a0-84a2-3ef957d923e0)<br>(Shadow Only)          |![DVDBox Dark](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/119e02b0-db45-401a-8ada-c2ea41033611)<br>DVDBox Dark          |![DVDBox Light](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/95a30678-84ed-4e27-9d64-02f4a72f87b5)<br>DVDBox Light          |
-|     :---:      |     :---:      |     :---:      |     :---:      |
-![DVDCase - Bluray](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/540689b7-c957-4b4b-9414-6e507cd14f44)<br>DVDCase Bluray          |![DVDCase - Transparent Plastic](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/76aa86f8-9c1d-4572-abf9-2bba66929810)<br>DVDCase Plastic          |![Folder Vertical](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8e27620d-824c-4c7b-8126-f87deff44d4f)<br>Folder Vertical          |![Folder Horizontal](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/dca6ae78-3db5-43f9-8d5f-1e4bdb049403)<br>Folder Horizontal          |
+<table>
+  <tr>
+    <td>     Folder<br>
+    <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/b2ab9d18-9faa-47e6-ab7f-bfc7d1aadf11"></img>
+    </td>
+    <td colspan="3">     Files inside folder<br>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/e0c20a52-5caf-4ec6-abc8-34d5122191e5"></img>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/832f2530-6b3b-41e9-a80a-692bc52e6ebd"><br>
+      <p align="center">Template: (none)</p></img>
+    </td>
+    <td>
+    <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/13045086-4646-44a0-84a2-3ef957d923e0"><br>
+      <p align="center">Template: (Shadow Only)</p></img>
+    </td>
+    <td>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/119e02b0-db45-401a-8ada-c2ea41033611"><br>
+      <p align="center">Template: DVDBox Dark</p></img>
+    </td>
+    <td>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/95a30678-84ed-4e27-9d64-02f4a72f87b5"><br>
+      <p align="center">Template: DVDBox Light</p></img>
+    </td>
+</td>
+  </tr>
+  
+  <tr>
+    <td>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/540689b7-c957-4b4b-9414-6e507cd14f44"><br>
+      <p align="center">Template: DVDCase Bluray</p></img>
+    </td>
+    <td>
+    <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/76aa86f8-9c1d-4572-abf9-2bba66929810"><br>
+      <p align="center">Template: DVDCase Plastic</p></img>
+    </td>
+    <td>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8e27620d-824c-4c7b-8126-f87deff44d4f"><br>
+      <p align="center">Template: Folder Vertical</p></img>
+    </td>
+    <td>
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/dca6ae78-3db5-43f9-8d5f-1e4bdb049403"><br>
+      <p align="center">Template: Folder Horizontal</p></img>
+    </td>
+  </tr>
+</table>
 
-<br>
 
->_The samples above use the `*Poster*.jpg` image as the folder icon, some templates with certain configuration may combine additional files located within the same directory as the image to get the results as shown above._
+>_The samples above use '**\*Poster\*.jpg**' as the generated folder icon. Certain templates with specific configurations may combine additional files located within the same directory as the image to achieve the results as shown above. If the required additional files are not available, they will be ignored, and the folder icon will be generated without them._
 
 <br>
 
