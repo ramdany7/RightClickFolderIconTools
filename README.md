@@ -1,7 +1,8 @@
 # RCFI TOOLS
 Adds "Folder Icon Tools" to your right-click menus, allowing you to easily customize folder icons with a simple right-click. 
 
-## [![Download](https://img.shields.io/github/downloads/ramdany7/rightclickfoldericontools/total?link=https%3A%2F%2Fgithub.com%2Framdany7%2FRightClickFolderIconTools%2Freleases)](https://github.com/ramdany7/RightClickFolderIconTools/releases) ![Code Size](https://img.shields.io/github/languages/code-size/ramdany7/RightClickFolderIconTools) ![Repo Size](https://img.shields.io/github/repo-size/ramdany7/rightclickfoldericontools)   ![License](https://img.shields.io/github/license/ramdany7/rightclickfoldericontools)
+## [![Download](https://img.shields.io/github/downloads/ramdany7/rightclickfoldericontools/total?link=https%3A%2F%2Fgithub.com%2Framdany7%2FRightClickFolderIconTools%2Freleases)](https://github.com/ramdany7/RightClickFolderIconTools/releases) ![Code Size](https://img.shields.io/github/languages/code-size/ramdany7/RightClickFolderIconTools) ![Repo Size](https://img.shields.io/github/repo-size/ramdany7/rightclickfoldericontools)   ![GitHub License](https://img.shields.io/github/license/ramdany7/RightClickFolderIconTools)
+
 
 
 |![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Folder Right-click ![RCFI-Folder_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8703384d-3c81-45fc-87cb-befa5891718c)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Background Right-click ![RCFI-Background_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/253aea77-5c6d-4fdd-bbf7-4819cf2270a8)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Image Right-click ![RCFI-Image_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/52230ba6-cee8-4bf7-903b-6e5751acc207)|
@@ -29,8 +30,9 @@ You can access '**Folder Icon Tools**' via the right-click menu in Windows Explo
 - Provides several available templates to choose from, eliminating the need for manual editing.
 - Generate `*.ico` files using template with multiple icon size resources included.
 - Generate `*.png` files using template.
-- Convert and Resize images.
-- Activate or Deactivate folders icons.
+- Convert multiple images to any image extension at once.
+- Resize and compress multiple images at once.
+- Activate and Deactivate folders icons.
 - Search for folder icon by folder name.
 - Search for poster image by folder name.
 - Achieve everything with just a few clicks, making it fast and easy.
@@ -152,7 +154,7 @@ Here are the available configuration options:
 <br><br>
 
 # Credits
-_In the end, My role involves is just bringing together the work and ideas of others to bring this project to happend. <br>_
+In the end, My role involves is just bringing together the work and ideas of others to bring this project to happend. <br>
 
 - This project was inspired by [Anime Icon Matcher 2018](http://www.mediafire.com/?nv3m231s8h9be) by serenity !29TgfcZgPU, which I used a lots in the past.
 - This project owes its existence to [ImageMagick](https://github.com/ImageMagick/ImageMagick), the tool that is use to process and edit images.
