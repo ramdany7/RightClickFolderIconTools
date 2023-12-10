@@ -10,16 +10,6 @@ Adds "Folder Icon Tools" to your right-click menus, allowing you to easily custo
 
 <br><br>
 
-# Installation
-1. Download the .zip file [**here**](https://github.com/ramdany7/RightClickFolderIconTools/releases)
-2. Unzip the downloaded file.
-2. Place the '**RCFI Tools**' folder somewhere, open it and double click '**RCFI Tools.bat**'
-3. You'll be prompted to allow the script to write to the Registry. Click 'Yes' to proceed with the installation.
-4. There will be 'config.ini' and 'uninstall.cmd' generated. And.. it's done.<br>
-
-You can access '**Folder Icon Tools**' via the right-click menu in Windows Explorer.
-<br><br>
-
 # Features
 - Batch generate and change folder icons for each folder.
 - Batch generate and change multiple folders at once.
@@ -36,7 +26,22 @@ You can access '**Folder Icon Tools**' via the right-click menu in Windows Explo
 - Search for folder icon by folder name.
 - Search for poster image by folder name.
 - Achieve everything with just a few clicks, making it fast and easy.
+<br><br>
 
+# Sreenshots
+[![GridArt_20230825_142729884_(-resize x260 -quality 90)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/93072845-ef87-4c28-8aa5-4ef7efb19b38)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/5f0ad30c-922f-485d-a43f-b97bfe549ebd)
+[![GridArt_20230825_092621697_(-resize x260 -quality 90)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/7fac770c-b754-41f7-abf2-96c153e0a042)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/df1abab2-0cb0-4da4-8b80-50c4386053ec)
+[![GridArt_20230825_092638437_(-resize x260 -quality 90)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/13f18efa-16c3-4b9f-9fe1-1b47d7af1530)](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/9582f9df-3513-4ac3-aa92-9e095dc6af50)
+<br><br>
+
+# Installation
+1. Download the .zip file [**here**](https://github.com/ramdany7/RightClickFolderIconTools/releases)
+2. Unzip the downloaded file.
+2. Place the '**RCFI Tools**' folder somewhere, open it and double click '**RCFI Tools.bat**'
+3. You'll be prompted to allow the script to write to the Registry. Click 'Yes' to proceed with the installation.
+4. There will be 'config.ini' and 'uninstall.cmd' generated. And.. it's done.<br>
+
+You can access '**Folder Icon Tools**' via the right-click menu in Windows Explorer.
 <br><br>
 
 # Usage
@@ -98,12 +103,9 @@ Here's some samples of the template i've made.
 
 >_The samples above use '**\*Poster\*.jpg**' as the generated folder icon. Certain templates with specific configurations may combine additional files located within the same directory as the image to achieve the results as shown above. If the required additional files are not available, they will be ignored, and the folder icon will be generated without them._
 
-<br>
-
 To give you an idea of how it looks and how you can use it,<br>
 I've made a video that you can watch it [**Here**](https://www.youtube.com/watch?v=MT7BZlhRWfI).<br>
 [![Youtube](https://github-production-user-asset-6210df.s3.amazonaws.com/113004105/260920450-86f4ecdb-d141-4ce6-893f-e08031796113.png)](https://www.youtube.com/watch?v=MT7BZlhRWfI)
-
 <br><br>
 
 # Configurations
