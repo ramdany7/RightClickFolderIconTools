@@ -159,6 +159,7 @@ if /i "%Context%"=="IMG.Generate.PNG"			goto IMG-Generate_icon
 if /i "%Context%"=="IMG-Set.As.Cover"			%setIMG%&goto IMG-Set_as_MKV_cover
 if /i "%Context%"=="IMG-Convert"				goto IMG-Convert
 if /i "%Context%"=="IMG-Resize"					goto IMG-Resize
+if /i "%Context%"=="IMG-Compress"				goto IMG-Compress
 REM Selected Dir	
 if /i "%Context%"=="Change.Folder.Icon"		%Dir% &call :Config-Save	&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
 if /i "%Context%"=="Select.And.Change.Folder.Icon" goto FI-Selected_folder
@@ -422,11 +423,13 @@ FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
 	call :FI-Scan-Desktop.ini
 )
 EXIT /B
+
 :FI-Scan                          
 set "yy_result=0"
 set "y_result=0"
 set "g_result=0"
 set "r_result=0"
+set "h_result=0"
 set "success_result=0"
 set "fail_result=0"
 set "target=%target: =*%"
@@ -438,6 +441,7 @@ call :timer-start
 call :FI-GetDir
 echo %TAB%%w_%==============================================================================%_%
 set /a "result=%yy_result%+%y_result%+%g_result%+%r_result%"
+set /a "hy_result=%yy_result%-%h_result%"
 echo.
 echo.
 
@@ -445,17 +449,19 @@ IF /i %result%		LSS 10 (set "s=   "		) else (IF /i %result%		GTR 9 set "s=  "		&
 IF /i %R_result%		LSS 10 (set "R_s=   "		) else (IF /i %R_result%		GTR 9 set "R_s=  "	&IF /i %R_result%		GTR 99	set "R_s= "	&IF /i %R_result%		GTR 999 set "R_s="	)		
 IF /i %Y_result%		LSS 10 (set "Y_s=   "		) else (IF /i %Y_result%		GTR 9 set "Y_s=  "	&IF /i %Y_result%		GTR 99 set "Y_s= "	&IF /i %Y_result%		GTR 999 set "Y_s="	)		
 IF /i %G_result%		LSS 10 (set "G_s=   "		) else (IF /i %G_result%		GTR 9 set "G_s=  "	&IF /i %G_result%		GTR 99 set "G_s= "	&IF /i %G_result%		GTR 999 set "G_s="	)		
-IF /i %YY_result%		LSS 10 (set "YY_s=   "	) else (IF /i %YY_result%		GTR 9 set "YY_s=  "	&IF /i %YY_result%	GTR 99 set "YY_s= "	&IF /i %YY_result%	GTR 999 set "YY_s="	)		
+IF /i %YY_result%		LSS 10 (set "YY_s=   "	) else (IF /i %YY_result%		GTR 9 set "YY_s=  "	&IF /i %YY_result%	GTR 99 set "YY_s= "	&IF /i %YY_result%	GTR 999 set "YY_s="	)
+IF /i %H_result%		LSS 10 (set "H_s=   "	)	else (IF /i %H_result%		GTR 9 set "H_s=  "	&IF /i %H_result%	GTR 99 set "H_s= "	&IF /i %H_result%	GTR 999 set "H_s="	)
 
-echo %TAB%%s%%u_%%result% Folder found.%_%
-IF /i %YY_result%		GTR 0 echo %TAB%%yy_%%YY_s%%YY_result%%_% Folder can be processed.
-IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folder icon is missing and can be changed.
-IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folder already has an icon.
-IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folder has no file match "%c_%%Target%%_%".
-IF /i %YY_result%		LSS 1 echo.&echo %TAB% Folder cantaining "%c_%%Target%%_%" couldn't be found.
+echo %TAB%%s%%u_%%result% Folders found.%_%
+IF /i %YY_result%		GTR 0 IF NOT %hy_result% EQU 0 echo %TAB%%yy_%%YY_s%%HY_result%%_% Folders can be processed.
+IF /i %h_result%		GTR 0 echo %TAB%%rr_%%H_s%%H_result%%_% Folders can't be processed.
+IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folder icons is missing and can be changed.
+IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folders already has an icon.
+IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folders has no file match "%c_%%Target%%_%".
+IF /i %YY_result%		LSS 1 echo.&echo %TAB% Folders cantaining "%c_%%Target%%_%" couldn't be found.
 echo.
 IF %YY_result% GTR 0 (
-	echo   %g_%Note: If there is more than one file named "%target%" inside the folder, the one 
+	echo   %g_%Note: If there is more than one files named "%target%" inside the folder, the one 
 	echo   selected as the folder icon will be the one that appear first in the folder.
 )
 set "result=0" &goto options
@@ -502,7 +508,7 @@ PUSHD "%location%"
 			if "%newline%"=="yes" echo.
 			echo %TAB%%ESC%%r_%📁 %yy_%%foldername%%ESC%
 			set /a R_result+=1
-			echo %TAB%%ESC%Folder icon:%r_%%iconresource% %_%(Not Found!)%ESC%
+			echo %TAB%%ESC%Folder icon:%r_%%iconresource% %g_%(file not found!)%ESC%
 			echo %TAB%%g_% This folder previously had a folder icon, but the icon file is missing.%_%
 			echo %TAB%%g_% The icon will be replaced by the selected image.%_%
 			call :FI-Scan-Find_Target
@@ -523,6 +529,7 @@ POPD&EXIT /B
 rem if exist "desktop.shellinfo.ini" >desktop.ini type desktop.shellinfo.ini &>>desktop.ini echo Tes &>>desktop.ini echo Satu &>>desktop.ini echo dua &echo. &EXIT /B
 
 :FI-Scan-Find_Target              
+set "Filename="
 for %%F in (%target%) do (
 	set "newline=no"
 	set "Filename=%%~nxF"
@@ -531,6 +538,7 @@ for %%F in (%target%) do (
 	if /i "%input%"=="Scan" call :FI-Scan-Display_Result
 	if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
 )
+if not defined Filename set /a h_result+=1&echo %TAB%%ESC%%_%Selected Image:%r_%Can't select the image because it's a hidden file.%ESC%
 echo. &EXIT /B
 
 :FI-Scan-Display_Result           
@@ -546,6 +554,7 @@ set "yy_result=0"
 set "y_result=0"
 set "g_result=0"
 set "r_result=0"
+set "h_result=0"
 set "success_result=0"
 set "fail_result=0"
 
@@ -562,6 +571,7 @@ call :timer-start
 call :FI-GetDir
 echo %TAB%%w_%==============================================================================%_%
 set /a "result=%yy_result%+%y_result%+%g_result%+%r_result%"
+set /a "action_result=%r_result%+%success_result%+%fail_result%"
 if /i "%cdonly%"=="true" if %success_result% EQU 1 goto options
 if /i "%cdonly%"=="true" if %result% EQU 1 if %y_result% EQU 1 (
 	echo.&echo.&echo.
@@ -589,14 +599,15 @@ IF /i %YY_result%			LSS 10 (set "YY_s=   "	) else (IF /i %YY_result%		GTR 9 set 
 IF /i %fail_result%		LSS 10 (set "fail_s=   "	) else (IF /i %fail_result%	GTR 9 set "fail_s=  "	&IF /i %fail_result%	GTR 99 set "fail_s= "	&IF /i %fail_result%	GTR 999 set "fail_s="	)
 IF /i %success_result%	LSS 10 (set "success_s=   ") else (IF /i %success_result% GTR 9 set "success_s=  " &IF /i %success_result% GTR 99 set "success_s= " &IF /i %success_result% LSS 999 set "success_s="	)
 
-echo %TAB%%s%%u_%%result% Folder found.%_%
-IF NOT "%YY_result%"=="%success_result%" IF /i %YY_result%		GTR 0 echo %TAB%%yy_%%YY_s%%YY_result%%_% Folder processed.
-IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folder icon changed.
-IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folder already has an icon.
-IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folder has no file match "%c_%%Target%%_%".
-IF /i %YY_result%		LSS 1 IF /i %success_result%	LSS 1 echo.&echo %TAB% ^(No folders to be proceed.^)
-IF /i %fail_result%	GTR 0 echo %TAB%%fail_s%%r_%%fail_result%%_% Folder icon failed to generate.
-IF /i %success_result%	GTR 1 echo %TAB%%success_s%%cc_%%success_result%%_% Folder icon generated. 
+echo %TAB%%s%%u_%%result% Folders found.%_%
+IF NOT "%YY_result%"=="%success_result%" IF %YY_result% GTR 0 IF %r_result% GTR 0 echo %TAB%%yy_%%YY_s%%YY_result%%_% Folders processed.
+IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folders icon changed.
+IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folders already has an icon.
+IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folders has no file match "%c_%%Target%%_%".
+IF /i %YY_result%		LSS 1 IF /i %success_result%	LSS 1 echo.&echo %TAB% ^(No folders to be processed.^)
+IF NOT "%YY_result%"=="%success_result%" IF %action_result% EQU 0 echo %TAB% ^(No files to be processed.^)
+IF /i %fail_result%	GTR 0 echo %TAB%%fail_s%%r_%%fail_result%%_% Folder icons failed to generate.
+IF /i %success_result%	GTR 1 echo %TAB%%success_s%%cc_%%success_result%%_% Folder icons generated. 
 echo %TAB%------------------------------------------------------------------------------
 goto options
 
@@ -1593,39 +1604,39 @@ if %Size_B% LSS 100 (
 exit /b
 
 :IMG-Resize                       
-if not exist "%RCFI%\resizer.ini" (
+if not exist "%RCFI%\RCFI.img-resizer.ini" (
 	(
 	echo.
 	echo     [  IMAGE RESIZER CONFIG  ]
 	echo.
 	echo IMGResize1Tag="_256p"
 	echo IMGResize1Name="256p"
-	echo IMGResize1Code="-resize x256  -quality 100"
+	echo IMGResize1Code="-resize x256"
 	echo.
 	echo IMGResize2Tag="_512p"
 	echo IMGResize2Name="512p"
-	echo IMGResize2Code="-resize x512  -quality 100"
+	echo IMGResize2Code="-resize x512"
 	echo.
 	echo IMGResize3Tag="_720p"
 	echo IMGResize3Name="720p"
-	echo IMGResize3Code="-resize x720  -quality 95"
+	echo IMGResize3Code="-resize x720"
 	echo.
 	echo IMGResize4Tag="_1080p"
 	echo IMGResize4Name="1080p"
-	echo IMGResize4Code="-resize x1080  -quality 95"
+	echo IMGResize4Code="-resize x1080"
 	echo.
 	echo IMGResize5Tag="_1440p"
 	echo IMGResize5Name="1440p"
-	echo IMGResize5Code="-resize x1440  -quality 95"
+	echo IMGResize5Code="-resize x1440"
 	echo.
 	echo IMGResize6Tag="_2160p"
 	echo IMGResize6Name="2160p"
-	echo IMGResize6Code="-resize x2160  -quality 95"
+	echo IMGResize6Code="-resize x2160"
 	echo.
 	echo IMGResize7Tag="_3240p"
 	echo IMGResize7Name="3240p"
-	echo IMGResize7Code="-resize x3240  -quality 95"
-	)>"%RCFI%\resizer.ini"
+	echo IMGResize7Code="-resize x3240"
+	)>"%RCFI%\RCFI.img-resizer.ini"
 )
 set separator=echo %TAB% %_%--------------------------------------------------------------------%_%
 if not defined Action echo %TAB%       %i_%%w_%    IMAGE RESIZER    %_%&%separator%
@@ -1661,7 +1672,7 @@ echo %TAB%%ESC%- %c_%%ImgName%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
 exit /b
 
 :IMG-Resize-Options               
-for /f "usebackq tokens=1,2 delims==" %%C in ("%RCFI%\resizer.ini") do (set "%%C=%%D")
+for /f "usebackq tokens=1,2 delims==" %%C in ("%RCFI%\RCFI.img-resizer.ini") do (set "%%C=%%D")
 set  "IMGResize1Tag=%IMGResize1Tag:"=%"
 set "IMGResize1Name=%IMGResize1Name:"=%"
 set "IMGResize1Code=%IMGResize1Code:"=%"
@@ -1728,6 +1739,162 @@ if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Resi
 set size_B=1
 set "ImgOutput=%ImgName%%ImgTag%%ImgExt%"
 "%converter%" "%ImgPath%%ImgName%%ImgExt%" %ImgResizeCode% "%ImgPath%%ImgOutput%"
+if exist "%ImgPath%%ImgOutput%" (
+	for %%I in ("%ImgPath%%ImgOutput%") do (
+		set "Size_B=%%~zI"
+		call :FileSize
+	)
+) else (
+	echo %TAB%-%ESC%%c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
+	exit /b
+)
+
+if not %size_B% LSS 1000 (
+	echo %TAB%%ESC%- %c_%%ImgName%%cc_%%ImgTag%%c_%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
+) else (
+	echo %TAB%-%ESC%%c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
+	del "%ImgPath%%ImgOutput%"
+	exit /b
+)
+exit /b
+
+
+:IMG-Compress                       
+if not exist "%RCFI%\RCFI.img-compressor.ini" (
+	(
+	echo.
+	echo     [  IMAGE COMPRESSOR CONFIG  ]
+	echo.
+	echo IMGCompress1Tag="_(95%%)"
+	echo IMGCompress1Name=" 95%%"
+	echo IMGCompress1Code="-quality 95"
+	echo.
+	echo IMGCompress2Tag="_(90%%)"
+	echo IMGCompress2Name=" 90%%"
+	echo IMGCompress2Code="-quality 90"
+	echo.
+	echo IMGCompress3Tag="_(85%%)"
+	echo IMGCompress3Name=" 85%%"
+	echo IMGCompress3Code="-quality 85"
+	echo.
+	echo IMGCompress4Tag="_(80%%)"
+	echo IMGCompress4Name=" 80%%"
+	echo IMGCompress4Code="-quality 80"
+	echo.
+	echo IMGCompress5Tag="_(75%%)"
+	echo IMGCompress5Name=" 75%%"
+	echo IMGCompress5Code="-quality 75"
+	echo.
+	echo IMGCompress6Tag="_(70%%)"
+	echo IMGCompress6Name=" 70%%"
+	echo IMGCompress6Code="-quality 70"
+	echo.
+	echo IMGCompress7Tag="_(60%%)"
+	echo IMGCompress7Name=" 60%%"
+	echo IMGCompress7Code="-quality 60"
+	)>"%RCFI%\RCFI.img-compressor.ini"
+)
+set separator=echo %TAB% %_%--------------------------------------------------------------------%_%
+if not defined Action echo %TAB%       %i_%%w_%    IMAGE COMPRESSOR    %_%&%separator%
+if /i "%Action%"=="Start" (
+	echo.
+	echo %TAB%       %i_%%cc_%    IMAGE CONVERTER    %_%
+	%separator%
+	for %%D in (%xSelected%) do (
+		for %%I in ("%%~fD") do (
+			set "ImgPath=%%~dpI"&set "ImgName=%%~nI"&set "ImgExt=%%~xI"&set "Size_B=%%~zI"
+			call :FileSize
+			call :IMG-Compress-FileList
+			call :IMG-Compress-Action
+		)
+	%separator%
+	)
+) else (
+	FOR %%D in (%xSelected%) do (
+		for %%I in ("%%~fD") do ( 
+			set "ImgPath=%%~dpI"&set "ImgName=%%~nI"&set "ImgExt=%%~xI"&set "Size_B=%%~zI"
+			call :FileSize
+		)
+		call :IMG-Compress-FileList
+	)
+	%separator%
+	call :IMG-Compress-Options
+)
+echo  %TAB%%g_%%i_%  Done!  %_%
+goto options
+
+:IMG-Compress-FileList              
+echo %TAB%%ESC%- %c_%%ImgName%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
+exit /b
+
+:IMG-Compress-Options               
+for /f "usebackq tokens=1,2 delims==" %%C in ("%RCFI%\RCFI.img-compressor.ini") do (set "%%C=%%D")
+set  "IMGCompress1Tag=%IMGCompress1Tag:"=%"
+set "IMGCompress1Name=%IMGCompress1Name:"=%"
+set "IMGCompress1Code=%IMGCompress1Code:"=%"
+
+set  "IMGCompress2Tag=%IMGCompress2Tag:"=%"
+set "IMGCompress2Name=%IMGCompress2Name:"=%"
+set "IMGCompress2Code=%IMGCompress2Code:"=%"
+
+set  "IMGCompress3Tag=%IMGCompress3Tag:"=%"
+set "IMGCompress3Name=%IMGCompress3Name:"=%"
+set "IMGCompress3Code=%IMGCompress3Code:"=%"
+
+set  "IMGCompress4Tag=%IMGCompress4Tag:"=%"
+set "IMGCompress4Name=%IMGCompress4Name:"=%"
+set "IMGCompress4Code=%IMGCompress4Code:"=%"
+
+set  "IMGCompress5Tag=%IMGCompress5Tag:"=%"
+set "IMGCompress5Name=%IMGCompress5Name:"=%"
+set "IMGCompress5Code=%IMGCompress5Code:"=%"
+
+set  "IMGCompress6Tag=%IMGCompress6Tag:"=%"
+set "IMGCompress6Name=%IMGCompress6Name:"=%"
+set "IMGCompress6Code=%IMGCompress6Code:"=%"
+
+set  "IMGCompress7Tag=%IMGCompress7Tag:"=%"
+set "IMGCompress7Name=%IMGCompress7Name:"=%"
+set "IMGCompress7Code=%IMGCompress7Code:"=%"
+
+echo.
+echo %TAB%%g_%To select, just press the %gg_%number%g_% associated below.
+echo.
+echo %TAB%  Select Image compression level quality:
+echo %TAB%  %gn_%1%_% ^>%cc_%%IMGCompress1Name%%_%
+echo %TAB%  %gn_%2%_% ^>%cc_%%IMGCompress2Name%%_%
+echo %TAB%  %gn_%3%_% ^>%cc_%%IMGCompress3Name%%_%
+echo %TAB%  %gn_%4%_% ^>%cc_%%IMGCompress4Name%%_%
+echo %TAB%  %gn_%5%_% ^>%cc_%%IMGCompress5Name%%_%
+echo %TAB%  %gn_%6%_% ^>%cc_%%IMGCompress6Name%%_%
+echo %TAB%  %gn_%7%_% ^>%cc_%%IMGCompress7Name%%_%
+echo.
+echo %TAB%%g_%Press %gn_%i%g_% to input your prefer output.%_% ^| %g_%Press %gn_%c%g_% to cancel.%bk_%
+choice /C:1234567ic /N
+set "ImgSizeInput=%errorlevel%"
+if /i "%ImgSizeInput%"=="1" set "ImgCompressCode=%IMGCompress1Code%"&set "ImgTag=%IMGCompress1Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="2" set "ImgCompressCode=%IMGCompress2Code%"&set "ImgTag=%IMGCompress2Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="3" set "ImgCompressCode=%IMGCompress3Code%"&set "ImgTag=%IMGCompress3Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="4" set "ImgCompressCode=%IMGCompress4Code%"&set "ImgTag=%IMGCompress4Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="5" set "ImgCompressCode=%IMGCompress5Code%"&set "ImgTag=%IMGCompress5Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="6" set "ImgCompressCode=%IMGCompress6Code%"&set "ImgTag=%IMGCompress6Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="7" set "ImgCompressCode=%IMGCompress7Code%"&set "ImgTag=%IMGCompress7Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+if /i "%ImgSizeInput%"=="9" echo %TAB%  %w_%%i_%  CANCELED  %_%&goto options
+
+echo %TAB%%g_%Input your own  command, example: %yy_%-resize 720x720  -quality 80%g_%  it will compress the
+echo %TAB%image to 720x720 pixels and compress the quality to 80%%. You can also specify only
+echo %TAB%a width or a height of the image,  example: %yy_%-compress 1000x%g_% it will resize the image 
+echo %TAB%to a width of 1000p or %yy_%-resize x1000%g_% to resize it to a height of 1000p.
+echo.
+set /p "ImgCompressCode=%-%%-%%-%%w_%Input:%yy_%"
+set "ImgCompressCode=%ImgCompressCode:"=%"
+set "ImgTag=_(%IMGCompressCode%)"
+if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
+
+:IMG-Compress-Action                
+set size_B=1
+set "ImgOutput=%ImgName%%ImgTag%%ImgExt%"
+"%converter%" "%ImgPath%%ImgName%%ImgExt%" %ImgCompressCode% "%ImgPath%%ImgOutput%"
 if exist "%ImgPath%%ImgOutput%" (
 	for %%I in ("%ImgPath%%ImgOutput%") do (
 		set "Size_B=%%~zI"
@@ -2314,6 +2481,12 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.IMG-Resize\command]
 	echo @="%SCMD% set \"Context=IMG-Resize\"%SRCFIexe% \"%%1\""
 
+	:REG-FI-IMAGE-Compress
+	echo [%RegExShell%\RCFI.IMG-Compress]
+	echo "MUIVerb"="Compress Image"
+	echo "Icon"="shell32.dll,-16826"
+	echo [%RegExShell%\RCFI.IMG-Compress\command]
+	echo @="%SCMD% set \"Context=IMG-Compress\"%SRCFIexe% \"%%1\""
 
 	REM Selected_Dir
 	:REG-FI-Change.Folder.Icon
@@ -2578,19 +2751,19 @@ rem Generating setup_*.reg
 	echo [%RegExImage%\RCFI.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Resize;"
+	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Compress;RCFI.IMG-Resize;"
 	
 	:REG-Context_Menu-Images-SVG
 	echo [%RegExSVG%\RCFI.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Resize;"
+	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Compress;RCFI.IMG-Resize;"
 	
 	:REG-Context_Menu-Images-WEBP
 	echo [%RegExWEBP%\RCFI.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Resize;"
+	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Compress;RCFI.IMG-Resize;"
 	
 )>"%Setup_Write%"
 exit /b
