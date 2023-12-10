@@ -1,7 +1,7 @@
 # RCFI TOOLS
 Adds "Folder Icon Tools" to your right-click menus, allowing you to easily customize folder icons with a simple right-click. 
 
-## [![Download](https://img.shields.io/github/downloads/ramdany7/rightclickfoldericontools/total?link=https%3A%2F%2Fgithub.com%2Framdany7%2FRightClickFolderIconTools%2Freleases)](https://github.com/ramdany7/RightClickFolderIconTools/releases) ![Code Size](https://img.shields.io/github/languages/code-size/ramdany7/RightClickFolderIconTools) ![Repo Size](https://img.shields.io/github/repo-size/ramdany7/rightclickfoldericontools)   ![GitHub License](https://img.shields.io/github/license/ramdany7/RightClickFolderIconTools)
+## [![Download](https://img.shields.io/github/downloads/ramdany7/rightclickfoldericontools/total?link=https%3A%2F%2Fgithub.com%2Framdany7%2FRightClickFolderIconTools%2Freleases)](https://github.com/ramdany7/RightClickFolderIconTools/releases) [![Code Size](https://img.shields.io/github/languages/code-size/ramdany7/RightClickFolderIconTools)](https://github.com/ramdany7/RightClickFolderIconTools/blob/main/RCFI%20Tools.bat) [![Repo Size](https://img.shields.io/github/repo-size/ramdany7/rightclickfoldericontools)](https://github.com/ramdany7/RightClickFolderIconTools/archive/refs/heads/main.zip)   [![GitHub License](https://img.shields.io/github/license/ramdany7/RightClickFolderIconTools)](https://github.com/ramdany7/RightClickFolderIconTools/blob/main/LICENSE) [![Like](https://img.shields.io/github/stars/ramdany7/RightClickFolderIconTools)](https://github.com/ramdany7/RightClickFolderIconTools/stargazers)
 
 
 
