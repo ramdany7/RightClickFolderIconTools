@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 set name=RCFI Tools
-set version=v0.1
+set version=v0.2
 setlocal
 cd /d "%~dp0"
 title %name%   "%cd%"
@@ -231,8 +231,8 @@ echo %TAB%%g_%^(supported file: %ImageSupport%^)
 goto options
 
 :DirectInput-Generate             
-if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk)
-if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk)
+if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk&echo.)
+if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk&echo.)
 for %%D in ("%cd%") do set "foldername=%%~nD%%~xD" &set "folderpath=%%~dpD"
 if /i "%Direct%"=="Confirm" echo %TAB%%ESC%%yy_%📁 %foldername%%_%%ESC% &goto DirectInput-Generate-Confirm
 if not exist desktop.ini echo %TAB%%ESC%%yy_%📁 %foldername%%_%%ESC% &goto DirectInput-Generate-Confirm
@@ -871,7 +871,7 @@ if /i "%TSelector%"=="Select" (
 			for /f "usebackq tokens=1,2 delims=`" %%I in ("%TFullPath%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
 			%p2%
 			set "TemplateChoice=Selected"
-			call :Config-Save
+			if /i not "%Context%"=="IMG-Choose.and.Set.As" call :Config-Save
 		)
 	)
 	if /i "%TemplateTestMode%"=="yes" (
@@ -998,6 +998,7 @@ set "TnameXfor=%TnameXfor:&=^&%"
 exit /b
 
 :FI-Template-TestMode
+set "OutputFile=%rcfi%\template\sample\%TName%.png"
 if /i "%referer%"=="FI-Generate" exit /b
 echo.&echo.&echo.
 if /i not "%TemplateTestMode-AutoExecute%"=="yes" set /a "TestCount+=1"
@@ -1438,8 +1439,8 @@ set "FI-ID=%get_ID%"
 exit /b
 
 :IMG-Generate_icon
-call :timer-start
 if /i "%TemplateAlwaysAsk%"=="Yes" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk&cls&echo.&echo.&echo.)
+call :timer-start
 FOR %%T in ("%Template%") do set "TName=%%~nT"
 echo %TAB%       %i_%%w_%    Generating Icon..    %_%
 echo.
@@ -1612,31 +1613,31 @@ if not exist "%RCFI%\RCFI.img-resizer.ini" (
 	echo.
 	echo IMGResize1Tag="_256p"
 	echo IMGResize1Name="256p"
-	echo IMGResize1Code="-resize x256"
+	echo IMGResize1Code="-resize 256x256"
 	echo.
 	echo IMGResize2Tag="_512p"
 	echo IMGResize2Name="512p"
-	echo IMGResize2Code="-resize x512"
+	echo IMGResize2Code="-resize 512x512"
 	echo.
 	echo IMGResize3Tag="_720p"
 	echo IMGResize3Name="720p"
-	echo IMGResize3Code="-resize x720"
+	echo IMGResize3Code="-resize 720x720"
 	echo.
 	echo IMGResize4Tag="_1080p"
 	echo IMGResize4Name="1080p"
-	echo IMGResize4Code="-resize x1080"
+	echo IMGResize4Code="-resize 1080x1080"
 	echo.
 	echo IMGResize5Tag="_1440p"
 	echo IMGResize5Name="1440p"
-	echo IMGResize5Code="-resize x1440"
+	echo IMGResize5Code="-resize 1440x1440"
 	echo.
 	echo IMGResize6Tag="_2160p"
 	echo IMGResize6Name="2160p"
-	echo IMGResize6Code="-resize x2160"
+	echo IMGResize6Code="-resize 2160x2160"
 	echo.
 	echo IMGResize7Tag="_3240p"
 	echo IMGResize7Name="3240p"
-	echo IMGResize7Code="-resize x3240"
+	echo IMGResize7Code="-resize 3240x3240"
 	)>"%RCFI%\RCFI.img-resizer.ini"
 )
 set separator=echo %TAB% %_%--------------------------------------------------------------------%_%
@@ -1647,7 +1648,11 @@ if /i "%Action%"=="Start" (
 	%separator%
 	for %%D in (%xSelected%) do (
 		for %%I in ("%%~fD") do (
-			set "ImgPath=%%~dpI"&set "ImgName=%%~nI"&set "ImgExt=%%~xI"&set "Size_B=%%~zI"
+			set "ImgPath=%%~dpI"
+			set "ImgName=%%~nI"
+			set "ImgExt=%%~xI"
+			set "Size_B=%%~zI"
+			set "numTag=1"
 			call :FileSize
 			call :IMG-Resize-FileList
 			call :IMG-Resize-Action
@@ -1726,19 +1731,27 @@ if /i "%ImgSizeInput%"=="6" set "ImgResizeCode=%IMGResize6Code%"&set "ImgTag=%IM
 if /i "%ImgSizeInput%"=="7" set "ImgResizeCode=%IMGResize7Code%"&set "ImgTag=%IMGResize7Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Resize
 if /i "%ImgSizeInput%"=="9" echo %TAB%  %w_%%i_%  CANCELED  %_%&goto options
 
-echo %TAB%%g_%Input your own  command, example: %yy_%-resize 720x720  -quality 80%g_%  it will resize the
-echo %TAB%image to 720x720 pixels and compress the quality to 80%%. You can also specify only
-echo %TAB%a width or a height of the image,  example: %yy_%-resize 1000x%g_% it will resize the image 
-echo %TAB%to a width of 1000p or %yy_%-resize x1000%g_% to resize it to a height of 1000p.
+echo %TAB%%g_%Input your own  command, example: 
+echo %TAB%%yy_%-resize 1000x1000!%g_% = force resize tha image to 1000px1000p and ignore the aspect ratio.
+echo %TAB%%yy_%-quality 85%g_%        = compress the image to 85%% quality.
+echo %TAB%%yy_%-resize 1000x%g_%      = resize the image to a width of 1000p.
+echo %TAB%%yy_%-resize x1000%g_%      = resize the image to a height of 1000p.
+echo %TAB%%yy_%-resize 720x720 -quality 80%g_% = resize the image to 720p and compress the quality to 80%%.
+
 echo.
 set /p "ImgResizeCode=%-%%-%%-%%w_%Input:%yy_%"
 set "ImgResizeCode=%ImgResizeCode:"=%"
-set "ImgTag=_(%IMGResizeCode%)"
+set "ImgTag=_custom"
 if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Resize
 
 :IMG-Resize-Action                
 set size_B=1
-set "ImgOutput=%ImgName%%ImgTag%%ImgExt%"
+set "ImgOutput=%ImgName%%ImgTag%%num_tag%%ImgExt%"
+if exist "%ImgPath%%ImgOutput%" (
+	set /a numTag+=1
+	set "num_tag=(%numTag%)
+	goto IMG-Resize-Action
+)
 "%converter%" "%ImgPath%%ImgName%%ImgExt%" %ImgResizeCode% "%ImgPath%%ImgOutput%"
 if exist "%ImgPath%%ImgOutput%" (
 	for %%I in ("%ImgPath%%ImgOutput%") do (
@@ -1751,7 +1764,7 @@ if exist "%ImgPath%%ImgOutput%" (
 )
 
 if not %size_B% LSS 1000 (
-	echo %TAB%%ESC%- %c_%%ImgName%%cc_%%ImgTag%%c_%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
+	echo %TAB%%ESC%- %c_%%ImgName%%cc_%%ImgTag%%num_tag%%c_%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
 ) else (
 	echo %TAB%-%ESC%%c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
 	del "%ImgPath%%ImgOutput%"
@@ -1803,7 +1816,11 @@ if /i "%Action%"=="Start" (
 	%separator%
 	for %%D in (%xSelected%) do (
 		for %%I in ("%%~fD") do (
-			set "ImgPath=%%~dpI"&set "ImgName=%%~nI"&set "ImgExt=%%~xI"&set "Size_B=%%~zI"
+			set "ImgPath=%%~dpI"
+			set "ImgName=%%~nI"
+			set "ImgExt=%%~xI"
+			set "Size_B=%%~zI"
+			set "numTag=1"
 			call :FileSize
 			call :IMG-Compress-FileList
 			call :IMG-Compress-Action
@@ -1882,19 +1899,26 @@ if /i "%ImgSizeInput%"=="6" set "ImgCompressCode=%IMGCompress6Code%"&set "ImgTag
 if /i "%ImgSizeInput%"=="7" set "ImgCompressCode=%IMGCompress7Code%"&set "ImgTag=%IMGCompress7Tag%"&if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
 if /i "%ImgSizeInput%"=="9" echo %TAB%  %w_%%i_%  CANCELED  %_%&goto options
 
-echo %TAB%%g_%Input your own  command, example: %yy_%-resize 720x720  -quality 80%g_%  it will compress the
-echo %TAB%image to 720x720 pixels and compress the quality to 80%%. You can also specify only
-echo %TAB%a width or a height of the image,  example: %yy_%-compress 1000x%g_% it will resize the image 
-echo %TAB%to a width of 1000p or %yy_%-resize x1000%g_% to resize it to a height of 1000p.
+echo %TAB%%g_%Input your own  command, example: 
+echo %TAB%%yy_%-resize 1000x1000!%g_% = force resize tha image to 1000px1000p and ignore the aspect ratio.
+echo %TAB%%yy_%-quality 85%g_%        = compress the image to 85%% quality.
+echo %TAB%%yy_%-resize 1000x%g_%      = resize the image to a width of 1000p.
+echo %TAB%%yy_%-resize x1000%g_%      = resize the image to a height of 1000p.
+echo %TAB%%yy_%-resize 720x720 -quality 80%g_% = resize the image to 720p and compress the quality to 80%%.
 echo.
 set /p "ImgCompressCode=%-%%-%%-%%w_%Input:%yy_%"
 set "ImgCompressCode=%ImgCompressCode:"=%"
-set "ImgTag=_(%IMGCompressCode%)"
+set "ImgTag=_custom"
 if not defined timestart call :timer-start&set "Action=Start" &cls&goto IMG-Compress
 
 :IMG-Compress-Action                
 set size_B=1
-set "ImgOutput=%ImgName%%ImgTag%%ImgExt%"
+set "ImgOutput=%ImgName%%ImgTag%%num_tag%%ImgExt%"
+if exist "%ImgPath%%ImgOutput%" (
+	set /a numTag+=1
+	set "num_tag=(%numTag%)
+	goto IMG-Resize-Action
+)
 "%converter%" "%ImgPath%%ImgName%%ImgExt%" %ImgCompressCode% "%ImgPath%%ImgOutput%"
 if exist "%ImgPath%%ImgOutput%" (
 	for %%I in ("%ImgPath%%ImgOutput%") do (
@@ -1907,7 +1931,7 @@ if exist "%ImgPath%%ImgOutput%" (
 )
 
 if not %size_B% LSS 1000 (
-	echo %TAB%%ESC%- %c_%%ImgName%%cc_%%ImgTag%%c_%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
+	echo %TAB%%ESC%- %c_%%ImgName%%cc_%%ImgTag%%num_tag%%c_%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
 ) else (
 	echo %TAB%-%ESC%%c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
 	del "%ImgPath%%ImgOutput%"
