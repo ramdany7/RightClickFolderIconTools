@@ -1,4 +1,4 @@
-:: Template-Version=v1.0
+:: Template-Version=v1.1
 
 ::                Template Info
 ::========================================================
@@ -9,8 +9,12 @@
 
 ::                Template Config
 ::========================================================
-set "display-discimage=yes"
-set "display-movieinfo=yes"
+set "display-DiscImage=yes"
+set "DiscArt-search=*discart.png"
+set "generate-DiscArt=yes"
+set "generate-DiscArt-search=*landscape.jpg, *fanart.jpg"
+
+set "display-MovieInfo=no"
 set "show-Rating=yes"
 set "show-Genre=yes"
 set "genre-characters-limit=32"
@@ -19,10 +23,10 @@ set "genre-characters-limit=32"
 
 ::                Images Source
 ::========================================================
-set "frame-image=%rcfi%\img\dvdbox-dark.png"
-set "star-image=%rcfi%\img\star.png"
-set "disc-image=%rcfi%\img\disc-vinyl.png"
-set "background-image=%rcfi%\img\- background.png"
+set "frame-image=%rcfi%\images\dvdbox-dark.png"
+set "star-image=%rcfi%\images\star.png"
+set "disc-image=%rcfi%\images\disc-vinyl.png"
+set "background-image=%rcfi%\images\- background.png"
 ::========================================================
 
 setlocal
@@ -40,8 +44,9 @@ call :LAYER-GENRE
   %CODE-GENRE% ^
   %CODE-ICON-SIZE% ^
  "%outputfile%"
+%deltempfile%
 endlocal
-
+exit /b
 
 
 :::::::::::::::::::::::::::   CODE START   ::::::::::::::::::::::::::::::::
@@ -70,10 +75,27 @@ exit /b
 :LAYER-DISC
 if /i not "%display-discimage%"=="yes" exit /b
 
-if exist "*discart.png" (
-	for %%D in (*discart.png) do set "discart=%%~fD"
+if exist "%discart-search%" (
+	for %%D in (%discart-search%) do (
+		set "DiscArt=%%~fD"
+		set "DiscArtName=%%~nxD"
+		echo %TAB%%ESC%%g_%Disc Art    :%%~nxD%ESC%
+		goto Generate_DiscArt-done
+	)
+) else if /i "%generate-discart%"=="yes" (
+	set "referrer=DVDcase"
+	for %%G in (%generate-discart-search%,"%inputfile%") do (
+		for %%X in (%ImageSupport%) do (
+			if /i "%%X"=="%%~xG" (
+				set "gen_disc=%%~fG"
+				echo %TAB%%ESC%%g_%Disc Art    :%%~nxG%ESC%
+				goto Generate_DiscArt-call
+			)
+		)
+	)
 ) else set "discart=%disc-image%"
 
+:Generate_DiscArt-done
 set CODE-DISC-IMAGE= ( "%discart%" ^
 	 -scale 340x340! ^
 	 -background none ^
@@ -82,6 +104,10 @@ set CODE-DISC-IMAGE= ( "%discart%" ^
 	 +swap -background none -layers merge -extent 512x512 ^
 	 ) -compose Over -composite
 exit /b
+
+:Generate_DiscArt-call
+call "%RCFI%\template\DiscArt.bat"
+goto Generate_DiscArt-done
 
 :LAYER-RATING
 if /i not "%display-movieinfo%" EQU "yes" exit /b
@@ -142,6 +168,7 @@ if not exist "*.nfo" (
 
 for %%N in (*.nfo) do (
 	set "nfoName=%%~nxN"
+	echo %TAB%%ESC%%g_%Movie info  :%%~nxN%ESC%
 	for /f "usebackq tokens=1,2,3,4 delims=<>" %%C in ("%%N") do (
 		if /i not "%%D"=="" (
 			if /i not "%%D"=="genre" (set "%%D=%%E") else (
