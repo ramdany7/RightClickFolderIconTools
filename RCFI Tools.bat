@@ -17,7 +17,11 @@ if defined Context goto Input-Context
 :Intro                            
 echo. 
 if not defined OpenFrom (
-	echo                                 %i_% %name% %version% %_%%-%&echo.
+	echo                             %i_% %name% %version% %_%%-%
+	echo.
+	echo                %gn_%Activate%g_%/%gn_%Act%g_%   to activate right-click menu.
+	echo                %gn_%Deactivate%g_%/%gn_%Dct%g_% to deactivate right-click menu. 
+	echo.
 ) else (
 echo %TAB%                  %pp_%Drag and  drop%_%%g_%  an %c_%image%g_%  to  this  window
 echo %TAB%                  then press Enter to change the folder icon.%_%
@@ -857,7 +861,15 @@ if /i "%TSelector%"=="Select" (
 		set "Template=%TFullPath%"
 		if "%refer%"=="Choose.Template" (cls &echo.&echo.&echo.&echo.)	
 		if /i "%TemplateAlwaysAsk%"=="yes" (
-			if /i not "%refer%"=="Choose.Template" (
+			if /i "%refer%"=="Choose.Template" (
+				echo.
+				echo   %_%%ESC%%cc_%  %TName%%_% selected.%ESC%
+				%p1%
+				for /f "usebackq tokens=1,2 delims=`" %%I in ("%TFullPath%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
+				%p2%
+				set "TemplateChoice=Selected"
+				if /i not "%Context%"=="IMG-Choose.and.Set.As" call :Config-Save
+			) else (
 				echo.
 				echo.
 				set "TemplateChoice=Selected"
@@ -1453,11 +1465,14 @@ FOR %%I in (%xSelected%) do (
 	set "IMGname=%%~nI"
 	set "IMGext=%%~xI"
 	set "Size_B=%%~zI"
+	set "-=%g_%┌"
 	call :FileSize
-	Call :IMG-Generate_icon-FileList	
+	echo.
+	Call :IMG-Generate_icon-FileList
 	call :IMG-Generate_icon-Act
 	call :IMG-Generate_icon-Done
 )
+echo.
 echo %TAB%%_%----------------------------------------------------%_%
 echo.
 echo %TAB%%g_%%i_%  Done!  %_%
@@ -1465,7 +1480,7 @@ goto options
 
 :IMG-Generate_icon-FileList
 if "%IMGext%"==".ico" set "IMGext=%y_%%IMGext%"
-echo %_%%TAB%-%ESC%%c_%%IMGname%%bb_%%IMGext% %g_%(%pp_%%size%%g_%)%ESC%%r_%
+echo %_%%TAB%%ESC%%-%%c_%%IMGname%%bb_%%IMGext% %g_%(%pp_%%size%%g_%)%ESC%%r_%
 exit /b
 
 :IMG-Generate_icon-Act
@@ -1492,6 +1507,7 @@ if exist "%OutputFile%" (
 			set "IMGname=%%~nG"
 			set "IMGext=%%~xG"
 			set "Size_B=%%~zG"
+			set "-=%g_%└"
 			call :FileSize
 			call :IMG-Generate_icon-FileList
 		)
@@ -1759,14 +1775,14 @@ if exist "%ImgPath%%ImgOutput%" (
 		call :FileSize
 	)
 ) else (
-	echo %TAB%-%ESC%%c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
+	echo %TAB%%ESC%- %c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
 	exit /b
 )
 
-if not %size_B% LSS 1000 (
+if not %size_B% LSS 10 (
 	echo %TAB%%ESC%- %c_%%ImgName%%cc_%%ImgTag%%num_tag%%c_%%ImgExt%%g_% (%pp_%%size%%g_%)%ESC%%r_%
 ) else (
-	echo %TAB%-%ESC%%c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
+	echo %TAB%%ESC%- %c_%%ImgName%%ImgExt%%g_% (%r_%Convert Fail!%g_%)%_%
 	del "%ImgPath%%ImgOutput%"
 	exit /b
 )
@@ -2113,16 +2129,21 @@ if not defined TemplateIconSize set "TemplateIconSize=Auto"
 	echo Keyword-Extension="%Keyword-Extension%"
 	echo ----------------------------------
 	echo.
+	echo.
 	echo ---------  TEMPLATE --------------
 	echo Template="%Template%"
 	echo TemplateForICO="%TemplateForICO%"
 	echo TemplateForPNG="%TemplateForPNG%"
 	echo TemplateForJPG="%TemplateForJPG%"
+	echo.
 	echo TemplateAlwaysAsk="%TemplateAlwaysAsk%"
+	echo.
 	echo TemplateTestMode="%TemplateTestMode%"
 	echo TemplateTestMode-AutoExecute="%TemplateTestMode-AutoExecute%"
+	echo.
 	echo TemplateIconSize="%TemplateIconSize%"
 	echo ----------------------------------
+	echo.
 	echo.
 	echo ---------  OTHER    --------------
 	echo ExitWait="%ExitWait%"
