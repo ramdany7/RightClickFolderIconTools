@@ -170,7 +170,9 @@ if /i "%Context%"=="Select.And.Change.Folder.Icon" goto FI-Selected_folder
 if /i "%Context%"=="DIR.Choose.Template"		set "refer=Choose.Template"&goto FI-Template
 if /i "%Context%"=="FI.Search.Folder.Icon"		goto FI-Search
 if /i "%Context%"=="FI.Search.Poster"			goto FI-Search
-if /i "%Context%"=="FI.Search.Folder.Icon.Here"	goto FI-Search
+if /i "%Context%"=="FI.Search.Logo"				goto FI-Search
+if /i "%Context%"=="FI.Search.Icon"				goto FI-Search
+if /i "%Context%"=="FI.Search.Folder.Icon.Here" set "Context="&goto FI-Search
 if /i "%Context%"=="Scan"						set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
 if /i "%Context%"=="DefKey"						goto FI-Keyword
 if /i "%Context%"=="GenKey"						set "input=Generate"		&set "cdonly=true"		&goto FI-Generate
@@ -1116,9 +1118,13 @@ exit
 :FI-Search                        
 set "PreAppliedKeywordFolder=folder icon site:deviantart.com OR site:freeiconspng.com OR site:iconarchive.com OR site:icon-icons.com OR site:pngwing.com OR site:iconfinder.com OR site:icons8.com OR site:pinterest.com OR site:pngegg.com&tbm=isch&tbs=ic:trans"
 set "PreAppliedKeywordPoster=poster site:themoviedb.org OR site:imdb.com OR site:impawards.com OR site:fanart.tv OR site:myanimelist.net OR site:anidb.net&tbm=isch&tbs=isz:l"
+set "PreAppliedKeywordLogo=Logo&tbm=isch&tbs=ic:trans"
+set "PreAppliedKeywordIcon=Icon&tbm=isch&tbs=ic:trans"
 set "PreAppliedKeyword=%PreAppliedKeywordFolder%"
 if /i "%Context%"=="FI.Search.Folder.Icon" (set "SrcInput=%~nx1"&goto FI-Search-Input)
 if /i "%Context%"=="FI.Search.Poster" (set "SrcInput=%~nx1"&set "PreAppliedKeyword=%PreAppliedKeywordPoster%"&goto FI-Search-Input)
+if /i "%Context%"=="FI.Search.Logo" (set "SrcInput=%~nx1"&set "PreAppliedKeyword=%PreAppliedKeywordLogo%"&goto FI-Search-Input)
+if /i "%Context%"=="FI.Search.Icon" (set "SrcInput=%~nx1"&set "PreAppliedKeyword=%PreAppliedKeywordIcon%"&goto FI-Search-Input)
 echo.&echo.
 echo                     %g_%    Search folder icon  on Google image search, Just type
 echo                     %g_% in the keyword then hit [Enter],  you will be redirected 
@@ -1136,12 +1142,11 @@ set "SrcInput=%SrcInput:#=%"
 if not "%SrcInput%"=="%SrcInput:poster=%" set "SrcInput=%SrcInput:poster=%"&set "PreAppliedKeyword=%PreAppliedKeywordPoster%"
 Start "" "https://google.com/search?q=%SrcInput% %PreAppliedKeyword%"
 cls
-if /i "%Context%"=="FI.Search.Folder.Icon" exit
-if /i "%Context%"=="FI.Search.Poster" exit
+if /i not "%Context%"=="" exit
 goto FI-Search
 
 :FI-Keyword                       
-echo %TAB%%g_%Current keyword:%ESC%%c_%%Keyword%%ESC%%_%
+echo %TAB%%g_%Current keyword:%ESC%%c_%%printTagFI%%ESC%%_%
 echo %TAB%%g_%This keyword will be used to search for file names to generate folder icons.%_%
 set "newKeyword=*"
 echo.
@@ -1178,15 +1183,15 @@ echo %TAB%%gn_%  9%_% ^> %c_%.jpeg%_%
 echo.
 echo %TAB%%g_%to select, just press the number assosiated to the options.%_%
 CHOICE /N /C 123456789
-	IF "%ERRORLEVEL%"=="1" set "Keyword-Extention=.png"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="2" set "Keyword-Extention=.jpg"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="3" set "Keyword-Extention=.ico"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="4" set "Keyword-Extention=.webp"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="5" set "Keyword-Extention=.svg"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="6" set "Keyword-Extention=.bmp"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="7" set "Keyword-Extention=.tiff"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="8" set "Keyword-Extention=.heic"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="9" set "Keyword-Extention=.jpeg"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="1" set "Keyword-Extension=.png"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="2" set "Keyword-Extension=.jpg"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="3" set "Keyword-Extension=.ico"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="4" set "Keyword-Extension=.webp"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="5" set "Keyword-Extension=.svg"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="6" set "Keyword-Extension=.bmp"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="7" set "Keyword-Extension=.tiff"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="8" set "Keyword-Extension=.heic"	&goto FI-Keyword-Selected
+	IF "%ERRORLEVEL%"=="9" set "Keyword-Extension=.jpeg"	&goto FI-Keyword-Selected
 echo.
 echo %TAB%%_%%i_%  Invalid selection.  %-%
 echo.
@@ -1197,7 +1202,7 @@ call :Config-UpdateVar
 if "%Context%"=="DefKey" (
 	cls &echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.
 	echo %TAB%%TAB%%TAB%%TAB%%_%%ESC%%printTagFI%%ESC% will be use to generate folder icon.
-	ping localhost -n 3 >nul
+	ping localhost -n 2 >nul
 	goto options
 )
 echo.&echo.
@@ -1465,7 +1470,7 @@ FOR %%I in (%xSelected%) do (
 	set "IMGname=%%~nI"
 	set "IMGext=%%~xI"
 	set "Size_B=%%~zI"
-	set "-=%g_%┌"
+	set "-=%g_%-"
 	call :FileSize
 	echo.
 	Call :IMG-Generate_icon-FileList
@@ -1479,7 +1484,8 @@ echo %TAB%%g_%%i_%  Done!  %_%
 goto options
 
 :IMG-Generate_icon-FileList
-if "%IMGext%"==".ico" set "IMGext=%y_%%IMGext%"
+if /i "%IMGext%"==".ico" set "IMGext=%y_%%IMGext%"
+if /i "%IMGext%"==".png" set "IMGext=%cc_%%IMGext%"
 echo %_%%TAB%%ESC%%-%%c_%%IMGname%%bb_%%IMGext% %g_%(%pp_%%size%%g_%)%ESC%%r_%
 exit /b
 
@@ -1507,7 +1513,7 @@ if exist "%OutputFile%" (
 			set "IMGname=%%~nG"
 			set "IMGext=%%~xG"
 			set "Size_B=%%~zG"
-			set "-=%g_%└"
+			set "-=%g_%-"
 			call :FileSize
 			call :IMG-Generate_icon-FileList
 		)
@@ -2570,6 +2576,7 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.Search.Folder.Icon]
 	echo "MUIVerb"="Search Folder Icon"
 	echo "Icon"="shell32.dll,-251"
+	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.Search.Folder.Icon\command]
 	echo @="%cmd% set \"Context=FI.Search.Folder.Icon\"%RCFIexe% \"%%V\""
 	
@@ -2577,9 +2584,22 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.Search.Poster]
 	echo "MUIVerb"="Search Poster"
 	echo "Icon"="shell32.dll,-251"
-	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.Search.Poster\command]
 	echo @="%cmd% set \"Context=FI.Search.Poster\"%RCFIexe% \"%%V\""
+	
+	:REG-FI.Search.Logo
+	echo [%RegExShell%\RCFI.Search.Logo]
+	echo "MUIVerb"="Search Logo"
+	echo "Icon"="shell32.dll,-251"
+	echo [%RegExShell%\RCFI.Search.Logo\command]
+	echo @="%cmd% set \"Context=FI.Search.Logo\"%RCFIexe% \"%%V\""
+	
+	:REG-FI.Search.Icon
+	echo [%RegExShell%\RCFI.Search.Icon]
+	echo "MUIVerb"="Search Icon"
+	echo "Icon"="shell32.dll,-251"
+	echo [%RegExShell%\RCFI.Search.Icon\command]
+	echo @="%cmd% set \"Context=FI.Search.Icon\"%RCFIexe% \"%%V\""
 
 	:REG-FI.Search.Folder.Icon.Here
 	echo [%RegExShell%\RCFI.Search.Folder.Icon.Here]
@@ -2802,7 +2822,7 @@ rem Generating setup_*.reg
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Search.Poster;RCFI.Search.Folder.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
+	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon;RCFI.Search.Poster;RCFI.Search.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
 	
 	:REG-Context_Menu-FI-Background
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
