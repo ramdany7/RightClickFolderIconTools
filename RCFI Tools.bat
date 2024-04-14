@@ -27,7 +27,6 @@ echo %TAB%                  %pp_%Drag and  drop%_%%g_%  an %c_%image%g_%  to  th
 echo %TAB%                  then press Enter to change the folder icon.%_%
 echo.
 )
-
 rem if not defined OpenFrom echo %ESC%%u_%%gg_%Template:%_%%cc_% %TemplateName%%gg_%     %u_%Keyword:%_% %printTagFI%%ESC%
 goto Options-Input
 
@@ -35,7 +34,7 @@ goto Options-Input
 %p1%
 echo   %_%------- Status ----------------------------------------
 echo   Directory           :%ESC%%u_%%cd%%-%%ESC%
-echo   Target Folder Icon  : %printTagFI%
+echo   Target Folder Icon  : %KeywordsPrint%
 if exist "%Template%" ^
 echo   Folder Icon Template:%ESC%%cc_%%templatename%%_%%ESC%
 if not exist "%Template%" ^
@@ -79,7 +78,7 @@ if defined Context (
 )
 
 :Options-Input                    
-rem if not defined OpenFrom echo %_%%GG_%Keyword%G_%^|%GG_%Scan%G_%^|%GG_%Template%G_%^|%GG_%Generate%G_%^|%GG_%Refresh%G_%^|%GG_%RefreshFc%G_%^|%GG_%Search%G_%^|%GG_%ON%G_%^|^
+rem if not defined OpenFrom echo %_%%GG_%Keywords%G_%^|%GG_%Scan%G_%^|%GG_%Template%G_%^|%GG_%Generate%G_%^|%GG_%Refresh%G_%^|%GG_%RefreshFc%G_%^|%GG_%Search%G_%^|%GG_%ON%G_%^|^
 rem %GG_%OFF%G_%^|%GG_%Remove%G_%^|%GG_%Config%G_%^|%GG_%Setup%G_%^|%GG_%RCFI%G_%^|%GG_%O%G_%^|%GG_%S%G_%^|%GG_%Help%G_%^|..
 if defined OpenFrom if /i not "%TemplateAlwaysAsk%"=="yes" echo %g_%Template:%ESC%%cc_%%TemplateName%%ESC%
 echo %g_%--------------------------------------------------------------------------------------------------
@@ -164,7 +163,7 @@ if /i "%Context%"=="IMG-Set.As.Cover"			%setIMG%&goto IMG-Set_as_MKV_cover
 if /i "%Context%"=="IMG-Convert"				goto IMG-Convert
 if /i "%Context%"=="IMG-Resize"					goto IMG-Resize
 if /i "%Context%"=="IMG-Compress"				goto IMG-Compress
-REM Selected Dir	
+REM Selected Dir
 if /i "%Context%"=="Change.Folder.Icon"		%Dir% &call :Config-Save	&set "Context="&set "OpenFrom=Context" &cls &echo.&echo.&echo.&goto Intro
 if /i "%Context%"=="Select.And.Change.Folder.Icon" goto FI-Selected_folder
 if /i "%Context%"=="DIR.Choose.Template"		set "refer=Choose.Template"&goto FI-Template
@@ -175,22 +174,22 @@ if /i "%Context%"=="FI.Search.Icon"				goto FI-Search
 if /i "%Context%"=="FI.Search.Folder.Icon.Here" set "Context="&goto FI-Search
 if /i "%Context%"=="Scan"						set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
 if /i "%Context%"=="DefKey"						goto FI-Keyword
-if /i "%Context%"=="GenKey"						set "input=Generate"		&set "cdonly=true"		&goto FI-Generate
-if /i "%Context%"=="GenJPG"						set "input=Generate"		&set "Keyword=*"			&set "Keyword-Extension=.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
-if /i "%Context%"=="GenPNG"						set "input=Generate"		&set "Keyword=*"			&set "Keyword-Extension=.png"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
-if /i "%Context%"=="GenPosterJPG"				set "input=Generate"		&set "Keyword=Poster"		&set "Keyword-Extension=.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
-if /i "%Context%"=="GenLandscapeJPG"			set "input=Generate"		&set "Keyword=Landscape"	&set "Keyword-Extension=.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
-if /i "%Context%"=="ActivateFolderIcon"		set "RefreshOpen=Select"	&goto FI-Activate
-if /i "%Context%"=="DeactivateFolderIcon"		set "RefreshOpen=Select"	&goto FI-Deactivate
-if /i "%Context%"=="RemFolderIcon"				set "delete=confirm"		&set "cdonly=true"		&goto FI-Remove
+if /i "%Context%"=="GenKey"						set "input=Generate"&set "cdonly=true"&goto FI-Generate
+if /i "%Context%"=="GenJPG"						set "input=Generate"&set "Keywords=.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
+if /i "%Context%"=="GenPNG"						set "input=Generate"&set "Keywords=.png"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
+if /i "%Context%"=="GenPosterJPG"				set "input=Generate"&set "Keywords=Poster.jpg"	&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
+if /i "%Context%"=="GenLandscapeJPG"			set "input=Generate"&set "Keywords=Landscape.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
+if /i "%Context%"=="ActivateFolderIcon"		set "RefreshOpen=Select"&goto FI-Activate
+if /i "%Context%"=="DeactivateFolderIcon"		set "RefreshOpen=Select"&goto FI-Deactivate
+if /i "%Context%"=="RemFolderIcon"				set "delete=confirm"&set "cdonly=true"		&goto FI-Remove
 REM Background Dir	                         	
 if /i "%Context%"=="DIRBG.Choose.Template"		set "refer=Choose.Template"		&goto FI-Template
 if /i "%Context%"=="Scan.Here"					%Dir% &set "input=Scan" 			&goto FI-Scan
 if /i "%Context%"=="GenKey.Here"				%Dir% &set "input=Generate"		&set "cdonly=false" 		&goto FI-Generate
-if /i "%Context%"=="GenJPG.Here"				%Dir% &set "input=Generate"		&set "Keyword=*"			&set "Keyword-Extension=.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
-if /i "%Context%"=="GenPNG.Here"				%Dir% &set "input=Generate"		&set "Keyword=*"			&set "Keyword-Extension=.png"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
-if /i "%Context%"=="GenPosterJPG.Here"			%Dir% &set "input=Generate"		&set "Keyword=Poster"		&set "Keyword-Extension=.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
-if /i "%Context%"=="GenLandscapeJPG.Here"		%Dir% &set "input=Generate"		&set "Keyword=Landscape"	&set "Keyword-Extension=.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenJPG.Here"				%Dir% &set "input=Generate"		&set "Keywords=.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenPNG.Here"				%Dir% &set "input=Generate"		&set "Keywords=.png"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenPosterJPG.Here"			%Dir% &set "input=Generate"		&set "Keywords=Poster.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
+if /i "%Context%"=="GenLandscapeJPG.Here"		%Dir% &set "input=Generate"		&set "Keywords=Landscape.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
 if /i "%Context%"=="ActivateFolderIcon.Here"	%Dir% &goto FI-Activate
 if /i "%Context%"=="DeactivateFolderIcon.Here" %Dir% &goto FI-Deactivate
 if /i "%Context%"=="RemFolderIcon.Here"		%Dir% &set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
@@ -237,20 +236,19 @@ echo %TAB%%g_%^(supported file: %ImageSupport%^)
 goto options
 
 :DirectInput-Generate             
-if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk&echo.)
-if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk&echo.)
+if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" (call :FI-Template-AlwaysAsk&echo.)
+if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" (call :FI-Template-AlwaysAsk&echo.)
 for %%D in ("%cd%") do set "foldername=%%~nD%%~xD" &set "folderpath=%%~dpD"
-if /i "%Direct%"=="Confirm" echo %TAB%%ESC%%yy_%📁 %foldername%%_%%ESC% &goto DirectInput-Generate-Confirm
-if not exist desktop.ini echo %TAB%%ESC%%yy_%📁 %foldername%%_%%ESC% &goto DirectInput-Generate-Confirm
+if /i "%Direct%"=="Confirm" echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC% &goto DirectInput-Generate-Confirm
+if not exist desktop.ini echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC% &goto DirectInput-Generate-Confirm
 for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do set "%%C=%%D" 2>nul
-if not exist "%iconresource%" echo %TAB%%ESC%%y_%📁 %foldername%%_%%ESC% &goto DirectInput-Generate-Confirm
-echo %TAB%%ESC%%y_%📁 %foldername%%_%%ESC%
-echo %TAB%%ESC%Folder icon:%c_%%iconresource%%ESC%
+if not exist "%iconresource%" echo %TAB%%W_%┌%YY_%📁%ESC%%w_%%foldername%%ESC% &goto DirectInput-Generate-Confirm
+echo %TAB%%Y_%┌%Y_%📁%ESC%%w_%%foldername%%ESC%
+echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%iconresource%%ESC%
 attrib -s -h "%iconresource%"
 attrib |exit /b
-echo.
-echo %TAB% This folder already has a folder icon.
-echo %TAB% Do you want to replace it^? %gn_%Y%_%/%gn_%N%bk_%
+echo %TAB%%g_% This folder already has a folder icon.
+echo %TAB%%g_% Do you want to replace it%r_%^? %gn_%Y%_%/%gn_%N%bk_%
 echo %TAB%%g_% Press %gg_%Y%g_% to confirm.%_%%bk_%
 CHOICE /N /C YN
 IF "%ERRORLEVEL%"=="2" (
@@ -259,7 +257,7 @@ IF "%ERRORLEVEL%"=="2" (
 	attrib -|exit /b
 	goto options
 )
-IF "%ERRORLEVEL%"=="1" if defined Context cls &echo.&set "Direct=Confirm"&echo.&echo.&echo.&echo %TAB%%ESC%%yy_%📁 %foldername%%_%%ESC%
+IF "%ERRORLEVEL%"=="1" if defined Context cls &echo.&set "Direct=Confirm"&echo.&echo.&echo.&echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
 
 :DirectInput-Generate-Confirm     
 set "ReplaceThis=%iconresource%"
@@ -296,8 +294,8 @@ echo.&echo.&echo.
 goto FI-Selected_folder
 
 :FI-Selected_folder-Get
-echo %TAB% %i_%  Change folder icon for selected folders.  %_%
-echo %TAB% %_%--------------------------------------------------------------------%_%
+echo %TAB%%i_%  Change folder icon for selected folders.  %_%
+echo %TAB%%_%--------------------------------------------------------------------%_%
 set /a FolderCount=0
 for %%S in (%xSelected%) do (
 	set "SelectedThing=%%~fS"
@@ -309,14 +307,14 @@ for %%S in (%xSelected%) do (
 	POPD
 )
 if %FolderCount% EQU 1 set "Context=Change.Folder.Icon"&set "xSelected=%SelectedThing%"&goto Input-Context
-echo %TAB% %_%--------------------------------------------------------------------%_%
-echo %TAB% %g_%Template:%ESC%%cc_%%TemplateName%%ESC%
+echo %TAB%%_%--------------------------------------------------------------------%_%
+echo %TAB%%g_%Template:%ESC%%cc_%%TemplateName%%ESC%
 echo.
-echo %g_%press %gn_%1%g_% then hit enter to change them separatly in each different window.%_%
+echo %g_% %g_%Press %gn_%1%g_% then hit Enter to change them separatly in each different window.%_%
 exit /b
 
 :FI-Selected_folder-Input
-if not exist "%input%" echo %g_%to enter the image path you can drag and drop the image here. then press enter. ^
+if not exist "%input%" echo  %g_%To enter the image path you can drag and drop the image here, then press Enter. ^
  &echo %g_%------------------------------------------------------------------------------- ^
  &set /p "Input=%_%%w_%Enter the image path:%_%%c_%"
 set "Input=%Input:"=%"
@@ -338,10 +336,7 @@ set "Selected="
 for %%I in ("%input%") do (set "filename=%%~nxI"&set "filepath=%%~dpI"&set "fileext=%%~xI")
 for %%X in (%ImageSupport%) do (
 	if "%%X"=="%fileext%" (
-		if /i "%TemplateAlwaysAsk%"=="yes" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk)
-		echo.
-		echo.
-		echo %TAB%%ESC%%yy_%📁 %FolderName%%_%%ESC%
+		if /i "%TemplateAlwaysAsk%"=="yes" call :FI-Template-AlwaysAsk
 		call :FI-Selected_folder-Act
 		echo %g_%-------------------------------------------------------------------------------
 		set "iconresource="
@@ -359,12 +354,14 @@ exit /b
 :FI-Selected_folder-Act
 if not defined iconresource (
 	if not defined timestart call :Timer-start
+	echo %TAB%%W_%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
 if /i "%replace%"=="all" (
 	set "ReplaceThis=%iconresource%"
 	if not defined timestart call :Timer-start
+	echo %TAB%%W_%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
@@ -373,13 +370,12 @@ if not exist "%iconresource%" (
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
-
-echo %TAB%%ESC%Folder icon:%c_%%iconresource%%ESC%
+echo %TAB%%Y_%┌%Y_%📁%ESC%%w_%%foldername%%ESC%
+echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%iconresource%%ESC%
 attrib -s -h "%iconresource%"
 attrib |exit /b
-echo.
-echo %TAB% This folder already has a folder icon.
-echo %TAB% Do you want to replace it^? %gn_%A%_%/%gn_%Y%_%/%gn_%N%bk_%
+echo %TAB%%g_% This folder already has a folder icon.
+echo %TAB%%g_% Do you want to replace it%r_%^? %gn_%A%_%/%gn_%Y%_%/%gn_%N%bk_%
 echo %TAB%%g_% Press %gg_%Y%g_% to confirm.%_%%g_% Press %gg_%A%g_% to confirm all.%bk_%
 CHOICE /N /C AYN
 IF "%ERRORLEVEL%"=="1" set "replace=all"
@@ -392,6 +388,7 @@ IF "%ERRORLEVEL%"=="3" (
 )
 set "ReplaceThis=%iconresource%"
 if not defined timestart call :Timer-start
+echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
 call :FI-Generate-Folder_Icon
 exit /b
 
@@ -405,42 +402,21 @@ for %%S in (%xSelected%) do (
 )
 exit
 
-:FI-GetDir                        
-set "locationCheck=Start"
-REM Current dir only
-if /i "%cdonly%"=="true" (
-	FOR %%D in (%xSelected%) do (
-		set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
-		call :FI-Scan-Desktop.ini
-	)
-	EXIT /B
-)
-REM All inside current dir including subfolders
-if /i "%Recursive%"=="yes" (
-	FOR /r %%D in (.) do (
-		set "location=%%D" &set "folderpath=%%~dpD" &set "foldername=%%~fD"
-		call :FI-Scan-Desktop.ini
-	)
-	EXIT /B
-)
-REM All inside current dir only
-FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
-	set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
-	call :FI-Scan-Desktop.ini
-)
-EXIT /B
 
 :FI-Scan                          
+set  "y_result=0"
+set  "g_result=0"
+set  "r_result=0"
+set  "h_result=0"
 set "yy_result=0"
-set "y_result=0"
-set "g_result=0"
-set "r_result=0"
-set "h_result=0"
 set "success_result=0"
 set "fail_result=0"
-set "target=%target: =*%"
-echo %TAB%%TAB%%cc_%%i_%  Scanning folder.. %-%
-Echo %TAB%Keyword   : %target%
+set  "Y_d=1"
+set  "G_d=1"
+set  "R_d=1"
+set "YY_d=1"
+echo %TAB%%TAB%%cc_%%i_%  Scanning Folders.. %-%
+Echo %TAB%Keywords  : %KeywordsPrint%
 echo %TAB%Directory :%ESC%%cd%%ESC%
 echo %TAB%%w_%==============================================================================%_%
 call :timer-start
@@ -461,98 +437,167 @@ IF /i %H_result%		LSS 10 (set "H_s=   "	)	else (IF /i %H_result%		GTR 9 set "H_s
 echo %TAB%%s%%u_%%result% Folders found.%_%
 IF /i %YY_result%		GTR 0 IF NOT %hy_result% EQU 0 echo %TAB%%yy_%%YY_s%%HY_result%%_% Folders can be processed.
 IF /i %h_result%		GTR 0 echo %TAB%%rr_%%H_s%%H_result%%_% Folders can't be processed.
-IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folder icons is missing and can be changed.
+IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folder icons are missing and can be changed.
 IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folders already has an icon.
-IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folders has no file match "%c_%%Target%%_%".
-IF /i %YY_result%		LSS 1 echo.&echo %TAB% Folders cantaining "%c_%%Target%%_%" couldn't be found.
+IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folders have no files matching the keywords.
+IF /i %YY_result%		LSS 1 echo.&echo %TAB% Couldn't find any files matching the keywords. No folder icons to be generated.
 echo.
-IF %YY_result% GTR 0 (
-	echo   %g_%Note: If there is more than one files named "%target%" inside the folder, the one 
-	echo   selected as the folder icon will be the one that appear first in the folder.
-)
 set "result=0" &goto options
 
-:FI-Scan-Desktop.ini              
-if "%locationCheck%"=="%location%" EXIT /B
-PUSHD "%location%"
-	set "locationCheck=%location%" &set "Selected="
-	if not exist "desktop.ini" (
-		if exist "%Target%" (
-			if "%newline%"=="yes" echo.
-			echo %TAB%%ESC%%yy_%📁 %foldername%%ESC%
-			set /a YY_result+=1 
-			call :FI-Scan-Find_Target
-			POPD&EXIT /B
-		)
-		echo %TAB%%ESC%%g_%📁 %foldername%%ESC%
-		set /a G_result+=1
-		set "newline=yes"
-		POPD&EXIT /B
-	)
-	if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do set "%%C=%%D"
-	if exist "desktop.ini" if not defined iconresource (
-		if exist "%Target%" (
-			if "%newline%"=="yes" echo.
-			echo %TAB%%ESC%%yy_%📁 %foldername%%ESC%
-			set /a YY_result+=1
-			attrib -s -h "desktop.ini"
-			attrib |EXIT /B
-			copy "desktop.ini" "desktop.backup.ini" >nul||echo %TAB%     %r_%%i_% copy fail! %-%
-			Attrib %Attrib% "desktop.ini"
-			Attrib %Attrib% "desktop.backup.ini"
-			attrib |EXIT /B
-			call :FI-Scan-Find_Target
-			POPD&EXIT /B
-		)
-		echo %TAB%%ESC%%g_%📁 %foldername%%ESC%
-		set /a G_result+=1
-		set "newline=yes"
-		POPD&EXIT /B
-	)
-	if exist "desktop.ini" if not exist "%iconresource%" (
-		if exist "%Target%" (
-			if "%newline%"=="yes" echo.
-			echo %TAB%%ESC%%r_%📁 %yy_%%foldername%%ESC%
-			set /a R_result+=1
-			echo %TAB%%ESC%Folder icon:%r_%%iconresource% %g_%(file not found!)%ESC%
-			echo %TAB%%g_% This folder previously had a folder icon, but the icon file is missing.%_%
-			echo %TAB%%g_% The icon will be replaced by the selected image.%_%
-			call :FI-Scan-Find_Target
-			set "iconresource="
-			POPD&EXIT /B
-		)
-	echo %TAB%%ESC%%g_%📁 %foldername%%ESC%
-	set /a G_result+=1
-	set "newline=yes"
-	POPD&EXIT /B
-	)
-	set "newline=yes"
-	if exist "desktop.ini" if exist "%iconresource%" echo %TAB%%ESC%%y_%📁 %foldername%%ESC% &set /a Y_result+=1
-	set "newline=yes"
-	set "iconresource="
-	if /i "%Context%"=="Create" call :FI-Scan-Find_Target
-POPD&EXIT /B
-rem if exist "desktop.shellinfo.ini" >desktop.ini type desktop.shellinfo.ini &>>desktop.ini echo Tes &>>desktop.ini echo Satu &>>desktop.ini echo dua &echo. &EXIT /B
 
-:FI-Scan-Find_Target              
-set "Filename="
-for %%F in (%target%) do (
-	set "newline=no"
-	set "Filename=%%~nxF"
-	set "FilePath=%%~dpF"
-	set "FileExt=%%~xF"
-	if /i "%input%"=="Scan" call :FI-Scan-Display_Result
-	if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
+:FI-GetDir                        
+set "locationCheck=Start"
+REM Current dir only
+if /i "%cdonly%"=="true" (
+	FOR %%D in (%xSelected%) do (
+		set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
+			call :FI-Scan-Desktop.ini
+	)
+	EXIT /B
 )
-if not defined Filename set /a h_result+=1&echo %TAB%%ESC%%_%Selected Image:%r_%Can't select the image because it's a hidden file.%ESC%
-echo. &EXIT /B
+REM All inside current dir including subfolders
+if /i "%Recursive%"=="yes" (
+	FOR /r %%D in (.) do (
+		set "location=%%D" &set "folderpath=%%~dpD" &set "foldername=%%~fD"
+		call :FI-Scan-Desktop.ini
+	)
+	EXIT /B
+)
+REM All inside current dir only
+FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
+	set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
+		call :FI-Scan-Desktop.ini
+)
+EXIT /B
 
 :FI-Scan-Display_Result           
 if not defined Selected (
 	set "Selected=%Filename%" 
-	echo %TAB%%ESC%%_%Selected Image:%c_%%Filename%%ESC%
+	echo   %ESC%%W_%└%C_%🏞 %c_%%Filename%%ESC%
 )
 EXIT /B
+
+:FI-Scan-Desktop.ini              
+if "%locationCheck%"=="%location%" EXIT /B
+set "locationCheck=%location%" &set "Selected="
+REM          Get New Line
+REM  define new line
+IF  %Y_result% NEQ %Y_d%  (set "Y_n=echo.") else (set "Y_n=")
+IF  %G_result% NEQ %G_d%  (set "G_n=echo.") else (set "G_n=")
+IF  %R_result% NEQ %R_d%  (set "R_n=echo.") else (set "R_n=")
+IF %R_result% EQU %R_d% (set "R_nx=echo.") else (set "R_nx=")
+IF %R_result% LSS %R_d% (set "R_nxx=echo.") else (set "R_nxx=")
+IF %YY_result% NEQ %YY_d% (set "YY_n=echo.") else (set "YY_n=")
+IF %YY_result% EQU %YY_d% (set "YY_nx=echo.") else (set "YY_nx=")
+IF %YY_result% LSS %YY_d% (set "YY_nxx=echo.") else (set "YY_nxx=")
+
+REM  display number correction +1
+IF  %Y_result% EQU %Y_d%  set /a  "Y_d+=1"
+IF  %G_result% EQU %G_d%  set /a  "G_d+=1"
+IF  %R_result% EQU %R_d%  set /a  "R_d+=1"
+IF %YY_result% EQU %YY_d% set /a "YY_d+=1"
+
+REM             Showing Number
+REM  display number indentation so all can be aligned.
+REM IF  %Y_d% LSS 10 (set  "Y_s=  %Y_d%")
+REM IF  %G_d% LSS 10 (set  "G_s=  %G_d%")
+REM IF  %R_d% LSS 10 (set  "R_s=  %R_d%")
+REM IF %YY_d% LSS 10 (set "YY_s=  %YY_d%")
+REM 
+REM IF  %Y_d% GTR 9 (set  "Y_s= %Y_d%")
+REM IF  %G_d% GTR 9 (set  "G_s= %G_d%")
+REM IF  %R_d% GTR 9 (set  "R_s= %R_d%")
+REM IF %YY_d% GTR 9 (set "YY_s= %YY_d%")
+REM 
+REM IF  %Y_d% GTR 99 (set  "Y_s=%Y_d%")
+REM IF  %G_d% GTR 99 (set  "G_s=%G_d%")
+REM IF  %R_d% GTR 99 (set  "R_s=%R_d%")
+REM IF %YY_d% GTR 99 (set "YY_s=%YY_d%")
+
+set    Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%foldername%%ESC%
+set    G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%foldername%%ESC%
+set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+set YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+
+
+PUSHD "%location%"
+	
+	set "IconResource="
+	if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do set "%%C=%%D"
+	if not defined IconResource (
+		for %%F in (%KeywordsFind%) do (
+			for %%X in (%ImageSupport%) do (
+				if /i "%%X"=="%%~xF" (
+					if exist "desktop.ini" (
+					REM "Access denied" if i put it up there, idk why?
+						attrib -s -h "desktop.ini"
+						attrib |EXIT /B
+						copy "desktop.ini" "desktop.backup.ini" >nul||echo %TAB%     %r_%%i_% copy fail! %-%
+						Attrib %Attrib% "desktop.ini"
+						Attrib %Attrib% "desktop.backup.ini"
+						attrib |EXIT /B
+					)
+					%YY_n%
+					%YY_FolderDisplay%
+					set /a YY_result+=1
+					set "Filename=%%~nxF"
+					set "FilePath=%%~dpF"
+					set "FileExt=%%~xF"
+					if /i "%input%"=="Scan" call :FI-Scan-Display_Result
+					if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
+					%YY_nx%
+					%YY_nxx%
+					POPD&EXIT /B
+				)
+			)
+		)
+		REM %G_n%
+		%G_FolderDisplay%
+		set /a G_result+=1
+		set "newline=yes"
+		POPD&EXIT /B
+	)
+	
+	if exist "desktop.ini" if not exist "%iconresource%" (
+		for %%F in (%KeywordsFind%) do (
+			for %%X in (%ImageSupport%) do (
+				if /i "%%X"=="%%~xF" (
+					%R_n%
+					%R_FolderDisplay%
+					set /a R_result+=1
+					echo %TAB%%w_%│%R_%🏞%ESC%%_%%iconresource% %g_%(file not found!)%ESC%
+					echo %TAB%%w_%│%G_%This folder previously had a folder icon, but the icon file is missing.%_%
+					echo %TAB%%w_%│%G_%The icon will be replaced by the selected image.%_%
+					set "newline=no"
+					set "Filename=%%~nxF"
+					set "FilePath=%%~dpF"
+					set "FileExt=%%~xF"
+					if /i "%input%"=="Scan" call :FI-Scan-Display_Result
+					if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
+					set "iconresource="
+					%R_nx%
+					%R_nxx%
+					POPD&EXIT /B
+				)
+			)
+		)
+	REM %G_n%
+	%G_FolderDisplay%
+	set /a G_result+=1
+	POPD&EXIT /B
+	)
+	
+	if exist "desktop.ini" if exist "%iconresource%" (
+		REM %Y_n%
+		%Y_FolderDisplay%
+		set /a Y_result+=1
+	)
+	
+	set "iconresource="
+	if /i "%Context%"=="Create" (
+		for %%F in (%KeywordsFind%) do (echo.&echo.&echo %r_%%TAB%   Something when wrong^?. :/  &pause>nul)
+	)
+POPD&EXIT /B
 
 :FI-Generate                      
 set "referer="
@@ -561,18 +606,22 @@ set "y_result=0"
 set "g_result=0"
 set "r_result=0"
 set "h_result=0"
+set  "Y_d=1"
+set  "G_d=1"
+set  "R_d=1"
+set "YY_d=1"
 set "success_result=0"
 set "fail_result=0"
 
 	echo %TAB%%TAB%%w_%%i_%  Generating folder icon..  %-%
 	echo.
-	echo %TAB%Keyword   :%ESC%%target%%ESC%
+	echo %TAB%Keyword   :%ESC%%KeywordsPrint%%ESC%
 	if exist "%Template%" for %%T in ("%Template%") do (
 	echo %TAB%Template  :%ESC%%cc_%%%~nT%ESC% 
 	)
 	echo %TAB%Directory :%ESC%%cd%%ESC%
 	echo %TAB%%w_%==============================================================================%_%
-if /i "%TemplateAlwaysAsk%"=="Yes" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk)
+if /i "%TemplateAlwaysAsk%"=="Yes" call :FI-Template-AlwaysAsk
 call :timer-start
 call :FI-GetDir
 echo %TAB%%w_%==============================================================================%_%
@@ -591,8 +640,7 @@ if /i "%cdonly%"=="true" if %result% EQU 1 if %g_result% EQU 1 (
 	echo.&echo.&echo.
 	echo %TAB%%ESC%%g_%📁 %foldername%%ESC%
 	echo.
-	echo %TAB%%w_%Couldn't find %target%
-	echo %TAB%Make sure there is file ^(%target%^) inside selected folder.%_%
+	echo %TAB%%w_%Couldn't find any files matching the keywords.
 	echo.&echo.&echo.
 )
 echo.
@@ -609,7 +657,7 @@ echo %TAB%%s%%u_%%result% Folders found.%_%
 IF NOT "%YY_result%"=="%success_result%" IF %YY_result% GTR 0 IF %r_result% GTR 0 echo %TAB%%yy_%%YY_s%%YY_result%%_% Folders processed.
 IF /i %R_result%		GTR 0 echo %TAB%%r_%%R_s%%R_result%%_% Folders icon changed.
 IF /i %Y_result%		GTR 0 echo %TAB%%y_%%Y_s%%Y_result%%_% Folders already has an icon.
-IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folders has no file match "%c_%%Target%%_%".
+IF /i %G_result%		GTR 0 echo %TAB%%g_%%G_s%%G_result%%_% Folders have no files matching the keywords.
 IF /i %YY_result%		LSS 1 IF /i %success_result%	LSS 1 echo.&echo %TAB% ^(No folders to be processed.^)
 IF NOT "%YY_result%"=="%success_result%" IF %action_result% EQU 0 echo %TAB% ^(No files to be processed.^)
 IF /i %fail_result%	GTR 0 echo %TAB%%fail_s%%r_%%fail_result%%_% Folder icons failed to generate.
@@ -636,7 +684,7 @@ if not defined Selected (
 	
 	rem Display "template" and "selected image"
 	set "Selected=%Filename%" 
-	echo %TAB%%ESC%%_%Folder Image:%c_%%Filename%%ESC%
+	echo   %ESC%%W_%└%C_%🏞 %c_%%Filename%%ESC%
 	if /i "%cdonly%"=="true" echo %TAB%%ESC%Template    :%cc_%%TemplateName%%ESC%%r_%
 	rem Executing "specified template" to convert and edit the selected image
 	if /i "%fileExt%"==".ICO" if exist "%TemplateForICO%" (
@@ -717,7 +765,7 @@ EXIT /B
 
 :FI-Template-AlwaysAsk             
 if /i "%Already%"=="Asked" exit /b
-rem echo %TAB% %g_%^(This will not be saved to the configurations^)%_%
+echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%
 set "TSelector=GetList"&set "TCount=0"
 PUSHD "%rcfi%\template"
 	FOR %%T in (*.bat) do (
@@ -735,7 +783,6 @@ for %%I in ("%TemplateSampleImage%") do (
 		set "size_B=%%~zI"
 		call :FileSize
 	)
-rem echo %TAB%%TAB%%gn_% S%_% ^> %w_%View template samples%_%
 echo.
 echo %g_%%TAB%%TAB%to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
@@ -851,10 +898,10 @@ call :Config-UpdateVar
 exit /b
 
 :FI-Template-Get_List             
-if /i "%Tselector%"=="GetList" if "%TemplateName%"=="%TName%" (set TNameList=%ESC%%cc_%%TName%%_%%ESC%) else set TNameList=%ESC%%w_%%TName%%_%%ESC%
+if /i "%Tselector%"=="GetList" if "%TemplateName%"=="%TName%" (set TNameList=%ESC%%cc_%%TName%%_%%ESC%) else set TNameList=%ESC%%_%%TName%%_%%ESC%
 if /i "%Tselector%"=="GetList" (
-	if %TCount% LSS 10 echo %TAB%%TAB% %gn_%%TCount%%_% ^>%TNameList%
-	if %TCount% GTR 9  echo %TAB%%TAB%%gn_%%TCount%%_% ^>%TNameList%
+	if %TCount% LSS 10 echo %TAB%     %gn_%%TCount%%w_%%TNameList%
+	if %TCount%   GTR 9 echo %TAB%    %gn_%%TCount%%w_%%TNameList%
 	exit /b
 	)
 set "_info="
@@ -1146,62 +1193,42 @@ if /i not "%Context%"=="" exit
 goto FI-Search
 
 :FI-Keyword                       
-echo %TAB%%g_%Current keyword:%ESC%%c_%%printTagFI%%ESC%%_%
-echo %TAB%%g_%This keyword will be used to search for file names to generate folder icons.%_%
-set "newKeyword=*"
 echo.
-set /p "newKeyword=%-%%-%%-%%w_%Change keyword:%c_%"
-if "%newKeyword%"=="*" set "newKeyword=%Keyword%"
-set "Keyword=%newKeyword%"
-echo. &echo. &echo.
-for %%X in (%ImageSupport%) do (
-	if /i "%%X"=="%Keyword:~-4%" (
-		call set "Keyword=%%Keyword:%keyword:~-4%=%%"
-		set "Keyword-Extension=%keyword:~-4%"
-		goto FI-Keyword-Selected
-	)
-	if /i "%%X"=="%Keyword:~-5%" (
-		call set "Keyword=%%Keyword:%keyword:~-5%=%%"
-		set "Keyword-Extension=%keyword:~-5%"
-		goto FI-Keyword-Selected
-	)
-)
-echo %TAB%%_%%g_%Current extension: %c_%%Keyword-Extension%%_%
-echo %TAB%%g_%During the generation process, matched file name and file extension will be
-echo %TAB%%g_%automatically converted into .ico format and set as the folder icon.
+call :Config-UpdateVar
+echo %TAB%%w_%%i_%Current keywords:%_%
+echo %TAB%%KeywordsPrint%
+rem echo.
+rem echo %TAB%%Keywords%
+rem echo %TAB%%KeywordsFind%
 echo.
-echo %TAB%%w_%Select extention:
-echo %TAB%%gn_%  1%_% ^> %c_%.Png%_%
-echo %TAB%%gn_%  2%_% ^> %c_%.Jpg%_%
-echo %TAB%%gn_%  3%_% ^> %c_%.Ico%_%
-echo %TAB%%gn_%  4%_% ^> %c_%.webp%_%
-echo %TAB%%gn_%  5%_% ^> %c_%.svg%_%
-echo %TAB%%gn_%  6%_% ^> %c_%.bmp%_%
-echo %TAB%%gn_%  7%_% ^> %c_%.tiff%_%
-echo %TAB%%gn_%  8%_% ^> %c_%.heic%_%
-echo %TAB%%gn_%  9%_% ^> %c_%.jpeg%_%
+echo %TAB%%r_%*%g_%Certain characters can causing an error, such as: %g_%%r_%%%%g_% %r_%"%g_% %r_%(%g_% %r_%)%g_% %r_%<%g_% %r_%>%g_% %r_%[%g_% %r_%&%g_%%_%
+echo %TAB%%r_%*%g_%Use comma to separate multiple keywords, for example:
+echo %TAB%%r_% %c_%folder icon.ico, folder art.png, favorite image.jpg
+echo %TAB%%r_% %g_%
 echo.
-echo %TAB%%g_%to select, just press the number assosiated to the options.%_%
-CHOICE /N /C 123456789
-	IF "%ERRORLEVEL%"=="1" set "Keyword-Extension=.png"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="2" set "Keyword-Extension=.jpg"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="3" set "Keyword-Extension=.ico"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="4" set "Keyword-Extension=.webp"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="5" set "Keyword-Extension=.svg"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="6" set "Keyword-Extension=.bmp"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="7" set "Keyword-Extension=.tiff"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="8" set "Keyword-Extension=.heic"	&goto FI-Keyword-Selected
-	IF "%ERRORLEVEL%"=="9" set "Keyword-Extension=.jpeg"	&goto FI-Keyword-Selected
-echo.
-echo %TAB%%_%%i_%  Invalid selection.  %-%
+set "newKeywords=*"
+set /p "newKeywords=%-%%-%%-%%w_%Change keywords:%c_%"
+if "%newKeywords%"=="*" set "newKeyword=%Keywords%"
+set "Keywords=%newKeywords%"
+
+goto FI-Keyword-Selected
+echo %TAB%%r_%%i_%  Somthing when wrong :/ ^?.  %-%
 echo.
 goto options
+
+:FI-Keyword-ImageSupport          
+call set "KeywordsFind=%%KeywordsFind:%ImgExtS%=*%ImgExtS%%%"
+exit /b
+
 :FI-Keyword-Selected              
 call :Config-Save
 call :Config-UpdateVar
 if "%Context%"=="DefKey" (
-	cls &echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.
-	echo %TAB%%TAB%%TAB%%TAB%%_%%ESC%%printTagFI%%ESC% will be use to generate folder icon.
+	cls &echo.&echo.&echo.&echo.&echo.&echo.&echo.
+	echo %TAB%%TAB%%w_%%i_% Keywords %_%
+	echo %TAB%%KeywordsPrint%
+	echo.
+	echo %TAB%%g_%The keywords will be use to find and generate folder icon.
 	ping localhost -n 2 >nul
 	goto options
 )
@@ -1456,7 +1483,7 @@ set "FI-ID=%get_ID%"
 exit /b
 
 :IMG-Generate_icon
-if /i "%TemplateAlwaysAsk%"=="Yes" (echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%&call :FI-Template-AlwaysAsk&cls&echo.&echo.&echo.)
+if /i "%TemplateAlwaysAsk%"=="Yes" (call :FI-Template-AlwaysAsk&cls&echo.&echo.&echo.)
 call :timer-start
 FOR %%T in ("%Template%") do set "TName=%%~nT"
 echo %TAB%       %i_%%w_%    Generating Icon..    %_%
@@ -2033,8 +2060,8 @@ if exist "%DrivePath%" for %%I in ("%DrivePath%") do (
 	echo %TAB%"%converter%" %r_%doesn't exist.%_%
 )
 echo.
-echo %TAB%%yy_%Keyword%_%
-echo %TAB%"%Keyword%%Keyword-extension%"
+echo %TAB%%yy_%Keywords%_%
+echo %TAB%"%Keywords%%Keyword-extension%"
 echo %TAB%%g_%Keyword will  be used to  search for the  target  image  to  use  as a 
 echo %TAB%%g_%folder  icon.
 echo.
@@ -2131,8 +2158,7 @@ if not defined TemplateIconSize set "TemplateIconSize=Auto"
 	echo     𝐑𝐂𝐅𝐈 𝐓𝐎𝐎𝐋𝐒 𝐂𝐎𝐍𝐅𝐈𝐆𝐔𝐑𝐀𝐓𝐈𝐎𝐍
 	echo.
 	echo ---------  KEYWORD  --------------
-	echo Keyword="%Keyword%"
-	echo Keyword-Extension="%Keyword-Extension%"
+	echo Keywords="%Keywords%"
 	echo ----------------------------------
 	echo.
 	echo.
@@ -2182,8 +2208,7 @@ if exist %TemplateForICO%	(for %%T in (%TemplateForICO%) do set TemplateForICO="
 if exist %TemplateForPNG%	(for %%T in (%TemplateForPNG%) do set TemplateForPNG="%%~nT")
 if exist %TemplateForJPG%	(for %%T in (%TemplateForJPG%) do set TemplateForJPG="%%~nT")
 set "DrivePath=%DrivePath:"=%"
-set "Keyword=%Keyword:"=%"
-set "Keyword-Extension=%Keyword-Extension:"=%"
+set "Keywords=%Keywords:"=%"
 set "Template=%rcfi%\template\%Template:"=%.bat"
 set "TemplateForICO=%rcfi%\template\%TemplateForICO:"=%.bat"
 set "TemplateForPNG=%rcfi%\template\%TemplateForPNG:"=%.bat"
@@ -2207,8 +2232,7 @@ EXIT /B
 :Config-GetDefault                
 cd /d "%~dp0"
 (
-	echo Keyword="*"
-	echo Keyword-Extension=".png"
+	echo Keywords="*"
 	echo Template="(none)"
 	echo TemplateForICO="(none)"
 	echo TemplateForPNG="insert the template name to use for .png files"
@@ -2229,9 +2253,25 @@ EXIT /B
 :Config-UpdateVar                 
 title %name% %version%    "%cd%"
 set "result=0"
-set "target=*%Keyword%*%Keyword-Extension%"
+set "keywordsFind=*%keywords%"
+set "keywordsFind=%keywordsFind: =*%"
+set "keywordsFind=%keywordsFind:.=*%
+set "keywordsFind=%keywordsFind:_=*%
+set "keywordsFind=%keywordsFind:-=*%
+set "keywordsFind=%keywordsFind:(=%"
+set "keywordsFind=%keywordsFind:)=%"
+set "keywordsFind=%keywordsFind:!=%"
+set "keywordsFind=%keywordsFind:[=%"
+set "keywordsFind=%keywordsFind:]=%"
+set "keywordsFind=%keywordsFind:<=%"
+set "keywordsFind=%keywordsFind:>=%"
+set "keywordsFind=%keywordsFind:,=*,*%"
+for %%X in (%ImageSupport%) do (
+	set ImgExtS=%%X
+	call :FI-Keyword-ImageSupport
+)
+call set "KeywordsPrint=%%Keywords:,=%c_%,%_%%%"
 for %%T in ("%Template%") do set "TemplateName=%%~nT"
-set "printTagFI=%ast%%c_%%Keyword%%ast%%_%%c_%%Keyword-Extension%%_%"
 EXIT /B
 
 :Config-Varset                    
@@ -2258,7 +2298,22 @@ set "pp_=[95m"
 set "ntc_=%_%%i_%%w_% %_%%-%"
 set "TAB=   "
 set ESC=[30m"[0m
-set "AST=%r_%*%_%"                         
+set "AST=%r_%*%_%"
+
+rem Initiating variables for FI-Scan-Desktop.ini
+set "yy_result=0"
+set "y_result=0"
+set "g_result=0"
+set "r_result=0"
+set "h_result=0"
+set  "Y_d=1"
+set  "G_d=1"
+set  "R_d=1"
+set "YY_d=1"
+set "success_result=0"
+set "fail_result=0"
+
+rem Storing required file path                  
 set p1=ping localhost -n 1 ^>nul
 set p2=ping localhost -n 2 ^>nul
 set p3=ping localhost -n 3 ^>nul
@@ -2656,7 +2711,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Generate_.JPG
 	echo [%RegExShell%\RCFI.GenJPG]
-	echo "MUIVerb"="Generate from - *.JPG"
+	echo "MUIVerb"="Generate from *.JPG"
 	echo "Icon"="shell32.dll,-241"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.GenJPG\command]
@@ -2664,21 +2719,21 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Generate_.PNG
 	echo [%RegExShell%\RCFI.GenPNG]
-	echo "MUIVerb"="Generate from - *.PNG"
+	echo "MUIVerb"="Generate from *.PNG"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenPNG\command]
 	echo @="%Scmd% set \"Context=GenPNG\"%SRCFIexe% \"%%V\""
 	
 	:REG-FI-Generate_Poster.JPG
 	echo [%RegExShell%\RCFI.GenPosterJPG]
-	echo "MUIVerb"="Generate from - *Poster.jpg"
+	echo "MUIVerb"="Generate from *Poster.jpg"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenPosterJPG\command]
 	echo @="%Scmd% set \"Context=GenPosterJPG\"%SRCFIexe% \"%%V\""
 	
 	:REG-FI-Generate_Landscape.JPG
 	echo [%RegExShell%\RCFI.GenLandscapeJPG]
-	echo "MUIVerb"="Generate from - *Landscape.jpg"
+	echo "MUIVerb"="Generate from *Landscape.jpg"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenLandscapeJPG\command]
 	echo @="%Scmd% set \"Context=GenLandscapeJPG\"%SRCFIexe% \"%%V\""
@@ -2739,7 +2794,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Generate_.JPG_here
 	echo [%RegExShell%\RCFI.GenJPG.Here]
-	echo "MUIVerb"="Generate from - *.JPG"
+	echo "MUIVerb"="Generate from *.JPG"
 	echo "Icon"="shell32.dll,-241"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.GenJPG.Here\command]
@@ -2747,21 +2802,21 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Generate_.PNG_here
 	echo [%RegExShell%\RCFI.GenPNG.Here]
-	echo "MUIVerb"="Generate from - *.PNG"
+	echo "MUIVerb"="Generate from *.PNG"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenPNG.Here\command]
 	echo @="%cmd% set \"Context=GenPNG.Here\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Generate_Poster.JPG_here
 	echo [%RegExShell%\RCFI.GenPosterJPG.Here]
-	echo "MUIVerb"="Generate from - *Poster.jpg"
+	echo "MUIVerb"="Generate from *Poster.jpg"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenPosterJPG.Here\command]
 	echo @="%cmd% set \"Context=GenPosterJPG.Here\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Generate_Landscape.JPG_here
 	echo [%RegExShell%\RCFI.GenLandscapeJPG.Here]
-	echo "MUIVerb"="Generate from - *Landscape.jpg"
+	echo "MUIVerb"="Generate from *Landscape.jpg"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenLandscapeJPG.Here\command]
 	echo @="%cmd% set \"Context=GenLandscapeJPG.Here\"%RCFIexe% \"%%V\""
@@ -2822,7 +2877,7 @@ rem Generating setup_*.reg
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon;RCFI.Search.Poster;RCFI.Search.Icon;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
+	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.Search.Folder.Icon;RCFI.Search.Poster;RCFI.Search.Icon;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
 	
 	:REG-Context_Menu-FI-Background
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
