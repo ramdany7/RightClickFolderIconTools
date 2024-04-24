@@ -765,7 +765,7 @@ EXIT /B
 
 :FI-Template-AlwaysAsk             
 if /i "%Already%"=="Asked" exit /b
-echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%
+if /i not "%Context%"=="Edit.Template" echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%
 set "TSelector=GetList"&set "TCount=0"
 PUSHD "%rcfi%\template"
 	FOR %%T in (*.bat) do (
@@ -1157,7 +1157,8 @@ goto FI-Template-TestMode-Auto
 :FI-Template-Edit
 echo            %i_%%w_%  Template Configuration  %_%
 echo.
-echo %TAB%   %w_%Choose Template:%_%
+echo %TAB%    %w_%Choose Template:%_%
+set "TemplateAlwaysAsk=yes"
 call :FI-Template-AlwaysAsk
 start "" "%TextEditor%" "%Template%"
 exit
