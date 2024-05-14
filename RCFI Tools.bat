@@ -1,8 +1,29 @@
 @echo off
-chcp 65001 >nul
+:: Update v0.2
+:: 2023-09-13 Adding context menu for .webp image extention
+:: 2023-10-07 Adding 'Template configuration' to background right-click menu.
+:: 2023-10-07 Removing unused lines
+:: 2023-10-07 Adding config to change prefred text editor.
+:: 2023-10-14 Removing 'Refresh icon cache (restart explorer)' from folder right-click options.
+:: 2023-12-06 Adding 'Compress Image' to image right-click menu.
+:: 2023-12-09 Fix: Generate result displayed incorrectly when hidden file selected as folder icon.
+:: 2023-12-11 Renaming "config.ini" to "RCFI.config.ini"
+:: 2023-12-13 Adding option to delete the original file.
+:: 2023-12-13 Adding option to hide "foldericon" and "desktop.ini" as system files.
+:: 2023-12-14 Fix: processing time counter displayed incorrectly when 'TemplateAlwaysAsk' enabled.
+:: 2023-12-16 Changing folder icon through "Choose and Set as" menu now doesn't save the selected template to the config.
+:: 2023-12-22 Adding suffix number to output file name of 'custom resize and custom compress' so it wont replace existing file.
+:: 2024-01-23 Fix: 'Choose template' menu always showing "Invalid Selection" when 'AlwaysAskTemplate' is active.
+:: 2024-02-10 Adding 'Search Icon' to Folder right-click menu.
+:: 2024-03-10 Fix: Unable to change keyword extension in 'Define keyword' menu.
+:: 2024-03-26 Adding support for multiple keywords.
+:: 2024-04-24 Fix: Template Configuration menu doesn't work properly when "AlwaysAskTemplate=No"
+:: 2024-05-14 Fix: file scan unable to find matched keywords when file extension not specified.
+
+setlocal
 set name=RCFI Tools
 set version=v0.2
-setlocal
+chcp 65001 >nul
 cd /d "%~dp0"
 title %name%   "%cd%"
 
@@ -239,10 +260,19 @@ goto options
 if /i "%TemplateAlwaysAsk%"=="Yes" if /i not "%Already%"=="Asked" (call :FI-Template-AlwaysAsk&echo.)
 if /i "%Context%"=="IMG-Choose.and.Set.As" if /i not "%Already%"=="Asked" (call :FI-Template-AlwaysAsk&echo.)
 for %%D in ("%cd%") do set "foldername=%%~nD%%~xD" &set "folderpath=%%~dpD"
-if /i "%Direct%"=="Confirm" echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC% &goto DirectInput-Generate-Confirm
-if not exist desktop.ini echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC% &goto DirectInput-Generate-Confirm
+if /i "%Direct%"=="Confirm" (
+	echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+	goto DirectInput-Generate-Confirm
+)
+if not exist desktop.ini (
+	echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+	goto DirectInput-Generate-Confirm
+)
 for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do set "%%C=%%D" 2>nul
-if not exist "%iconresource%" echo %TAB%%W_%┌%YY_%📁%ESC%%w_%%foldername%%ESC% &goto DirectInput-Generate-Confirm
+if not exist "%iconresource%" (
+	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+	goto DirectInput-Generate-Confirm
+)
 echo %TAB%%Y_%┌%Y_%📁%ESC%%w_%%foldername%%ESC%
 echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%iconresource%%ESC%
 attrib -s -h "%iconresource%"
@@ -251,13 +281,16 @@ echo %TAB%%g_% This folder already has a folder icon.
 echo %TAB%%g_% Do you want to replace it%r_%^? %gn_%Y%_%/%gn_%N%bk_%
 echo %TAB%%g_% Press %gg_%Y%g_% to confirm.%_%%bk_%
 CHOICE /N /C YN
+IF "%ERRORLEVEL%"=="1" (
+	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+)
 IF "%ERRORLEVEL%"=="2" (
 	echo %_%%TAB% %I_%     Canceled     %_%
 	Attrib %Attrib% "%iconresource%"
 	attrib -|exit /b
 	goto options
 )
-IF "%ERRORLEVEL%"=="1" if defined Context cls &echo.&set "Direct=Confirm"&echo.&echo.&echo.&echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+IF "%ERRORLEVEL%"=="1" if defined Context cls &echo.&set "Direct=Confirm"&echo.&echo.&echo.&echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 
 :DirectInput-Generate-Confirm     
 set "ReplaceThis=%iconresource%"
@@ -354,14 +387,14 @@ exit /b
 :FI-Selected_folder-Act
 if not defined iconresource (
 	if not defined timestart call :Timer-start
-	echo %TAB%%W_%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
 if /i "%replace%"=="all" (
 	set "ReplaceThis=%iconresource%"
 	if not defined timestart call :Timer-start
-	echo %TAB%%W_%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
@@ -388,7 +421,7 @@ IF "%ERRORLEVEL%"=="3" (
 )
 set "ReplaceThis=%iconresource%"
 if not defined timestart call :Timer-start
-echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 call :FI-Generate-Folder_Icon
 exit /b
 
@@ -516,8 +549,8 @@ REM IF %YY_d% GTR 99 (set "YY_s=%YY_d%")
 
 set    Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%foldername%%ESC%
 set    G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%foldername%%ESC%
-set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
-set YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%w_%%foldername%%ESC%
+set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+set YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 
 
 PUSHD "%location%"
@@ -1287,7 +1320,7 @@ echo %TAB%%w_%==================================================================
 IF /i %result% LSS 1 if defined Context cls
 IF /i %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%r_%%result%%_%%_%^) Couldn't find any folder icon. &goto options
 echo. &echo %_%%TAB%  ^(%y_%%result%%_%%_%^) Folder icon found.%_% &echo.&echo.
-echo       %_%%r_%Continue to Remove (%y_%%result%%_%%r_%^) folder icon^?%-% 
+echo       %_%%r_%Continue to Remove (%y_%%result%%_%%r_%^) folder icons^?%-% 
 echo %TAB%%ast%%g_%The folder icon will be deactivated from the folder, "desktop.ini"
 echo %TAB% and "foldericon.ico"   inside   the  folder   will   be  deleted.
 echo %TAB%%g_% Options:%_% %gn_%Y%_%/%gn_%N%_% %g_%^| Press %gg_%Y%g_% to confirm.%_%%bk_%
@@ -2254,7 +2287,7 @@ EXIT /B
 :Config-UpdateVar                 
 title %name% %version%    "%cd%"
 set "result=0"
-set "keywordsFind=*%keywords%"
+set "keywordsFind=*%keywords%*"
 set "keywordsFind=%keywordsFind: =*%"
 set "keywordsFind=%keywordsFind:.=*%
 set "keywordsFind=%keywordsFind:_=*%
