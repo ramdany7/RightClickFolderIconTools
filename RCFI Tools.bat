@@ -1,14 +1,16 @@
 @echo off
 :: Update v0.2
-:: 2023-09-13 Adding context menu for .webp image extention
+:: 2023-09-13 Adding context menu for .webp image extention.
 :: 2023-10-07 Adding 'Template configuration' to background right-click menu.
 :: 2023-10-07 Removing unused lines
 :: 2023-10-07 Adding config to change prefred text editor.
-:: 2023-10-14 Removing 'Refresh icon cache (restart explorer)' from folder right-click options.
+:: 2023-10-14 Removing 'Refresh icon cache (restart explorer)' from folder right-click menu.
 :: 2023-12-06 Adding 'Compress Image' to image right-click menu.
 :: 2023-12-09 Fix: Generate result displayed incorrectly when hidden file selected as folder icon.
+::            Reported by Reddit user: https://www.reddit.com/r/Batch/comments/rzqrx5/comment/kcmda8o/
 :: 2023-12-11 Renaming "config.ini" to "RCFI.config.ini"
 :: 2023-12-13 Adding option to delete the original file.
+::            Requested by Reddit user: https://www.reddit.com/r/Batch/comments/rzqrx5/comment/kcmda8o/
 :: 2023-12-13 Adding option to hide "foldericon" and "desktop.ini" as system files.
 :: 2023-12-14 Fix: processing time counter displayed incorrectly when 'TemplateAlwaysAsk' enabled.
 :: 2023-12-16 Changing folder icon through "Choose and Set as" menu now doesn't save the selected template to the config.
@@ -19,6 +21,8 @@
 :: 2024-03-26 Adding support for multiple keywords.
 :: 2024-04-24 Fix: Template Configuration menu doesn't work properly when "AlwaysAskTemplate=No"
 :: 2024-05-14 Fix: file scan unable to find matched keywords when file extension not specified.
+:: 2024-05-20 Changing default configuration of "TemplateIconSize" from "Auto" to "256" for smaller file size and faster image processing.
+:: 2024-05-20 Replacing ImageMagick Convert with version 7.1.1-32-portable-Q8-x64. Newer, Faster, but not compatible with x86 architecture (64 bit only).
 
 setlocal
 set name=RCFI Tools
@@ -40,8 +44,8 @@ echo.
 if not defined OpenFrom (
 	echo                             %i_% %name% %version% %_%%-%
 	echo.
-	echo                %gn_%Activate%g_%/%gn_%Act%g_%   to activate right-click menu.
-	echo                %gn_%Deactivate%g_%/%gn_%Dct%g_% to deactivate right-click menu. 
+	echo                %gn_%Activate%g_%/%gn_%Act%g_%   to activate Folder Icon Tools.
+	echo                %gn_%Deactivate%g_%/%gn_%Dct%g_% to deactivate Folder Icon Tools. 
 	echo.
 ) else (
 echo %TAB%                  %pp_%Drag and  drop%_%%g_%  an %c_%image%g_%  to  this  window
@@ -1227,21 +1231,25 @@ if /i not "%Context%"=="" exit
 goto FI-Search
 
 :FI-Keyword                       
+echo                 %w_%%i_%     K E Y W O R D S     %_%
 echo.
 call :Config-UpdateVar
-echo %TAB%%w_%%i_%Current keywords:%_%
-echo %TAB%%KeywordsPrint%
 rem echo.
 rem echo %TAB%%Keywords%
 rem echo %TAB%%KeywordsFind%
+echo %TAB%%r_%*%g_%Certain characters can causing an error, such as: 
+echo %TAB%%r_% %g_%%g_%%c_%%%%g_% %c_%"%g_% %c_%(%g_% %c_%)%g_% %c_%<%g_% %c_%>%g_% %c_%[%g_% %c_%&%g_%%_%
 echo.
-echo %TAB%%r_%*%g_%Certain characters can causing an error, such as: %g_%%r_%%%%g_% %r_%"%g_% %r_%(%g_% %r_%)%g_% %r_%<%g_% %r_%>%g_% %r_%[%g_% %r_%&%g_%%_%
 echo %TAB%%r_%*%g_%Use comma to separate multiple keywords, for example:
 echo %TAB%%r_% %c_%folder icon.ico, folder art.png, favorite image.jpg
-echo %TAB%%r_% %g_%
 echo.
+echo %TAB%%r_%*%g_%Spaces, dots, hypens, underscores will be interpreted as a wildcard.
+echo.
+echo.
+echo.
+echo %TAB%%w_%Current keywords:%_% %KeywordsPrint%
 set "newKeywords=*"
-set /p "newKeywords=%-%%-%%-%%w_%Change keywords:%c_%"
+set /p "newKeywords=%-%%-%%-%%g_%%i_%Change  keywords:%_% %c_%"
 if "%newKeywords%"=="*" set "newKeyword=%Keywords%"
 set "Keywords=%newKeywords%"
 
@@ -2211,7 +2219,7 @@ if not defined TemplateIconSize set "TemplateIconSize=Auto"
 	echo ----------------------------------
 	echo.
 	echo.
-	echo ---------  OTHER    --------------
+	echo ---------  ADDITIONAL ------------
 	echo ExitWait="%ExitWait%"
 	echo HideAsSystemFiles="%HideAsSystemFiles%"
 	echo DeleteOriginalFile="%DeleteOriginalFile%"
@@ -2274,7 +2282,7 @@ cd /d "%~dp0"
 	echo TemplateAlwaysAsk="No"
 	echo TemplateTestMode="No"
 	echo TemplateTestMode-AutoExecute="No"
-	echo TemplateIconSize="Auto"
+	echo TemplateIconSize="256"
 	echo ExitWait="100"
 	echo HideAsSystemFiles="No"
 	echo DeleteOriginalFile="No"
