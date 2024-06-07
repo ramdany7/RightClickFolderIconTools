@@ -5,7 +5,7 @@ Adds "Folder Icon Tools" to your right-click menus, allowing you to easily custo
 
 
 
-|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Folder Right-click ![RCFI-Folder_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8703384d-3c81-45fc-87cb-befa5891718c)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Background Right-click ![RCFI-Background_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/253aea77-5c6d-4fdd-bbf7-4819cf2270a8)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Image Right-click ![RCFI-Image_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/52230ba6-cee8-4bf7-903b-6e5751acc207)|
+|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Folder Right-click<br>![RCFI-Folder_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8703384d-3c81-45fc-87cb-befa5891718c)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Background Right-click<br> ![RCFI-Background_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/253aea77-5c6d-4fdd-bbf7-4819cf2270a8)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Image Right-click<br> ![RCFI-Image_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/52230ba6-cee8-4bf7-903b-6e5751acc207)|
 |     :---      |     :---      |     :---      |
 
 <br><br>
@@ -51,57 +51,106 @@ You can choose the template you want to generate the folder icon, it will automa
 <br>
 Here's some samples of the template i've made.
 
-<table>
+<p align="center">
+<u>  Files inside folder  </u><br>
+<img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/9b7a7390-c127-418a-a831-aae0b720af1e" Alt="Sample files" Title="Sample files to generate folder icons">
+</p>
+
+<br>
+
+<p align="center">
+<u>  Generated folder icon  </u><br>
+<table class="center">
   <tr>
-    <td>     Folder<br>
-    <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/b2ab9d18-9faa-47e6-ab7f-bfc7d1aadf11"></img>
+    <td>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/a1f1fc8d-c3a6-401e-99b3-7d38ef0ddb67" alt="Generated image, Template: (none)" title="The output image will be identical to the source image, without a frame or shadow. Additionally, the image will be positioned at the center of a 1:1 image ratio.">
+      <br>(none)
+      </p>
     </td>
-    <td colspan="3">     Files inside folder<br>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/e0c20a52-5caf-4ec6-abc8-34d5122191e5"></img>
+    <td>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/5049f507-4e4f-45e5-ba60-ee552de2d644" alt="Generated image, Template: DVDCase Transparent" title="Transparent plastic DVD case style folder icon.">
+      <br>DVDCase Transparent
+      </p>
+    </td>
+    <td>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/9985c126-1c38-4912-92bb-b352f81032c6" alt="Generated image, Template: DVDCase Bluray" title="Bluray disc case style folder icon.">
+      <br>DVDCase Bluray
+      </p>
+    </td>
+    <td>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/fb6a4c04-82d2-4428-a1f2-a537b1f02288" alt="Generated image, Template: Folder Vertical" title="Vertical version of Folder Horizontal template.">
+      <br>Folder Vertical
+      </p>
+    </td>
+    <td>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/1df4e3b2-adda-41d7-b82f-b1d6a74e4d01" alt="Generated image, Template: Folder Horizontal" title="Classic style folder icon template, frequently used in folder icon community.">
+      <br>Folder Horizontal
+      </p>
     </td>
   </tr>
+
   <tr>
     <td>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/832f2530-6b3b-41e9-a80a-692bc52e6ebd"><br>
-      <p align="center">Template: (none)</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/f64a41c3-53de-43ed-87cb-f5bd471665a8" alt="Generated image, Template: (Shadow Only)" title="This template only add a little bit of shadow.">
+      <br>(Shadow Only)
+      </p>
     </td>
     <td>
-    <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/13045086-4646-44a0-84a2-3ef957d923e0"><br>
-      <p align="center">Template: (Shadow Only)</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/73d10ab8-f8c8-4f7e-b5a6-0f674c64b484" alt="Generated image, Template: BeOrigin" title="MacOS like folder icon.">
+      <br>BeOrigin
+      </p>
     </td>
     <td>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/119e02b0-db45-401a-8ada-c2ea41033611"><br>
-      <p align="center">Template: DVDBox Dark</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/7f15409e-e5c1-46a2-bb41-a3056e5ade32" alt="Generated image, Template: Windows 11 A" title="Windows 11 style folder icon template.">
+      <br>Windows 11 A
+      </p>
     </td>
     <td>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/95a30678-84ed-4e27-9d64-02f4a72f87b5"><br>
-      <p align="center">Template: DVDBox Light</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/95efd776-302a-4fab-a403-2637371ab88d" alt="Generated image, Template: Windows 11 Cover" title="Windows 11 theme folder icon template.">
+      <br>Windows 11 Cover
+      </p>
     </td>
-</td>
+    <td>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8f45cfdb-b5c9-4464-81ca-8a6aab591c64" alt="Generated image, Template: Windows 11 Cover" title="RCFI Tools template inpired by Folderify.">
+      <br>Windows 11 Folderify
+      </p>
+    </td>
   </tr>
-  
+
   <tr>
     <td>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/540689b7-c957-4b4b-9414-6e507cd14f44"><br>
-      <p align="center">Template: DVDCase Bluray</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/287831c7-f4c7-4743-85f4-5bfd37862392" alt="Generated image, Template: DiscArt" title="Disc Art template. This template will also be used to automatically generate disc image for DVDbox template.">
+      <br>DiscArt
     </td>
     <td>
-    <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/76aa86f8-9c1d-4572-abf9-2bba66929810"><br>
-      <p align="center">Template: DVDCase Plastic</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/1a5ce9c2-8ba2-4c68-90ec-25210bd9989d" alt="Generated image, Template: DVDBox Dark" title="DVD Box style folder icon template with a disc image.">
+      <br>DVDBox Dark
+      </p>
     </td>
     <td>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8e27620d-824c-4c7b-8126-f87deff44d4f"><br>
-      <p align="center">Template: Folder Vertical</p></img>
-    </td>
-    <td>
-      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/dca6ae78-3db5-43f9-8d5f-1e4bdb049403"><br>
-      <p align="center">Template: Folder Horizontal</p></img>
+      <p align="center">
+      <img src="https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/dfd59806-70c2-4544-80cf-0c2b96e510d1" alt="Generated image, Template: DVDBox Light" title="DVD Box style folder icon template with a disc image.">
+      <br>DVDBox Light
+      </p>
     </td>
   </tr>
 </table>
 
+</p>
 
->_The samples above use '**\*Poster\*.jpg**' as the generated folder icon. Certain templates with specific configurations may combine additional files located within the same directory as the image to achieve the results as shown above. If the required additional files are not available, they will be ignored, and the folder icon will be generated without them._
+>_The samples above use '**\*Poster\*.jpg**' as the generated folder icon. Certain templates with specific configurations may combine additional files located within the folder directory to achieve the results as shown above. If the required additional files are not available, they will be ignored, and the folder icon will be generated without them._
 
 To give you an idea of how it looks and how you can use it,<br>
 I've made a video that you can watch it [**Here**](https://www.youtube.com/watch?v=MT7BZlhRWfI).<br>
@@ -110,9 +159,9 @@ I've made a video that you can watch it [**Here**](https://www.youtube.com/watch
 
 # Configurations
 ###      Template Configuration
-Some templates include configuration settings that can be customized according to your preferences. To modify the configuration, open the 'template file.bat' using a text editor and adjust the values. The 'template file.bat' can be found at `RCFI Tools\template\`.
+Some templates include configuration settings that can be customized according to your preferences. To modify the configuration, open the 'template file.bat' using a text editor and adjust the values. The 'template file.bat' can be found at `RCFI Tools\templates\`.
 
-Here are the available settings:
+Here are some available settings:
 |Configuration|Options|Description|
 |   :---   |   :---   |   :---   |
 |set "display-movieinfo= "                    |`yes` `no`            | Search for a '***.nfo**' file located within the same directory as the selected image to get movie information.|
@@ -133,7 +182,7 @@ Here are the available settings:
 <br>
 
 ###      RCFI Tools Configuration
-The RCFI Tools Configuration can be found in `RCFI Tools\config.ini` and can be adjusted and modified using a text editor.
+The RCFI Tools Configuration can be found in `RCFI Tools\RCFI.config.ini` and can be adjusted and modified using a text editor.
 
 Here are the available configuration options:
 
@@ -161,7 +210,7 @@ In the end, My role involves is just bringing together the work and ideas of oth
 - This project was inspired by [Anime Icon Matcher 2018](http://www.mediafire.com/?nv3m231s8h9be) by serenity !29TgfcZgPU, which I used a lots in the past.
 - This project owes its existence to [ImageMagick](https://github.com/ImageMagick/ImageMagick), the tool that is use to process and edit images.
 - I utilize the [SingleInstanceAccumulator](https://github.com/Beej126/SingleInstanceAccumulator) by Beej126 to accumulate the selected items in Explorer so it doesn't make a new instance for each selected items.
-- I use PSD templates by [em1l](https://www.deviantart.com/em1l), [saikuro](https://www.deviantart.com/saikuro), [mauricioestrella](https://www.deviantart.com/mauricioestrella) and [90scomics.com](http://www.90scomics.com) to create all available folder icon templates.
-- While working on this project, I also drew some inspiration from [FolderIco](http://folderico.com) and [Raticon](http://jamedjo.github.io/Raticon) by Jamedjo.<br>
+- I use PSD templates by [em1l](https://www.deviantart.com/em1l), [saikuro](https://www.deviantart.com/saikuro), [mauricioestrella](https://www.deviantart.com/mauricioestrella), [90scomics.com](http://www.90scomics.com) and [Jonathan Brimer](https://beoriginal.com/blog/free-folder-icon-photoshop-template) to create all available folder icon templates.
+- While working on this project, I also drew some inspiration from [FolderIco](http://folderico.com), [Raticon](http://jamedjo.github.io/Raticon) and [Folderify](https://github.com/lgarron/folderify).<br>
 
 **_A big thank you to all mentioned above for their contributions._**
