@@ -19,7 +19,7 @@
 :: 2024-02-10 Adding 'Search Icon' to Folder right-click menu.
 :: 2024-03-10 Fix: Unable to change keyword extension in 'Define keyword' menu.
 :: 2024-03-26 Adding support for multiple keywords.
-:: 2024-04-24 Fix: Template Configuration menu doesn't work properly when "AlwaysAskTemplate=No."
+:: 2024-04-24 Fix: Template Configuration menu doesn't work properly when "AlwaysAskTemplate=No".
 :: 2024-05-14 Fix: File scan unable to find matched keywords when file extension not specified.
 :: 2024-05-20 Changing default configuration of "TemplateIconSize" from "Auto" to "256" for smaller file size and faster image processing.
 :: 2024-05-20 Replacing ImageMagick Convert with version 7.1.1-32-portable-Q8-x64. Newer, faster, but not compatible with x86 architecture (64-bit only).
@@ -993,11 +993,13 @@ if /i "%TSelector%"=="Select" (
 			)
 		) else (
 			rem Display Template info.
+			if /i not "%Context%"=="IMG-Choose.and.Set.As" (
 			echo.
 			echo   %_%%ESC%%cc_%  %TName%%_% selected.%ESC%
 			%p1%
 			for /f "usebackq tokens=1,2 delims=`" %%I in ("%TFullPath%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
 			%p2%
+			)
 			set "TemplateChoice=Selected"
 			if /i not "%Context%"=="IMG-Choose.and.Set.As" call :Config-Save
 		)
