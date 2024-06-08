@@ -35,13 +35,16 @@ Adds "Folder Icon Tools" to your right-click menus, allowing you to easily custo
 <br><br>
 
 # Installation
-1. Download the .zip file [**here**](https://github.com/ramdany7/RightClickFolderIconTools/releases)
-2. Unzip the downloaded file.
-2. Place the '**RCFI Tools**' folder somewhere, open it and double click '**RCFI Tools.bat**'
-3. You'll be prompted to allow the script to write to the Registry. Click 'Yes' to proceed with the installation.
-4. There will be 'config.ini' and 'uninstall.cmd' generated. And.. it's done.<br>
+1. Download the .zip file [**here**](https://github.com/ramdany7/RightClickFolderIconTools/releases).
+2. Extract  it using the password: **1234**.
+3. Put the "RCFI Tools" folder somewhere, once it's installed, you are not allowed to move the folder; otherwise you'll have to reinstall it.
+4. Open RCFI Tools.bat.
+5. You'll be prompted to allow the script to write to the Registry. Click 'Yes' to proceed with the installation.
+6. There will be 'config.ini' and 'uninstall.cmd' generated. Done.
 
 You can access '**Folder Icon Tools**' via the right-click menu in Windows Explorer.
+> **Note**: In case if "**RCFI Tools.bat**" is flagged as a malicious program by antivirus software (see the issue [discussion](https://github.com/ramdany7/RightClickFolderIconTools/issues/1)), you might have to add the "**RCFI Tools.bat**" to the allow list in your antivirus.
+
 <br><br>
 
 # Usage
