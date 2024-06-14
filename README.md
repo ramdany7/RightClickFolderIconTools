@@ -5,7 +5,8 @@ Adds "Folder Icon Tools" to your right-click menus, allowing you to easily custo
 
 
 
-|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Folder Right-click<br>![RCFI-Folder_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/8703384d-3c81-45fc-87cb-befa5891718c)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Background Right-click<br> ![RCFI-Background_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/253aea77-5c6d-4fdd-bbf7-4819cf2270a8)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Image Right-click<br> ![RCFI-Image_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/52230ba6-cee8-4bf7-903b-6e5751acc207)|
+
+|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Folder Right-click<br>![RCFI-Folder_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/ceb0435a-0f2a-4c1c-b35c-ba74bad1d93d)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Background Right-click<br> ![RCFI-Background_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/e01a4696-bd3d-440f-81a0-68427a62f11d)|![](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/683be449-8e14-4f2f-aecc-6d0311d9c05c) Image Right-click<br> ![RCFI-Image_Menu](https://github.com/ramdany7/RightClickFolderIconTools/assets/113004105/560127a3-716a-497b-8812-d0cb764351c8)|
 |     :---      |     :---      |     :---      |
 
 <br><br>
