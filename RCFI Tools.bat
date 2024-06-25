@@ -6,7 +6,7 @@
 
 setlocal
 set name=RCFI Tools
-set version=v0.2
+set version=v0.3
 chcp 65001 >nul
 cd /d "%~dp0"
 title %name%   "%cd%"
