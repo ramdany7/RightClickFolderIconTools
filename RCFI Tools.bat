@@ -1,37 +1,8 @@
 @echo off
-<<<<<<< HEAD
-:: Update v0.2
-:: 2023-09-13 Adding context menu for .webp image extension.
-:: 2023-10-07 Adding 'Template configuration' to background right-click menu.
-:: 2023-10-07 Removing unused lines.
-:: 2023-10-07 Adding config to change preferred text editor.
-:: 2023-10-14 Removing 'Refresh icon cache (restart explorer)' from folder right-click menu.
-:: 2023-12-06 Adding 'Compress Image' to image right-click menu.
-:: 2023-12-09 Fix: "Generate result" displayed incorrectly when hidden file selected as folder icon.
-::            Reported by Reddit user https://www.reddit.com/r/Batch/comments/rzqrx5/comment/kcmda8o/
-:: 2023-12-11 Renaming "config.ini" to "RCFI.config.ini."
-:: 2023-12-13 Adding option to delete the original file.
-::            Requested by Reddit user: https://www.reddit.com/r/Batch/comments/rzqrx5/comment/kcmda8o/
-:: 2023-12-13 Adding option to hide "foldericon" and "desktop.ini" as system files.
-:: 2023-12-14 Fix: Processing time counter displayed incorrectly when 'TemplateAlwaysAsk' enabled.
-:: 2023-12-16 Changing folder icon through "Choose and Set as" menu now doesn't save the selected template to the config.
-:: 2023-12-22 Adding suffix number to output file name of 'resize and compress' so it won't replace existing files.
-:: 2024-01-23 Fix: 'Choose template' menu always shows "Invalid Selection" when "AlwaysAskTemplate=Yes".
-:: 2024-02-10 Adding 'Search Icon' to Folder right-click menu.
-:: 2024-03-10 Fix: Unable to change keyword extension in 'Define keyword' menu.
-:: 2024-03-26 Adding support for multiple keywords.
-:: 2024-04-24 Fix: Template Configuration menu doesn't work properly when "AlwaysAskTemplate=No".
-:: 2024-05-14 Fix: File scan unable to find matched keywords when file extension not specified.
-:: 2024-05-20 Changing default configuration of "TemplateIconSize" from "Auto" to "256" for smaller file size and faster image processing.
-:: 2024-05-20 Replacing ImageMagick Convert with version 7.1.1-32-portable-Q8-x64. Newer, faster, but not compatible with x86 architecture (64-bit only).
-:: 2024-06-06 Minor bug fixes and optimization for v0.2 release.
-
-=======
 :: Update v0.3
 :: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
 :: 2024-06-23 Add "Global Template Config" to override all templates configuration.
 :: 2024-06-24 Adding some adjustment to "Windows 11 A" template.
->>>>>>> 4876230 (...)
 
 setlocal
 set name=RCFI Tools
