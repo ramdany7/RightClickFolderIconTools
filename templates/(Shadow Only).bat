@@ -26,3 +26,6 @@ set "shadow-Y-position=+6.5"
 ::      Template Command
 ::===================================
 "%Converter%" "%inputfile%" -resize 490x490 ^( +clone -background %shadow-color% -shadow %shadow-opacity%x%shadow-blur%%shadow-x-position%%shadow-y-position% ^) +swap -background none -layers merge -gravity %image-position% -extent 512x512 -define icon:auto-resize="%TemplateIconSize%" "%outputfile%"
+
+
+

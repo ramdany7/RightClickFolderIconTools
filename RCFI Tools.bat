@@ -1,4 +1,5 @@
 @echo off
+<<<<<<< HEAD
 :: Update v0.2
 :: 2023-09-13 Adding context menu for .webp image extension.
 :: 2023-10-07 Adding 'Template configuration' to background right-click menu.
@@ -25,6 +26,12 @@
 :: 2024-05-20 Replacing ImageMagick Convert with version 7.1.1-32-portable-Q8-x64. Newer, faster, but not compatible with x86 architecture (64-bit only).
 :: 2024-06-06 Minor bug fixes and optimization for v0.2 release.
 
+=======
+:: Update v0.3
+:: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
+:: 2024-06-23 Add "Global Template Config" to override all templates configuration.
+:: 2024-06-24 Adding some adjustment to "Windows 11 A" template.
+>>>>>>> 4876230 (...)
 
 setlocal
 set name=RCFI Tools
@@ -150,7 +157,7 @@ if /i "%Command%"=="help"		goto Help
 if /i "%Command%"=="cd.."		cd /d .. &echo %TAB% Changing to the parent directory. &goto options
 if /i "%Command%"==".."			cd /d .. &echo %TAB% Changing to the parent directory. &goto options
 if /i "%Command%"=="o"			echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%cd%%ESC% &explorer.exe "%cd%" &goto options
-if /i "%Command%"=="rcfi"		echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%~dp0%ESC% &echo. &explorer.exe "%~dp0" &goto options
+if /i "%Command%"=="RCFI"		echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%~dp0%ESC% &echo. &explorer.exe "%~dp0" &goto options
 if /i "%Command%"=="cls"			cls&goto options
 if /i "%Command%"=="r"			start "" "%~f0" &exit
 if /i "%Command%"=="tc"			goto Colour
@@ -219,7 +226,7 @@ if /i "%Context%"=="GenLandscapeJPG.Here"		%Dir% &set "input=Generate"		&set "Ke
 if /i "%Context%"=="ActivateFolderIcon.Here"	%Dir% &goto FI-Activate
 if /i "%Context%"=="DeactivateFolderIcon.Here" %Dir% &goto FI-Deactivate
 if /i "%Context%"=="RemFolderIcon.Here"		%Dir% &set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
-if /i "%Context%"=="Edit.Config"				start "" notepad.exe "%rcfi%\RCFI.config.ini"&exit
+if /i "%Context%"=="Edit.Config"				start "" notepad.exe "%RCFI%\RCFI.config.ini"&exit
 if /i "%Context%"=="Edit.Template"				goto FI-Template-Edit
 if /i "%Context%"=="Ver.Context.Click"			echo %TAB%%_%Opening..   		&echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &exit
 REM Other
@@ -312,7 +319,7 @@ set "context="
 set "target=0.0"
 set "replace="
 set "Already="
-del "%appdata%\RCFI Tools\replaceALL.rcfi" 2>nul
+del "%appdata%\RCFI Tools\replaceALL.RCFI" 2>nul
 if not defined SFproceed call :FI-Selected_folder-Get
 for %%S in (%xSelected%) do (
 	PUSHD "%%~fS" 2>nul &&for %%F in (%%S) do (
@@ -833,7 +840,7 @@ EXIT /B
 if /i "%Already%"=="Asked" exit /b
 if /i not "%Context%"=="Edit.Template" echo.&echo.&echo %TAB%  %w_%Choose Template to Generate Folder Icons:%_%
 set "TSelector=GetList"&set "TCount=0"
-PUSHD "%rcfi%\templates"
+PUSHD "%RCFI%\templates"
 	FOR %%T in (*.bat) do (
 		set /a TCount+=1
 		set "TName=%%~nT"
@@ -849,6 +856,10 @@ for %%I in ("%TemplateSampleImage%") do (
 		set "size_B=%%~zI"
 		call :FileSize
 	)
+if /i "%context%"=="Edit.Template" (
+	echo.
+	echo %TAB%%TAB%%gn_% A%_%  %w_%Global Template Configuration%_%
+)
 echo.
 echo %g_%%TAB%%TAB%to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
@@ -880,7 +891,7 @@ if /i not	"%referer%"=="FI-Generate" (
 	echo. 
 )
 set "TSelector=GetList"&set "TCount=0"
-PUSHD "%rcfi%\templates"
+PUSHD "%RCFI%\templates"
 	FOR %%T in (*.bat) do (
 		set /a TCount+=1
 		set "TName=%%~nT"
@@ -912,8 +923,12 @@ if /i "%Context%"=="IMG.Choose.Template" (
 )
 
 if /i "%Context%"=="IMG.Choose.Template" (
+	echo.
 	echo %TAB%%TAB%%gn_% S%_% ^> %w_%See all sample icons, using:%ESC%%c_%%TSampleName%%g_% (%pp_%%size%%g_%)%ESC%
-) else (echo %TAB%%TAB%%gn_% S%_% ^> %w_%See all sample icons%_%)
+) else (
+	echo.
+	echo %TAB%%TAB%%gn_% S%_% ^> %w_%See all sample icons%_%
+)
 echo.
 echo %g_%%TAB%%TAB%to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
@@ -924,8 +939,10 @@ goto options
 rem Input template options
 set "TemplateChoice=NotSelected"
 set /p "TemplateChoice=%_%%w_%%TAB%%TAB%Select option:%_%%gn_%"
+
 if /i "%TemplateChoice%"=="NotSelected" echo %_%%TAB%   %i_%  CANCELED  %-%&%p2%&goto options
 if /i "%TemplateChoice%"=="r" cls&echo.&echo.&echo.&goto FI-Template
+if /i "%TemplateChoice%"=="a" set "template=%RCFI.templates.ini%"&exit /b
 if /i "%TemplateChoice%"=="s" if /i "%refer%"=="Choose.Template" (
 		set "act=FI-Template-Sample-All"
 		set "FITSA=%TemplateSampleImage%"
@@ -943,7 +960,7 @@ rem 		)
 rem 	if /i "%TemplateChoice%"=="s" goto FI-Template-Input
 rem Process valid selected options
 set "TSelector=Select"&set "TCount=0"
-PUSHD "%rcfi%\templates"
+PUSHD "%RCFI%\templates"
 	FOR %%T in (*.bat) do (
 		set /a TCount+=1
 		set "TName=%%~nT"
@@ -1009,7 +1026,7 @@ if /i "%TSelector%"=="Select" (
 	set "Ttest="
 	set "referer=FI-Template"
 	set "InputFile=%TemplateSampleImage%"
-	set "OutputFile=%rcfi%\templates\samples\%TName%.ico"
+	set "OutputFile=%RCFI%\templates\samples\%TName%.ico"
 	cls
 	goto FI-Template-TestMode
 	)
@@ -1019,9 +1036,9 @@ exit /b
 :FI-Template-Sample               
 if /i "%referer%"=="FI-Generate" exit /b
 call :Config-UpdateVar
-if not exist "%rcfi%\templates\samples" md "%rcfi%\templates\samples"
+if not exist "%RCFI%\templates\samples" md "%RCFI%\templates\samples"
 set "InputFile=%TemplateSampleImage%"
-set "OutputFile=%rcfi%\templates\samples\%TName%.ico"
+set "OutputFile=%RCFI%\templates\samples\%TName%.ico"
 if /i "%Context%"=="IMG.Choose.Template" set "InputFile=%img%"
 REM if /i "%testmode%"=="yes" set "AlwaysGenerateSample=No"
 
@@ -1070,14 +1087,14 @@ echo.&echo %TAB%Sample image selected:
 echo   %ESC%- %c_%%TSampleName%%_% (%pp_%%size%%_%)
 echo.
 echo %TAB%%yy_%Generating all sample images..%_%
-echo %TAB%"%rcfi%\templates\samples\"
+echo %TAB%"%RCFI%\templates\samples\"
 echo.
-if not exist "%rcfi%\templates\samples" md "%rcfi%\templates\samples"
-pushd "%rcfi%\templates\samples"
+if not exist "%RCFI%\templates\samples" md "%RCFI%\templates\samples"
+pushd "%RCFI%\templates\samples"
 	for %%I in (*.ico) do del "%%~fI"
 popd
 set /a TCount=0
-PUSHD "%rcfi%\templates"
+PUSHD "%RCFI%\templates"
 	FOR %%T in (*.bat) do (
 		set /a TCount+=1
 		set "TName=%%~nT"
@@ -1087,19 +1104,19 @@ PUSHD "%rcfi%\templates"
 POPD
 echo %TAB%%i_%%yy_%   Done!   %_%
 if /i "%Context%"=="IMG.Template.Samples" (
-	md "%rcfi%\templates\samples\montage" 2>nul
-	for /f "tokens=*" %%I in ('dir /b "%rcfi%\templates\samples\*.ico"') do (
-		"%converter%" "%rcfi%\templates\samples\%%~nxI" -define icon:auto-resize="256" "%rcfi%\templates\samples\montage\%%~nI.ico"
+	md "%RCFI%\templates\samples\montage" 2>nul
+	for /f "tokens=*" %%I in ('dir /b "%RCFI%\templates\samples\*.ico"') do (
+		"%converter%" "%RCFI%\templates\samples\%%~nxI" -define icon:auto-resize="256" "%RCFI%\templates\samples\montage\%%~nI.ico"
 	)
-	"%montage%" -pointsize 3 -label "%%f" -density 300 -tile 4x0 -geometry +3+2 -border 1 -bordercolor rgba^(210,210,210,0.3^) -background rgba^(255,255,255,0.4^) "%rcfi%\templates\samples\montage\*.ico" "%~dpn1-Folder_Samples.png"
+	"%montage%" -pointsize 3 -label "%%f" -density 300 -tile 4x0 -geometry +3+2 -border 1 -bordercolor rgba^(210,210,210,0.3^) -background rgba^(255,255,255,0.4^) "%RCFI%\templates\samples\montage\*.ico" "%~dpn1-Folder_Samples.png"
 	explorer.exe "%~dpn1-Folder_Samples.png"
-	rd /s /q "%rcfi%\templates\samples\montage" 
-) else explorer.exe "%rcfi%\templates\samples\"
+	rd /s /q "%RCFI%\templates\samples\montage" 
+) else explorer.exe "%RCFI%\templates\samples\"
 goto options
 
 :FI-Template-Sample-All-Generate  
 set "InputFile=%FITSA%"
-set "OutputFile=%rcfi%\templates\samples\%TName%.ico"
+set "OutputFile=%RCFI%\templates\samples\%TName%.ico"
 if %TCount% LSS 10 echo %TAB%%gn_% %TCount%%_%%ESC%> %cc_%%TName%%ESC%
 if %TCount% GTR 9  echo %TAB%%gn_%%TCount%%_%%ESC%> %cc_%%TName%%ESC%%r_%
 PUSHD "%TSamplePath%"
@@ -1128,7 +1145,7 @@ set "TnameXfor=%TnameXfor:&=^&%"
 exit /b
 
 :FI-Template-TestMode
-set "OutputFile=%rcfi%\templates\samples\%TName%.png"
+set "OutputFile=%RCFI%\templates\samples\%TName%.png"
 if /i "%referer%"=="FI-Generate" exit /b
 echo.&echo.&echo.
 if /i not "%TemplateTestMode-AutoExecute%"=="yes" set /a "TestCount+=1"
@@ -1449,7 +1466,7 @@ EXIT /B
 
 :FI-Refresh                       
 call :timer-start
-if exist "%rcfi%\resources\refresh.rcfi" (if defined Context exit else goto options) else (echo    refreshing >>"%rcfi%\resources\refresh.rcfi")
+if exist "%RCFI%\resources\refresh.RCFI" (if defined Context exit else goto options) else (echo    refreshing >>"%RCFI%\resources\refresh.RCFI")
 if /i not "%Context%"=="" echo.&echo.&echo.
 echo %_%%g_%%TAB%Note: In case if the process gets stuck and explorer doesn't come back.
 echo %TAB%Hold %i_% CTRL %_%%g_%+%i_% SHIFT %_%%g_%+%i_% ESC %_%%g_%%-% %g_%^> Click File ^> Run New Task ^> Type "explorer" ^> OK.
@@ -1539,7 +1556,7 @@ echo.
 echo %TAB%               %i_%%w_%    Done!    %_%
 echo. &echo.
 ping localhost -n 2 >nul
-del "%rcfi%\resources\refresh.rcfi" 2
+del "%RCFI%\resources\refresh.RCFI" 2
 ping localhost -n 1 >nul
 exit
 
@@ -2111,7 +2128,7 @@ exit /b
 call :Config-Load
 echo %TAB%       %i_%%pp_% RCFI Tools Configuration %_%
 echo %TAB%%_%to change the configurations, you  have to edit the "RCFI.config.ini" file
-echo %TAB%which is located at:%ESC%%w_%%rcfi%\%c_%RCFI.config.ini%ESC%
+echo %TAB%which is located at:%ESC%%w_%%RCFI%\%c_%RCFI.config.ini%ESC%
 echo.
 echo %TAB%%w_% Current Config %_%
 echo %TAB%%_%----------------------------------------------------------------------
@@ -2213,8 +2230,8 @@ choice /C:oc /N
 set "ImgSizeInput=%errorlevel%"
 if /i "%ImgSizeInput%"=="1" (
 	echo %TAB%%w_% Opening..
-	echo %TAB%%ESC%%i_%%rcfi%%ESC%
-	explorer.exe /select, "%rcfi%\RCFI.config.ini"
+	echo %TAB%%ESC%%i_%%RCFI%%ESC%
+	explorer.exe /select, "%RCFI%\RCFI.config.ini"
 	goto options
 )
 if /i "%ImgSizeInput%"=="2" echo %TAB%%_%Exiting configuration.. &goto options
@@ -2222,7 +2239,7 @@ goto options
 
 :Config-Save                      
 REM Save current config to RCFI.config.ini
-if exist "%Template%"        (for %%T in ("%Template%")        do set "Template=%%~nT")       else (set "Template=%rcfi%\templates\(none).bat")
+if exist "%Template%"        (for %%T in ("%Template%")        do set "Template=%%~nT")       else (set "Template=%RCFI%\templates\(none).bat")
 if exist "%TemplateForICO%"	(for %%T in ("%TemplateForICO%") do set "TemplateForICO=%%~nT") else (set "TemplateForICO=(none)")
 if exist "%TemplateForPNG%"	(for %%T in ("%TemplateForPNG%") do set "TemplateForPNG=%%~nT") else (set "TemplateForPNG=insert a template name to use for .png files")
 if exist "%TemplateForJPG%"	(for %%T in ("%TemplateForJPG%") do set "TemplateForJPG=%%~nT") else (set "TemplateForJPG=insert a template name to use for .jpg files")
@@ -2257,35 +2274,38 @@ if not defined TemplateIconSize set "TemplateIconSize=Auto"
 	echo TextEditor="%TextEditor%"
 	echo ----------------------------------
 	echo DrivePath="%cd%"	
-)>"%~dp0RCFI.config.ini"
+)>"%RCFI.config.ini%"
 if /i "%TemplateIconSize%"=="Auto" set "TemplateIconSize="
-set "Template=%rcfi%\templates\%Template:"=%.bat"
-set "TemplateForICO=%rcfi%\templates\%TemplateForICO:"=%.bat"
-set "TemplateForPNG=%rcfi%\templates\%TemplateForPNG:"=%.bat"
-set "TemplateForJPG=%rcfi%\templates\%TemplateForJPG:"=%.bat"
+set "Template=%RCFI%\templates\%Template:"=%.bat"
+set "TemplateForICO=%RCFI%\templates\%TemplateForICO:"=%.bat"
+set "TemplateForPNG=%RCFI%\templates\%TemplateForPNG:"=%.bat"
+set "TemplateForJPG=%RCFI%\templates\%TemplateForJPG:"=%.bat"
 EXIT /B
 
 :Config-Load                      
 REM Load Config from RCFI.config.ini
-if not exist "%~dp0RCFI.config.ini" call :Config-GetDefault
-if exist "%~dp0RCFI.config.ini" (
-	for /f "usebackq tokens=1,2 delims==" %%C in ("%~dp0RCFI.config.ini") do (set "%%C=%%D")
+if not exist "%RCFI.config.ini%" call :Config-GetDefault
+if not exist "%~dp0RCFI.templates.ini" call :Config-GetTemplatesConfig
+
+if exist "%RCFI.config.ini%" (
+	for /f "usebackq tokens=1,2 delims==" %%C in ("%RCFI.config.ini%") do (set "%%C=%%D")
 ) else (
 	echo.&echo.&echo.&echo.
 	echo       %w_%Couldn't load RCFI.config.ini.   %r_%Access is denied.
 	echo       %w_%Try Run As Admin.%_%
 	%P5%&%p5%&exit
 )
+
 if exist %Template% (for %%T in (%Template%) do set Template="%%~nT")       
 if exist %TemplateForICO%	(for %%T in (%TemplateForICO%) do set TemplateForICO="%%~nT")
 if exist %TemplateForPNG%	(for %%T in (%TemplateForPNG%) do set TemplateForPNG="%%~nT")
 if exist %TemplateForJPG%	(for %%T in (%TemplateForJPG%) do set TemplateForJPG="%%~nT")
 set "DrivePath=%DrivePath:"=%"
 set "Keywords=%Keywords:"=%"
-set "Template=%rcfi%\templates\%Template:"=%.bat"
-set "TemplateForICO=%rcfi%\templates\%TemplateForICO:"=%.bat"
-set "TemplateForPNG=%rcfi%\templates\%TemplateForPNG:"=%.bat"
-set "TemplateForJPG=%rcfi%\templates\%TemplateForJPG:"=%.bat"
+set "Template=%RCFI%\templates\%Template:"=%.bat"
+set "TemplateForICO=%RCFI%\templates\%TemplateForICO:"=%.bat"
+set "TemplateForPNG=%RCFI%\templates\%TemplateForPNG:"=%.bat"
+set "TemplateForJPG=%RCFI%\templates\%TemplateForJPG:"=%.bat"
 set "TemplateAlwaysAsk=%TemplateAlwaysAsk:"=%"
 set "TemplateTestMode=%TemplateTestMode:"=%"
 set "TemplateTestMode-AutoExecute=%TemplateTestMode-AutoExecute:"=%"
@@ -2296,10 +2316,13 @@ set "TextEditor=%TextEditor:"=%"
 
 
 if /i "%TemplateIconSize%"=="Auto" set "TemplateIconSize="
+
 if /i "%HideAsSystemFiles%"=="yes" (set "Attrib=+s +h") else (set Attrib=+h)
+
 REM "AlwaysGenerateSample=%AlwaysGenerateSample:"=%"
 rem set "RunAsAdmin=%RunAsAdmin:"=%"
 set "ExitWait=%ExitWait:"=%"
+
 EXIT /B
 
 :Config-GetDefault                
@@ -2319,8 +2342,26 @@ cd /d "%~dp0"
 	echo DeleteOriginalFile="No"
 	echo TextEditor="%windir%\notepad.exe"
 	echo DrivePath="%cd%"
-rem	echo RunAsAdmin="No"
-)>"%~dp0RCFI.config.ini"
+)>"%RCFI.config.ini%"
+EXIT /B
+
+:Config-GetTemplatesConfig                
+cd /d "%~dp0"
+(
+	echo     𝐆𝐋𝐎𝐁𝐀𝐋 𝐓𝐄𝐌𝐏𝐋𝐀𝐓𝐄 𝐂𝐎𝐍𝐅𝐈𝐆𝐔𝐑𝐀𝐓𝐈𝐎𝐍
+	echo This config will override template configurations for all templates.
+	echo - You can add any config inside any template here.
+	echo - Config with no value ^(empty/blank^) will be ignored.
+	echo.
+	echo.
+	echo set "display-FolderName="
+	echo set "use-Logo-instead-FolderName="
+	echo set "display-clearArt="
+	echo.
+	echo set "display-movieinfo="
+	echo set "show-Rating="
+	echo set "show-Genre="
+)>"%RCFI.templates.ini%"
 EXIT /B
 
 :Config-UpdateVar                 
@@ -2394,34 +2435,22 @@ set p4=ping localhost -n 4 ^>nul
 set p5=ping localhost -n 5 ^>nul
 set "RCFI=%~dp0"
 set "RCFI=%RCFI:~0,-1%"
-set "RCFID=%rcfi%\uninstall.cmd"
-set "Converter=%rcfi%\resources\Convert.exe"
-set "montage=%rcfi%\resources\montage.exe"
+set "RCFID=%RCFI%\uninstall.cmd"
+set "Converter=%RCFI%\resources\Convert.exe"
+set "montage=%RCFI%\resources\montage.exe"
 set "ImageSupport=.jpg,.png,.ico,.webp,.wbmp,.bmp,.svg,.jpeg,.tiff,.heic,.heif,.tga"
-set "TemplateSampleImage=%rcfi%\images\- test.jpg"
+set "TemplateSampleImage=%RCFI%\images\- test.jpg"
+set "RCFI.config.ini=%RCFI%\RCFI.config.ini"
+set "RCFI.templates.ini=%RCFI%\RCFI.templates.ini"
 set "timestart="
-
-rem Define some variables for MKV Tools
-set "mkvpropedit=%rcfi%\resources\mkvpropedit.exe"
-set "mkvmerge=%rcfi%\resources\mkvmerge.exe"
-set "mkvextract=%rcfi%\resources\mkvextract.exe"
-set "mkvinfo=%rcfi%\resources\mkvinfo.exe"
-set "ffmpeg=%rcfi%\resources\ffmpeg.exe"
-set "VideoSupport=.mp4,.avi,.ts"
-set "SubtitleSupport=srt,sub,ass"
-set "SubLanguage=ID"
-set "SubName=Bahasa Indonesia"
-set "SubSetAsDefault=Yes"
-set "SubForcedDisplay=No"
-set "MKVsubSuffix=_"
 
 rem Load some variables from RCFI.config.ini
 call :Config-Load
-if /i "%Setup%"=="Deactivate" (echo.&echo.&echo.&>"%rcfi%\resources\deactivating.rcfi" echo Deactivating)
+if /i "%Setup%"=="Deactivate" (echo.&echo.&echo.&>"%RCFI%\resources\deactivating.RCFI" echo Deactivating)
 
 rem initiate 'Run As Admin'
 if /i "%RunAsAdmin%"=="yes" call :Config-RunAsAdmin
-if exist "%temp%\rcfi.getAdmin" (for /f "usebackq tokens=*" %%A in ("%temp%\rcfi.getAdmin") do %%A&del "%temp%\rcfi.getAdmin")
+if exist "%temp%\RCFI.getAdmin" (for /f "usebackq tokens=*" %%A in ("%temp%\RCFI.getAdmin") do %%A&del "%temp%\RCFI.getAdmin")
 
 rem Updating / reset some variables
 if exist "%DrivePath%" (cd /d "%DrivePath%") else (cd /d "%~dp0")
@@ -2440,7 +2469,7 @@ if '%errorlevel%' NEQ '0' (
 	echo set "SelectedThing=%SelectedThing%"
 	echo set "SelectedThingPath=%SelectedThingPath%"
 	echo set xSelected=%xSelected%
-	)> "%temp%\rcfi.getAdmin"
+	)> "%temp%\RCFI.getAdmin"
 	echo Requesting administrative privileges...
 	echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
 	echo UAC.ShellExecute "cmd.exe", "/c set ""context=%context%""&set ""errorlevel=0""&""%~s0""", "", "runas", 1 >> "%temp%\getadmin.vbs"
@@ -2491,7 +2520,7 @@ goto Options-Input
 
 :Setup                            
 if /i "%setup%" EQU "Deactivate" set "setup_select=2" &goto Setup-Choice
-if exist "%rcfi%\resources\deactivating.rcfi" set "Setup=Deactivate" &set "setup_select=2" &goto Setup-Choice
+if exist "%RCFI%\resources\deactivating.RCFI" set "Setup=Deactivate" &set "setup_select=2" &goto Setup-Choice
 if exist "%RCFID%" (
 	for /f "useback tokens=1,2 delims=:" %%S in ("%RCFID%") do set /a "InstalledRelease=%%T" 2>nul
 	call :Setup-Update
@@ -2553,7 +2582,7 @@ if /i "%setup_select%"=="1" (
 
 REM uninstalling -> delete "uninstall.bat"
 if /i "%setup_select%"=="2" (
-	del "%rcfi%\resources\deactivating.rcfi" 2>nul
+	del "%RCFI%\resources\deactivating.RCFI" 2>nul
 	if exist "%RCFID%" del "%RCFID%"
 	echo %w_%%name% %version%  %r_%Deactivated%_%
 	echo %g_%Folder Icon Tools have been removed from the right-click menus.%_%
@@ -2569,8 +2598,8 @@ echo            %r_%Setup fail.
 echo            %w_%Permission denied.
 set "setup="
 set "context="
-del "%rcfi%\Setup_%Setup_action%.reg" 2>nul
-del "%rcfi%\resources\deactivating.rcfi" 2>nul
+del "%RCFI%\Setup_%Setup_action%.reg" 2>nul
+del "%RCFI%\resources\deactivating.RCFI" 2>nul
 pause>nul&exit
 
 

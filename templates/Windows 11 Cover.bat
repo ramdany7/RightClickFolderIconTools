@@ -1,4 +1,6 @@
-:: Template-Version=v1.0
+:: Template-Version=v1.1
+:: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
+:: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
 
 ::                Template Info
 ::========================================================
@@ -8,6 +10,7 @@
 
 ::                Template Config
 ::========================================================
+set "use-GlobalConfig=Yes"
 
 ::--------- Movie Info ---------------------
 set "display-movieinfo=yes"
@@ -31,7 +34,7 @@ set "FolderName-Center=Auto"
 	set "FolderNameShort-font=Microsoft-PhagsPa-Bold"
 	set "FolderNameShort-size=7.7"
 
-    :: Folder name position when it's on the left
+	:: Folder name position when it's on the left
 	set "FolderNameShort-Pos-Left-Gravity=SouthWest"
 	set "FolderNameShort-Pos-Left-X=+34"
 	set "FolderNameShort-Pos-Left-Y=+385"
@@ -70,7 +73,6 @@ set "Picture-Drawing-Smoothness=0"
 ::========================================================
 set "Win11Cover-Front=%rcfi%\images\Win11Cover-Front.png"
 set "Win11Cover-BG=%rcfi%\images\Win11Cover.png"
-
 set "star-image=%rcfi%\images\star.png"
 set "canvas=%rcfi%\images\- canvas.png"
 ::========================================================
@@ -104,6 +106,12 @@ exit /b
 :::::::::::::::::::::::::::   CODE START   :::::::::::::::::::::::::::::::::
 
 :LAYER-BASE
+if /i "%use-GlobalConfig%"=="Yes" (
+	for /f "usebackq tokens=1,2 delims==" %%A in ("%RCFI.templates.ini%") do (
+		if /i not "%%B"=="" if /i not %%B EQU ^" %%A=%%B
+	)
+)
+
 set CODE-BACKGROUND= ( ^
 	"%canvas%" ^
 	-scale      512x512! ^
@@ -156,8 +164,8 @@ exit /b
 
 :LAYER-RATING
 if /i not "%display-movieinfo%" EQU "yes" exit /b
+if not exist "*.nfo" (exit /b) else call :GetInfo-nfo_file
 if /i not "%Show-Rating%" EQU "yes" exit /b
-call :GetInfo-nfo_file
 
 set CODE-STAR-IMAGE= ( ^
 	 "%star-image%" ^
@@ -336,11 +344,6 @@ exit /b
 
 
 :GetInfo-nfo_file
-if not exist "*.nfo" (
-	rem echo %TAB% %g_%No ".nfo" detected.%r_% 
-	exit /b
-)
-
 for %%N in (*.nfo) do (
 	set "nfoName=%%~nxN"
 	echo %TAB%%ESC%%g_%Movie info  :%%~nxN%ESC%

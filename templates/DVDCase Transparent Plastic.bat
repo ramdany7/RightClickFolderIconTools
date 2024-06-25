@@ -1,5 +1,6 @@
-:: Template-Version=v1.1
-:: 2024-05-25 Adding error handling for: when the .nfo file doesn't contain a rating value.
+:: Template-Version=v1.2
+:: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
+:: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
 
 ::                Template Info
 ::========================================================
@@ -10,6 +11,8 @@
 
 ::                Template Config
 ::========================================================
+set "use-GlobalConfig=Yes"
+
 set "display-movieinfo=yes"
 set "show-Rating=yes"
 set "show-Genre=yes"
@@ -45,6 +48,12 @@ endlocal
 :::::::::::::::::::::::::::   CODE START   ::::::::::::::::::::::::::::::::
 
 :LAYER-BASE
+if /i "%use-GlobalConfig%"=="Yes" (
+	for /f "usebackq tokens=1,2 delims==" %%A in ("%RCFI.templates.ini%") do (
+		if /i not "%%B"=="" if /i not %%B EQU ^" %%A=%%B
+	)
+)
+
 set CODE-BACKGROUND= ( "%canvas%" ^
 	-scale 512x512! ^
 	-background none ^
@@ -67,8 +76,9 @@ exit /b
 
 :LAYER-RATING
 if /i not "%display-movieinfo%" EQU "yes" exit /b
-call :GetInfo-nfo_file
+if not exist "*.nfo" (exit /b) else call :GetInfo-nfo_file
 if /i not "%Show-Rating%" EQU "yes" exit /b
+
 
 set CODE-STAR-IMAGE= ( ^
 	 "%star-image%" ^
@@ -119,11 +129,6 @@ exit /b
  
 
 :GetInfo-nfo_file
-if not exist "*.nfo" (
-	rem echo %TAB% %g_%No ".nfo" detected.%r_% 
-	exit /b
-)
-
 for %%N in (*.nfo) do (
 	set "nfoName=%%~nxN"
 	echo %TAB%%ESC%%g_%Movie info  :%%~nxN%ESC%

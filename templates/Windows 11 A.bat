@@ -1,4 +1,7 @@
-:: Template-Version=v1.0
+:: Template-Version=v1.1
+:: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
+:: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
+:: 2024-06-24 Adding gradient brightness, gradient shadow and bevel shadow. 
 
 ::                Template Info
 ::========================================================
@@ -8,6 +11,7 @@
 
 ::                Template Config
 ::========================================================
+set "use-GlobalConfig=Yes"
 
 ::--------- Movie Info ---------------------
 set "display-movieinfo=yes"
@@ -27,37 +31,47 @@ set "FolderName-Center=Auto"
     ::          Yes  = Always put folder name on the center
     ::          No   = Always put folder name on the left
 	
-set "FolderNameShort-characters-limit=8"
-set "FolderNameShort-font=Microsoft-PhagsPa-Bold"
-set "FolderNameShort-size=7.7"
-set "FolderNameShort-Pos-Left-Direction=SouthWest"
-set "FolderNameShort-Pos-Left-X=-18"
-set "FolderNameShort-Pos-Left-Y=+360"
-set "FolderNameShort-Pos-Center-Direction=Center"
-set "FolderNameShort-Pos-Center-X=-148"
-set "FolderNameShort-Pos-Center-Y=-167"
-
-set "FolderNameLong-characters-limit=20"
-set "FolderNameLong-font=Microsoft-PhagsPa"
-set "FolderNameLong-size=3.5"
-set "FolderNameLong-Pos-Direction=Northwest"
-set "FolderNameLong-Pos-X=-15"
-set "FolderNameLong-Pos-Y=+75"
+	set "FolderNameShort-characters-limit=8"
+	set "FolderNameShort-font=Microsoft-PhagsPa-Bold"
+	set "FolderNameShort-size=7.7"
+	
+	:: Folder name position when it's on the left
+	set "FolderNameShort-Pos-Left-Direction=SouthWest"
+	set "FolderNameShort-Pos-Left-X=-18"
+	set "FolderNameShort-Pos-Left-Y=+360"
+	
+	:: Folder name position when it's on the center
+	set "FolderNameShort-Pos-Center-Direction=Center"
+	set "FolderNameShort-Pos-Center-X=-148"
+	set "FolderNameShort-Pos-Center-Y=-167"
+	
+	set "FolderNameLong-characters-limit=20"
+	set "FolderNameLong-font=Microsoft-PhagsPa"
+	set "FolderNameLong-size=3.5"
+	set "FolderNameLong-Pos-Direction=Northwest"
+	set "FolderNameLong-Pos-X=-15"
+	set "FolderNameLong-Pos-Y=+75"
 
 ::--------- Additional Config --------------
 set "Picture-Opacity=100%"
 
-set "Background-Brightness=0"
-set "Background-Contrast=30"
-set "Background-Exposure=110"
-set "Background-Saturation=170"
+set "Background-Brightness=5"
+set "Background-Contrast=20"
+set "Background-Exposure=105"
+set "Background-Saturation=150"
 set "Background-Blur=200"
 set "Background-AmbientColor=2"
 
 set "Bevel-Brightness=25"
-set "Bevel-Contrast=15"
-set "Bevel-Exposure=120"
+set "Bevel-Contrast=10"
+set "Bevel-Exposure=110"
 set "Bevel-Saturation=110"
+
+set "Gradient-Brightness=20"
+set "Gradient-Contrast=10"
+set "Gradient-Exposure=110"
+set "Gradient-Saturation=110"
+
 ::========================================================
 
 
@@ -67,7 +81,9 @@ set "Win11-Back=%rcfi%\images\Win11A-Back.png"
 set "Win11-Back-Gradient=%rcfi%\images\Win11A-Back-Gradient.png"
 set "Win11-Front=%rcfi%\images\Win11A-Front.png"
 set "Win11-Front-Gradient=%rcfi%\images\Win11A-Front-Gradient.png"
+set "Win11-Front-GradientShadow=%rcfi%\images\Win11A-Front-GradientShadow.png"
 set "Win11-Front-Bevel=%rcfi%\images\Win11A-Front-Bevel.png"
+set "Win11-Front-BevelShadow=%rcfi%\images\Win11A-Front-BevelShadow.png"
 set "star-image=%rcfi%\images\star.png"
 set "canvas=%rcfi%\images\- canvas.png"
 ::========================================================
@@ -101,6 +117,12 @@ exit /b
 :::::::::::::::::::::::::::   CODE START   :::::::::::::::::::::::::::::::::
 
 :LAYER-BASE
+if /i "%use-GlobalConfig%"=="Yes" (
+	for /f "usebackq tokens=1,2 delims==" %%A in ("%RCFI.templates.ini%") do (
+		if /i not "%%B"=="" if /i not %%B EQU ^" %%A=%%B
+	)
+)
+
 set CODE-BACKGROUND= ( "%canvas%" ^
 	-scale 512x512! ^
 	-background none ^
@@ -123,6 +145,13 @@ set CODE-FRONT= ( ^
 	 -scale 498x320! ^
 	 -gravity Northwest ^
 	 -geometry +5+117 ^
+	 -brightness-contrast -9x10 ^
+	 %Picture-Opacity-Bevel% "%Win11-Front-BevelShadow%" ) -compose over -composite ^
+	 ( ^
+	 "%inputfile%" ^
+	 -scale 498x320! ^
+	 -gravity Northwest ^
+	 -geometry +5+117 ^
 	 -modulate %Bevel-Exposure%,%Bevel-Saturation% ^
 	 -brightness-contrast %Bevel-Brightness%x%Bevel-Contrast% ^
 	 %Picture-Opacity-Bevel% "%Win11-Front-Bevel%" ) -compose over -composite ^
@@ -131,8 +160,17 @@ set CODE-FRONT= ( ^
 	 -scale 498x320! ^
 	 -gravity Northwest ^
 	 -geometry +5+117 ^
-	 -brightness-contrast 10x5 ^
-	 %Picture-Opacity% "%Win11-Front-Gradient%" ) -compose over -composite
+	 -brightness-contrast %Gradient-Brightness%x%Gradient-Contrast% ^
+	 -modulate %Gradient-Exposure%,%Gradient-Saturation% ^
+	 %Picture-Opacity% "%Win11-Front-Gradient%" ) -compose over -composite ^
+	 ( ^
+	 "%inputfile%" ^
+	 -scale 498x320! ^
+	 -gravity Northwest ^
+	 -geometry +5+117 ^
+	 -brightness-contrast -6x10^
+	 -modulate 94,100 ^
+	 %Picture-Opacity% "%Win11-Front-GradientShadow%" ) -compose over -composite
 	 
 if /i "%Background-AmbientColor%"=="0" set CODE-BACK= ( "%Win11-Back%" -scale 512x512! ) -compose over -composite
 
@@ -156,7 +194,7 @@ if /i not "%Background-AmbientColor%"=="0" set CODE-BACK= ( ^
 	 -modulate 100,%Background-Saturation% ^
 	 -blur 0x%Background-Blur% ^
 	 -brightness-contrast %Background-Brightness%x%Background-Contrast% ^
-	 -brightness-contrast -30x20 ^
+	 -brightness-contrast -50x10 ^
 	  "%Win11-Back-Gradient%" -scale 512x512! ) -compose over -composite
 	  
 set CODE-ICON-SIZE=-define icon:auto-resize="%TemplateIconSize%"
@@ -164,8 +202,8 @@ exit /b
 
 :LAYER-RATING
 if /i not "%display-movieinfo%" EQU "yes" exit /b
+if not exist "*.nfo" (exit /b) else call :GetInfo-nfo_file
 if /i not "%Show-Rating%" EQU "yes" exit /b
-call :GetInfo-nfo_file
 
 set CODE-STAR-IMAGE= ( ^
 	 "%star-image%" ^
@@ -328,11 +366,6 @@ exit /b
 
 
 :GetInfo-nfo_file
-if not exist "*.nfo" (
-	rem echo %TAB% %g_%No ".nfo" detected.%r_% 
-	exit /b
-)
-
 for %%N in (*.nfo) do (
 	set "nfoName=%%~nxN"
 	echo %TAB%%ESC%%g_%Movie info  :%%~nxN%ESC%

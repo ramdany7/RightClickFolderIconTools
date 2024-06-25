@@ -1,3 +1,5 @@
+:: Template-Version=v1.0
+
 ::                Template Info
 ::========================================================
 ::`  This template will also be used to automatically
