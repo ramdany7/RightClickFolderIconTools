@@ -33,9 +33,9 @@ if /i not "%display-logo%"=="yes" set "discArt-logo=%canvas%"
 if /i "%Template%"=="%~f0" if /i "%Context%"=="IMG.Generate.PNG" for %%D in ("%OutputFile%") do set "DiscArtName=%%~dpnD"&Call :DiscArt-Add_Suffix
 if /i "%referrer%"=="DVDcase" (
 	set "inDiscArt=%gen_disc%"
-	set "outDiscArt=%cd%\DiscArt(%FI-ID%).png"
-	set "DiscArt=%cd%\DiscArt(%FI-ID%).png"
-	set deltempfile=del "%cd%\DiscArt(%FI-ID%).png"
+	set "outDiscArt=DiscArt(%FI-ID%).png"
+	set "DiscArt=DiscArt(%FI-ID%).png"
+	set deltemp=del "DiscArt(%FI-ID%).png"
 ) else set "outDiscArt=%OutputFile%"&set "inDiscArt=%inputfile%"
  "%Converter%" ^
   ( "%canvas%" -scale 512x512! -background none -extent 512x512 ) -compose Over ^

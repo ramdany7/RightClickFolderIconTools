@@ -1,12 +1,12 @@
 @echo off
-:: Update v0.3
-:: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
-:: 2024-06-23 Add "Global Template Config" to override all templates configuration.
-:: 2024-06-24 Adding some adjustment to "Windows 11 A" template.
+:: Update v0.4
+:: 2024-06-27 Fix: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs and BeOrigin templates.
+:: 2024-06-27 Fix: Couldn’t open "Choose Template" and "Define Keyword" menu in some drive paths.
+:: 2024-06-28 Fix: "The syntax of the command is incorrect." on 'Change folder icon' Folder right-click menu.
 
 setlocal
 set name=RCFI Tools
-set version=v0.3
+set version=v0.4
 chcp 65001 >nul
 cd /d "%~dp0"
 title %name%   "%cd%"
@@ -565,7 +565,7 @@ if /i "%referer%"=="MultiFolderRightClick" (
 PUSHD "%location%"
 	
 	set "IconResource="
-	if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do set "%%C=%%D"
+	if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
 	if not defined IconResource (
 		for %%F in (%KeywordsFind%) do (
 			for %%X in (%ImageSupport%) do (
@@ -2585,9 +2585,10 @@ rem Escaping the slash using slash
 rem Multi Select, Separate instance
 	set cmd=cmd.exe /c
 	set "RCFITools=%~f0"
-	set RCFIexe=^&call \"%RCFITools:\=\\%\"
+	set "RCFITools=%RCFITools:\=\\%"
+	set RCFIexe=^&call \"%RCFITools%\"
 	set SCMD=\"%curdir%\\resources\\SingleInstanceAccumulator.exe\" \"-c:cmd /c
-	set SRCFIexe=^^^&set xSelected=$files^^^&call \"\"%RCFITools:\=\\%\"\"\"
+	set SRCFIexe=^^^&set xSelected=$files^^^&call \"\"%RCFITools%\"\"\"
 
 
 rem Define registry root
@@ -2613,7 +2614,7 @@ rem Generating setup_*.reg
 
 	:REG-FI-IMAGE-Set.As.Folder.Icon
 	echo [%RegExShell%\RCFI.IMG-Set.As.Folder.Icon]
-	echo "MUIVerb"="Set as Folder Icon"
+	echo "MUIVerb"="Set as folder icon"
 	echo "Icon"="shell32.dll,-16805"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG-Set.As.Folder.Icon\command]
@@ -2621,14 +2622,14 @@ rem Generating setup_*.reg
 	
 	:REG-FI-IMAGE-Choose.and.Set.As
 	echo [%RegExShell%\RCFI.IMG-Choose.and.Set.As]
-	echo "MUIVerb"="Choose and Set as Folder Icon"
+	echo "MUIVerb"="Choose and set as folder icon"
 	echo "Icon"="shell32.dll,-270"
 	echo [%RegExShell%\RCFI.IMG-Choose.and.Set.As\command]
 	echo @="%cmd% set \"Context=IMG-Choose.and.Set.As\"%RCFIexe% \"%%1\""
 
 	:REG-FI-IMAGE-Choose.Template
 	echo [%RegExShell%\RCFI.IMG.Choose.Template]
-	echo "MUIVerb"="Choose Template"
+	echo "MUIVerb"="Choose template"
 	echo "Icon"="shell32.dll,-270"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG.Choose.Template\command]
@@ -2659,14 +2660,14 @@ rem Generating setup_*.reg
 
 	:REG-FI-IMAGE-Template.Samples
 	echo [%RegExShell%\RCFI.IMG.Template.Samples]
-	echo "MUIVerb"="Generate Template Samples"
+	echo "MUIVerb"="Generate template samples"
 	echo "Icon"="imageres.dll,-1003"
 	echo [%RegExShell%\RCFI.IMG.Template.Samples\command]
 	echo @="%cmd% set \"Context=IMG.Template.Samples\"%RCFIexe% \"%%1\""
 		
 	:REG-FI-IMAGE-Convert
 	echo [%RegExShell%\RCFI.IMG-Convert]
-	echo "MUIVerb"="Convert Image"
+	echo "MUIVerb"="Convert images"
 	echo "Icon"="shell32.dll,-16826"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.IMG-Convert\command]
@@ -2674,14 +2675,14 @@ rem Generating setup_*.reg
 	
 	:REG-FI-IMAGE-Resize
 	echo [%RegExShell%\RCFI.IMG-Resize]
-	echo "MUIVerb"="Resize Image"
+	echo "MUIVerb"="Resize images"
 	echo "Icon"="shell32.dll,-16826"
 	echo [%RegExShell%\RCFI.IMG-Resize\command]
 	echo @="%SCMD% set \"Context=IMG-Resize\"%SRCFIexe% \"%%1\""
 
 	:REG-FI-IMAGE-Compress
 	echo [%RegExShell%\RCFI.IMG-Compress]
-	echo "MUIVerb"="Compress Image"
+	echo "MUIVerb"="Compress images"
 	echo "Icon"="shell32.dll,-16826"
 	echo [%RegExShell%\RCFI.IMG-Compress\command]
 	echo @="%SCMD% set \"Context=IMG-Compress\"%SRCFIexe% \"%%1\""
@@ -2689,21 +2690,21 @@ rem Generating setup_*.reg
 	REM Selected_Dir
 	:REG-FI-Change.Folder.Icon
 	echo [%RegExShell%\RCFI.Change.Folder.Icon]
-	echo "MUIVerb"="Change Folder Icon"
+	echo "MUIVerb"="Change folder icon"
 	echo "Icon"="imageres.dll,-5303"
 	echo [%RegExShell%\RCFI.Change.Folder.Icon\command]
 	echo @="%cmd% set \"Context=Change.Folder.Icon\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Select.And.Change.Folder.Icon
 	echo [%RegExShell%\RCFI.Select.And.Change.Folder.Icon]
-	echo "MUIVerb"="Change Folder Icon"
+	echo "MUIVerb"="Change folder icon"
 	echo "Icon"="imageres.dll,-148"
 	echo [%RegExShell%\RCFI.Select.And.Change.Folder.Icon\command]
 	echo @="%Scmd% set \"Context=Select.And.Change.Folder.Icon\"%SRCFIexe% \"%%V\""
 	
 	:REG-FI.Search.Folder.Icon
 	echo [%RegExShell%\RCFI.Search.Folder.Icon]
-	echo "MUIVerb"="Search Folder Icon"
+	echo "MUIVerb"="Search folder icon"
 	echo "Icon"="shell32.dll,-251"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.Search.Folder.Icon\command]
@@ -2711,28 +2712,28 @@ rem Generating setup_*.reg
 	
 	:REG-FI.Search.Poster
 	echo [%RegExShell%\RCFI.Search.Poster]
-	echo "MUIVerb"="Search Poster"
+	echo "MUIVerb"="Search poster"
 	echo "Icon"="shell32.dll,-251"
 	echo [%RegExShell%\RCFI.Search.Poster\command]
 	echo @="%cmd% set \"Context=FI.Search.Poster\"%RCFIexe% \"%%V\""
 	
 	:REG-FI.Search.Logo
 	echo [%RegExShell%\RCFI.Search.Logo]
-	echo "MUIVerb"="Search Logo"
+	echo "MUIVerb"="Search logo"
 	echo "Icon"="shell32.dll,-251"
 	echo [%RegExShell%\RCFI.Search.Logo\command]
 	echo @="%cmd% set \"Context=FI.Search.Logo\"%RCFIexe% \"%%V\""
 	
 	:REG-FI.Search.Icon
 	echo [%RegExShell%\RCFI.Search.Icon]
-	echo "MUIVerb"="Search Icon"
+	echo "MUIVerb"="Search icon"
 	echo "Icon"="shell32.dll,-251"
 	echo [%RegExShell%\RCFI.Search.Icon\command]
 	echo @="%cmd% set \"Context=FI.Search.Icon\"%RCFIexe% \"%%V\""
 
 	:REG-FI.Search.Folder.Icon.Here
 	echo [%RegExShell%\RCFI.Search.Folder.Icon.Here]
-	echo "MUIVerb"="Search Folder Icon"
+	echo "MUIVerb"="Search folder icon"
 	echo "Icon"="shell32.dll,-251"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.Search.Folder.Icon.Here\command]
@@ -2740,14 +2741,14 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Refresh
 	echo [%RegExShell%\RCFI.Refresh]
-	echo "MUIVerb"="Refresh Icon Cache (Restart Explorer)"
+	echo "MUIVerb"="Refresh icon cache (restart explorer)"
 	echo "Icon"="shell32.dll,-16739"
 	echo [%RegExShell%\RCFI.Refresh\command]
 	echo @="%cmd% set \"Context=Refresh\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Refresh-No.Restart
 	echo [%RegExShell%\RCFI.RefreshNR]
-	echo "MUIVerb"="Refresh Icon Cache (Without Restart)"
+	echo "MUIVerb"="Refresh icon cache (without restart)"
 	echo "Icon"="shell32.dll,-16739"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.RefreshNR\command]
@@ -2755,11 +2756,11 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Choose.Template
 	echo [%RegExShell%\RCFI.DIR.Choose.Template]
-	echo "MUIVerb"="Choose Template"
+	echo "MUIVerb"="Choose template"
 	echo "Icon"="shell32.dll,-270"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.DIR.Choose.Template\command]
-	echo @="%Scmd% set \"Context=DIR.Choose.Template\"%SRCFIexe% \"%%V\""
+	echo @="%Scmd% set \"Context=DIR.Choose.Template\"%SRCFIexe% \"%RCFITools%\""
 		
 	:REG-FI-Scan
 	echo [%RegExShell%\RCFI.Scan]
@@ -2771,14 +2772,14 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Define.Keyword
 	echo [%RegExShell%\RCFI.DefKey]
-	echo "MUIVerb"="Define keyword"
+	echo "MUIVerb"="Define keywords"
 	echo "Icon"="shell32.dll,-242"
 	echo [%RegExShell%\RCFI.DefKey\command]
-	echo @="%scmd% set \"Context=DefKey\"%sRCFIexe% \"%%V\""
+	echo @="%scmd% set \"Context=DefKey\"%sRCFIexe% \"%RCFITools%\""
 	
 	:REG-FI-Generate_Keyword
 	echo [%RegExShell%\RCFI.GenKey]
-	echo "MUIVerb"="Generate from Keyword"
+	echo "MUIVerb"="Generate from keywords"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenKey\command]
 	echo @="%Scmd% set \"Context=GenKey\"%SRCFIexe% \"%%V\""
@@ -2814,7 +2815,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Activate_Folder_Icon
 	echo [%RegExShell%\RCFI.ActivateFolderIcon]
-	echo "MUIVerb"="Activate Folder Icon"
+	echo "MUIVerb"="Activate folder icons"
 	echo "Icon"="imageres.dll,-166"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.ActivateFolderIcon\command]
@@ -2822,14 +2823,14 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Deactivate_Folder_Icon
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon]
-	echo "MUIVerb"="Deactivate Folder Icon"
+	echo "MUIVerb"="Deactivate folder icons"
 	echo "Icon"="imageres.dll,-4"
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon\command]
 	echo @="%Scmd% set \"Context=DeactivateFolderIcon\"%SRCFIexe% \"%%V\""
 	
 	:REG-FI-Remove_Folder_Icon
 	echo [%RegExShell%\RCFI.RemFolderIcon]
-	echo "MUIVerb"="Remove Folder Icon"
+	echo "MUIVerb"="Remove folder icons"
 	echo "Icon"="shell32.dll,-145"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.RemFolderIcon\command]
@@ -2838,14 +2839,14 @@ rem Generating setup_*.reg
 	REM Background Dir
 	:REG-FI-Refresh_here
 	echo [%RegExShell%\RCFI.Refresh.Here]
-	echo "MUIVerb"="Refresh Icon Cache (Restart Explorer)"
+	echo "MUIVerb"="Refresh icon cache (restart explorer)"
 	echo "Icon"="shell32.dll,-16739"
 	echo [%RegExShell%\RCFI.Refresh.Here\command]
 	echo @="%cmd% set \"Context=Refresh.Here\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Refresh_No_Restart_here
 	echo [%RegExShell%\RCFI.RefreshNR.Here]
-	echo "MUIVerb"="Refresh Icon Cache (Without Restart)"
+	echo "MUIVerb"="Refresh icon cache (without restart)"
 	echo "Icon"="shell32.dll,-16739"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.RefreshNR.Here\command]
@@ -2861,7 +2862,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Generate_Keyword_here
 	echo [%RegExShell%\RCFI.GenKey.Here]
-	echo "MUIVerb"="Generate from keyword"
+	echo "MUIVerb"="Generate from keywords"
 	echo "Icon"="shell32.dll,-241"
 	echo [%RegExShell%\RCFI.GenKey.Here\command]
 	echo @="%cmd% set \"Context=GenKey.Here\"%RCFIexe% \"%%V\""
@@ -2897,7 +2898,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Activate_Folder_Icon_here
 	echo [%RegExShell%\RCFI.ActivateFolderIcon.Here]
-	echo "MUIVerb"="Activate Folder Icons"
+	echo "MUIVerb"="Activate folder icons"
 	echo "Icon"="imageres.dll,-166"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.ActivateFolderIcon.Here\command]
@@ -2905,14 +2906,14 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Deactivate_Folder_Icon_here
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon.Here]
-	echo "MUIVerb"="Deactivate Folder Icons"
+	echo "MUIVerb"="Deactivate folder icons"
 	echo "Icon"="imageres.dll,-3"
 	echo [%RegExShell%\RCFI.DeactivateFolderIcon.Here\command]
 	echo @="%cmd% set \"Context=DeactivateFolderIcon.Here\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Remove_Folder_Icon_here
 	echo [%RegExShell%\RCFI.RemFolderIcon.Here]
-	echo "MUIVerb"="Remove Folder Icons"
+	echo "MUIVerb"="Remove folder icons"
 	echo "Icon"="shell32.dll,-145"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.RemFolderIcon.Here\command]
@@ -2927,7 +2928,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Edit.Template
 	echo [%RegExShell%\RCFI.Edit.Template]
-	echo "MUIVerb"="Template Configuration"
+	echo "MUIVerb"="Template configurations"
 	echo "Icon"="imageres.dll,-69"
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.Edit.Template\command]
@@ -2935,7 +2936,7 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Edit.Config
 	echo [%RegExShell%\RCFI.Edit.Config]
-	echo "MUIVerb"="RCFI Tools Configuration"
+	echo "MUIVerb"="RCFI Tools configurations"
 	echo "Icon"="imageres.dll,-69"
 	echo [%RegExShell%\RCFI.Edit.Config\command]
 	echo @="%cmd% set \"Context=Edit.Config\"%RCFIexe%"

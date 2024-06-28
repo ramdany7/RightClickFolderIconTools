@@ -1,4 +1,4 @@
-:: Template-Version=v1.1
+:: Template-Version=v1.2
 :: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
 :: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
 
@@ -218,6 +218,7 @@ exit /b
 
 
 :LAYER-FOLDER_NAME
+if not defined FolderName exit /b
 if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 

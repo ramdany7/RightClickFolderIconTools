@@ -1,6 +1,6 @@
-:: Template-Version=v1.1
-:: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
-:: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
+:: Template-Version=v1.2
+:: 2024-06-27 Add error handling: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." 
+
 
 ::                Template Info
 ::========================================================
@@ -120,7 +120,7 @@ set CODE-BACKGROUND= ( ^
 	) -compose Over ( "%Win11Cover-BG%" ) -compose over -composite
 
 :: Creating mask to carve the picture
-set "Win11CoverMask=%CD%\Win11CoverMask.png"
+set "Win11CoverMask=Win11CoverMask(%FI-ID%).png"
 
 "%Converter%" ^
 	( "%canvas%" ^
@@ -159,7 +159,7 @@ set CODE-PICTURE=	( ^
 	  
 set CODE-ICON-SIZE=-define icon:auto-resize="%TemplateIconSize%"
 
-set deltemp=del "%CD%\Win11CoverMask.png" "%CD%\Win11CoverLogoMask.png" 2>nul
+set deltemp=del "Win11CoverMask(%FI-ID%).png" "Win11CoverLogoMask(%FI-ID%).png" 2>nul
 exit /b
 
 :LAYER-RATING
@@ -225,7 +225,7 @@ if exist "*logo.png" (
 
 echo %TAB%%ESC%%g_%Logo        :%LogoName%%ESC%
 :: Creating mask to carve the logo
-set "Win11CoverLogoMask=%CD%\Win11CoverLogoMask.png"
+set "Win11CoverLogoMask=Win11CoverLogoMask(%FI-ID%).png"
 
 "%Converter%" ( "%canvas%" ^
 	-scale 512x512! ^
@@ -270,6 +270,7 @@ exit /b
 
 
 :LAYER-FOLDER_NAME
+if not defined FolderName exit /b
 if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 

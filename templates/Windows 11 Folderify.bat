@@ -149,7 +149,7 @@ set CODE-FOLDERIFY= ( "%Win11Folderify-BG%" %ReAdjust-Position% ) -compose over 
 if /i "%Picture-TrimTransparentSpace%"=="yes"	(set "TrimPNG=-trim +repage") else (set "TrimPNG=")
 
 :: Creating mask to carve the picture
-set "Win11FolderifyMask=%CD%\Win11FolderifyMask.png"
+set "Win11FolderifyMask=Win11FolderifyMask(%FI-ID%).png"
 
 if /i "%Picture-Drawing%"=="yes" (
 	set "PictureIntensity=-modulate %Picture-Drawing-ON-Exposure%,%Picture-Drawing-ON-Saturation% -brightness-contrast %Picture-Drawing-ON-Brightness%x%Picture-Drawing-ON-Contrast% -blur 0x%Picture-Drawing-ON-Smoothness%"
@@ -184,7 +184,7 @@ set CODE-PICTURE=	( ^
 	  
 set CODE-ICON-SIZE=-define icon:auto-resize="%TemplateIconSize%"
 
-set deltemp=del "%CD%\Win11FolderifyMask.png" "%CD%\Win11FolderifyLogoMask.png" 2>nul
+set deltemp=del "Win11FolderifyMask(%FI-ID%).png" "Win11FolderifyLogoMask(%FI-ID%).png" 2>nul
 exit /b
 
 :LAYER-RATING
@@ -250,7 +250,7 @@ if exist "*logo.png" (
 
 echo %TAB%%ESC%%g_%Logo        :%LogoName%%ESC%
 :: Creating mask to carve the logo
-set "Win11FolderifyLogoMask=%CD%\Win11FolderifyLogoMask.png"
+set "Win11FolderifyLogoMask=Win11FolderifyLogoMask(%FI-ID%).png"
 
 "%Converter%" ( "%canvas%" ^
 	-scale 512x512! ^
@@ -295,6 +295,7 @@ exit /b
 
 
 :LAYER-FOLDER_NAME
+if not defined FolderName exit /b
 if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 

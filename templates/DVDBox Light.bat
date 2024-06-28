@@ -48,7 +48,7 @@ call :LAYER-GENRE
   %CODE-GENRE%         ^
   %CODE-ICON-SIZE%     ^
  "%OutputFile%"
-%deltempfile%
+  %deltemp%
 endlocal
 exit /b
 
@@ -93,7 +93,7 @@ if exist "%discart-search%" (
 	for %%D in (%discart-search%) do (
 		set "DiscArt=%%~fD"
 		set "DiscArtName=%%~nxD"
-		echo %TAB%%ESC%%g_%Disc Art    :%%~nxD%ESC%
+		echo %TAB%%ESC%%g_%Disc Art    :%%~nxD%ESC%%r_%
 		goto Generate_DiscArt-done
 	)
 ) else if /i "%generate-discart%"=="yes" (
@@ -102,7 +102,7 @@ if exist "%discart-search%" (
 		for %%X in (%ImageSupport%) do (
 			if /i "%%X"=="%%~xG" (
 				set "gen_disc=%%~fG"
-				echo %TAB%%ESC%%g_%Disc Art    :%%~nxG%ESC%
+				echo %TAB%%ESC%%g_%Disc Art    :%%~nxG%ESC%%r_%
 				goto Generate_DiscArt-call
 			)
 		)
@@ -120,7 +120,7 @@ set CODE-DISC-IMAGE= ( "%discart%" ^
 exit /b
 
 :Generate_DiscArt-call
-if not exist "%RCFI%\templates\DiscArt.bat" (echo %TAB%%R_% DiscArt Template not found.) else call "%RCFI%\templates\DiscArt.bat"
+if not exist "%RCFI%\templates\DiscArt.bat" (echo %TAB%%r_% "%cc_%DiscArt%r_%" Template not found.) else call "%RCFI%\templates\DiscArt.bat"
 goto Generate_DiscArt-done
 
 :LAYER-RATING
