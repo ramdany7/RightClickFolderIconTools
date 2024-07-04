@@ -1,9 +1,10 @@
 @echo off
 :: Update v0.4
 :: 2024-06-27 Fix: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs and BeOrigin templates.
-:: 2024-06-27 Fix: Couldn’t open "Choose Template" and "Define Keyword" menu in some drive paths.
+:: 2024-06-27 Fix: Couldn’t open 'Choose template' and 'Define keywords' menu in root/drive directory.
 :: 2024-06-28 Fix: "The syntax of the command is incorrect." on 'Change folder icon' Folder right-click menu.
-
+:: 2024-06-29 Add: progess info on title bar when generating folder icon.
+ 
 setlocal
 set name=RCFI Tools
 set version=v0.4
@@ -689,6 +690,7 @@ if /i "%cdonly%"=="true" if %result% EQU 1 if %g_result% EQU 1 (
 )
 echo.
 echo.
+title %name% %version% ^| (%YY_result%) Folders processed.
 IF /i %result%			LSS 10 (set "s=   "		) else (IF /i %result%		GTR 9 set "s=  "		&IF /i %result%		GTR 99	set "s= "		&IF /i %result%		GTR 999 set "s="	)
 IF /i %R_result%			LSS 10 (set "R_s=   "		) else (IF /i %R_result%		GTR 9 set "R_s=  "	&IF /i %R_result%		GTR 99	set "R_s= "	&IF /i %R_result%		GTR 999 set "R_s="	)		
 IF /i %Y_result%			LSS 10 (set "Y_s=   "		) else (IF /i %Y_result%		GTR 9 set "Y_s=  "	&IF /i %Y_result%		GTR 99 set "Y_s= "	&IF /i %Y_result%		GTR 999 set "Y_s="	)		
@@ -710,6 +712,8 @@ echo %TAB%----------------------------------------------------------------------
 goto options
 
 :FI-Generate-Folder_Icon          
+set /a GeneratingCount+=1
+title (%GeneratingCount%) "%FolderName%" ^| Generating folder icon ...
 if not defined Selected call :FI-ID
 if not defined Selected (
 	if not defined Context (
@@ -755,7 +759,7 @@ if not defined Selected (
 	rem Executing "general template" to convert and edit the selected image
 	if not exist "%OutputFile%" call "%Template%"
 	
-	rem Check icon size, if icon size is less then 10kB then it's fail.
+	rem Check icon size, if icon size is less then 200 byte then it's fail.
 	if exist "foldericon(%FI-ID%).ico" for %%S in ("foldericon(%FI-ID%).ico") do (
 		if %%~zS GTR 200 echo %TAB%%ESC%%g_%Convert success - foldericon(%FI-ID%).ico (%%~zS Bytes)%ESC%%r_%
 		if %%~zS LSS 200 (
@@ -793,6 +797,7 @@ if not defined Selected (
 		echo %TAB% %i_%%g_%  Success!  %-%
 	)
 )
+title %name% %version% ^| (%YY_result%) Folders processed.
 EXIT /B
 
 :FI-Generate-Get_Template         
@@ -1253,21 +1258,21 @@ goto FI-Search
 :FI-Keyword                       
 echo                 %w_%%i_%     K E Y W O R D S     %_%
 echo.
+echo.
 call :Config-UpdateVar
 rem echo.
 rem echo %TAB%%Keywords%
 rem echo %TAB%%KeywordsFind%
 echo %TAB%%r_%*%g_%Certain characters can causing an error, such as: 
 echo %TAB%%r_% %g_%%g_%%c_%%%%g_% %c_%"%g_% %c_%(%g_% %c_%)%g_% %c_%<%g_% %c_%>%g_% %c_%[%g_% %c_%&%g_%%_%
-echo.
 echo %TAB%%r_%*%g_%Use comma to separate multiple keywords, for example:
 echo %TAB%%r_% %c_%folder icon.ico, folder art.png, favorite image.jpg
-echo.
 echo %TAB%%r_%*%g_%Spaces, dots, hypens, underscores will be interpreted as a wildcard.
 echo.
 echo.
 echo.
 echo %TAB%%w_%Current keywords:%_% %KeywordsPrint%
+echo.
 set "newKeywords=*"
 set /p "newKeywords=%-%%-%%-%%g_%%i_%Change  keywords:%_% %c_%"
 if "%newKeywords%"=="*" set "newKeyword=%Keywords%"
