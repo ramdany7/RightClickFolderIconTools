@@ -1,9 +1,11 @@
 @echo off
 :: Update v0.4
-:: 2024-06-27 Fix: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs and BeOrigin templates.
-:: 2024-06-27 Fix: Couldn’t open 'Choose template' and 'Define keywords' menu in root/drive directory.
-:: 2024-06-28 Fix: "The syntax of the command is incorrect." on 'Change folder icon' Folder right-click menu.
-:: 2024-06-29 Add: progess info on title bar when generating folder icon.
+:: 2024-06-27 Fixing "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs and BeOrigin templates.
+:: 2024-06-27 Fixing Couldn’t open 'Choose template' and 'Define keywords' menu in root/drive directory.
+:: 2024-06-28 Fixing "The syntax of the command is incorrect." on 'Change folder icon' Folder right-click menu.
+:: 2024-06-29 Adding progess info on title bar when generating folder icon.
+:: 2024-07-06 Adding capability to scan, generate and remove folder icons on all subfolders (recursive).
+:: 2024-07-06 Adding "More ..." button to background right-click menu.
  
 setlocal
 set name=RCFI Tools
@@ -21,18 +23,38 @@ call :Setup
 if defined Context goto Input-Context
 
 :Intro                            
-echo. 
-if not defined OpenFrom (
-	echo                             %i_% %name% %version% %_%%-%
-	echo.
-	echo                %gn_%Activate%g_%/%gn_%Act%g_%   to activate Folder Icon Tools.
-	echo                %gn_%Deactivate%g_%/%gn_%Dct%g_% to deactivate Folder Icon Tools. 
-	echo.
-) else (
-echo %TAB%                  %pp_%Drag and  drop%_%%g_%  an %c_%image%g_%  to  this  window
-echo %TAB%                  then press Enter to change the folder icon.%_%
+set "__=   %gg_%"
+set "_/_=%g_%/%gg_%"
+set "_I_=%g_%^:"
 echo.
-)
+echo.
+echo.
+echo                             %i_% %name% %version% %_%%-%
+echo.
+echo %__%Open%_/_%o         %_I_% Open RCFI Tools folder.
+echo %__%Keyword%_/_%key    %_I_% Set the keywords to search and select the image inside each folder.
+echo %__%Scans%_/_%scs      %_I_% Scan and check which image will be selected to generate the folder icon.
+echo %__%Generates%_/_%gns  %_I_% Generate folder icons on current folder including all subfolders ^(recursive^).
+echo %__%Removes%_/_%rms    %_I_% Remove all folder icons on currrent folder including all subfolders ^(recursive^).
+echo %__%Renames%_/_%rns    %_I_% Rename all icons on currrent folder including all subfolders ^(recursive^).
+echo %__%Moves%_/_%mvs      %_I_% Move all icons on currrent folder including all subfolders ^(recursive^).
+echo %__%Activate%_/_%act%g_%   %_I_% Activate Folder Icon Tools.
+echo %__%Deactivate%_/_%dct%g_% %_I_% Deactivate Folder Icon Tools.
+echo.
+echo %g_%Template:%ESC%%cc_%%TemplateName%%ESC%   %g_%Keywords:%ESC%%KeywordsPrint%%ESC%
+
+rem echo. 
+rem if not defined OpenFrom (
+rem 	echo                             %i_% %name% %version% %_%%-%
+rem 	echo.
+rem 	echo                %gn_%Activate%g_%/%gn_%Act%g_%   to activate Folder Icon Tools.
+rem 	echo                %gn_%Deactivate%g_%/%gn_%Dct%g_% to deactivate Folder Icon Tools. 
+rem 	echo.
+rem ) else (
+rem echo %TAB%                  %pp_%Drag and  drop%_%%g_%  an %c_%image%g_%  to  this  window
+rem echo %TAB%                  then press Enter to change the folder icon.%_%
+rem echo.
+rem )
 goto Options-Input
 
 :Status                           
@@ -96,23 +118,26 @@ call :Config-Load
 for %%F in ("%cd%") do set "FolderName=%%~nxF"
 if not defined OpenFrom set "FolderName=%cd%"
 set "Command=(none)"
-set /p "Command=%_%%w_%%FolderName%%_%%gn_%>"
+echo %FolderName%
+set /p "Command=%i_%%gn_% %_%%gn_% "
 set "Command=%Command:"=%"
 echo %-% &echo %-% &echo %-%
 if /i "%Command%"=="keyword"		goto FI-Keyword
+if /i "%Command%"=="keywords"	goto FI-Keyword
 if /i "%Command%"=="keyword:"	goto Status
 if /i "%Command%"=="ky"			goto FI-Keyword
 if /i "%Command%"=="key"			goto FI-Keyword
-if /i "%Command%"=="scan"		set "recursive=no"		&goto FI-Scan
-if /i "%Command%"=="sc"			set "recursive=no"		&goto FI-Scan
-if /i "%Command%"=="scans"		set "recursive=yes"		&goto FI-Scan
-if /i "%Command%"=="scs"			set "recursive=yes"		&goto FI-Scan
+if /i "%Command%"=="scan"		set "recursive=no"		&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="sc"			set "recursive=no"		&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="scans"		set "recursive=yes"		&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="scs"			set "recursive=yes"		&set "input=Scan"		&goto FI-Scan
 if /i "%Command%"=="generate"	set "recursive=no"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
 if /i "%Command%"=="gn"			set "recursive=no"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
 if /i "%Command%"=="generates"	set "recursive=yes"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
 if /i "%Command%"=="gns"			set "recursive=yes"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
 if /i "%Command%"=="Remove"		set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
 if /i "%Command%"=="Rm"			set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
+if /i "%Command%"=="Removes"		set "delete=ask"			&set "recursive=yes"	&goto FI-Remove
 if /i "%Command%"=="on"			set "refreshopen=index"	&goto FI-Activate
 if /i "%Command%"=="off"			set "refreshopen=index"	&goto FI-Deactivate
 if /i "%Command%"=="copy"			goto CopyFolderIcon
@@ -128,8 +153,9 @@ if /i "%Command%"=="s"			goto Status
 if /i "%Command%"=="help"		goto Help
 if /i "%Command%"=="cd.."		cd /d .. &echo %TAB% Changing to the parent directory. &goto options
 if /i "%Command%"==".."			cd /d .. &echo %TAB% Changing to the parent directory. &goto options
-if /i "%Command%"=="o"			echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%cd%%ESC% &explorer.exe "%cd%" &goto options
 if /i "%Command%"=="RCFI"		echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%~dp0%ESC% &echo. &explorer.exe "%~dp0" &goto options
+if /i "%Command%"=="open"		echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%~dp0%ESC% &echo. &explorer.exe "%~dp0" &goto options
+if /i "%Command%"=="o"			echo %TAB%%_% Opening..   &echo %TAB%%ESC%%i_%%~dp0%ESC% &echo. &explorer.exe "%~dp0" &goto options
 if /i "%Command%"=="cls"			cls&goto options
 if /i "%Command%"=="r"			start "" "%~f0" &exit
 if /i "%Command%"=="tc"			goto Colour
@@ -200,7 +226,7 @@ if /i "%Context%"=="DeactivateFolderIcon.Here" %Dir% &goto FI-Deactivate
 if /i "%Context%"=="RemFolderIcon.Here"		%Dir% &set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
 if /i "%Context%"=="Edit.Config"				start "" notepad.exe "%RCFI%\RCFI.config.ini"&exit
 if /i "%Context%"=="Edit.Template"				goto FI-Template-Edit
-if /i "%Context%"=="Ver.Context.Click"			echo %TAB%%_%Opening..   		&echo %TAB%%i_%%~dp0%-% &echo. &explorer.exe "%~dp0" &exit
+if /i "%Context%"=="More.Context"				goto FI-More_Tools
 REM Other
 if /i "%Context%"=="FI.Deactivate" 			set "Setup=Deactivate" &goto Setup
 goto Input-Error
@@ -215,6 +241,11 @@ echo.
 echo %TAB%%g_%The command, file path, or directory path is unavailable. 
 rem echo %TAB%Use %gn_%Help%g_% to see available commands.
 goto options
+
+:FI-More_Tools
+cd /d "%SelectedThing%"
+set "Context="
+goto Intro
 
 :DirectInput                      
 set "cdonly=true"
@@ -481,8 +512,10 @@ if /i "%cdonly%"=="true" (
 REM All inside current dir including subfolders
 if /i "%Recursive%"=="yes" (
 	FOR /r %%D in (.) do (
-		set "location=%%D" &set "folderpath=%%~dpD" &set "foldername=%%~fD"
-		call :FI-Scan-Desktop.ini
+		if /i not "%%~fD"=="%CD%" (
+			set "location=%%D" &set "folderpath=%%~dpD" &set "foldername=%%~fD"
+			call :FI-Scan-Desktop.ini
+		)
 	)
 	EXIT /B
 )
@@ -558,6 +591,9 @@ set    Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%foldername%%ESC%
 set    G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%foldername%%ESC%
 set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 set   YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+
+if /i "%recursive%"=="yes" call :FI-Scan-Desktop.ini-Recursive
+
 if /i "%referer%"=="MultiFolderRightClick" (
 	set    R_FolderDisplay=echo %TAB%%W_%%R_s%%RR_%📁%ESC%%_%%foldername%%ESC%
 	set   YY_FolderDisplay=echo %TAB%%W_%%YY_s%%YY_%📁%ESC%%_%%foldername%%ESC% 
@@ -644,6 +680,19 @@ PUSHD "%location%"
 	)
 POPD&EXIT /B
 
+:FI-Scan-Desktop.ini-Recursive
+call set "FolderName=%%Location:%CD%\=%%
+if /i "%FolderName:~-2%"=="\." set "FolderName=%FolderName:~0,-2%"
+call set "Y_FolderName=%%FolderName:\=%W_%\%_%%%"
+call set "G_FolderName=%%FolderName:\=%W_%\%_%%%"
+call set "R_FolderName=%%FolderName:\=%W_%\%R_%%%"
+call set "YY_FolderName=%%FolderName:\=%W_%\%YY_%%%"
+set    Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%Y_foldername%%ESC%
+set    G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%G_foldername%%ESC%
+set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%R_foldername%%ESC% 
+set   YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%YY_foldername%%ESC%
+exit /b
+
 :FI-Generate                      
 set "referer="
 set "yy_result=0"
@@ -690,7 +739,7 @@ if /i "%cdonly%"=="true" if %result% EQU 1 if %g_result% EQU 1 (
 )
 echo.
 echo.
-title %name% %version% ^| (%YY_result%) Folders processed.
+title %name% %version% ^| (%YY_result%) Folders processed. ^| "%SelectedThing%"
 IF /i %result%			LSS 10 (set "s=   "		) else (IF /i %result%		GTR 9 set "s=  "		&IF /i %result%		GTR 99	set "s= "		&IF /i %result%		GTR 999 set "s="	)
 IF /i %R_result%			LSS 10 (set "R_s=   "		) else (IF /i %R_result%		GTR 9 set "R_s=  "	&IF /i %R_result%		GTR 99	set "R_s= "	&IF /i %R_result%		GTR 999 set "R_s="	)		
 IF /i %Y_result%			LSS 10 (set "Y_s=   "		) else (IF /i %Y_result%		GTR 9 set "Y_s=  "	&IF /i %Y_result%		GTR 99 set "Y_s= "	&IF /i %Y_result%		GTR 999 set "Y_s="	)		
@@ -797,7 +846,7 @@ if not defined Selected (
 		echo %TAB% %i_%%g_%  Success!  %-%
 	)
 )
-title %name% %version% ^| (%YY_result%) Folders processed.
+title %name% %version% ^| (%YY_result%) Folders processed. ^| "%SelectedThing%"
 EXIT /B
 
 :FI-Generate-Get_Template         
@@ -1378,6 +1427,7 @@ if defined Context if /i not "%cdonly%"=="true" echo %TAB%%w_%==================
 IF /i %result% LSS 1 if defined Context cls
 IF /i %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%r_%%result%%_%%_%^) Couldn't find any folder icon. &goto options
 if %delresult% GTR 0 echo. &echo %TAB% ^(%r_%%delresult%%_%^) Folder icon deleted.
+set "recursive="
 goto options
 
 :FI-Remove-Get                    
@@ -1395,24 +1445,48 @@ if /i "%cdonly%"=="true" (
 	)
 	EXIT /B
 )
-FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
-	set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
-	PUSHD "%%~fD"
-		if exist "desktop.ini" (
-			FOR /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do (
-				set "%%C=%%D"
-				if /i "%%C"=="iconresource" call :FI-Remove-Act
-			)
+
+IF /i "%recursive%"=="yes" (
+	FOR /r %%D in (.) do (
+		if /i not "%%~fD"=="%CD%" (
+		set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
+		call :FI-Remove-Get-SubDir
+			PUSHD "%%~fD"
+				if exist "desktop.ini" (
+					FOR /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do (
+						set "%%C=%%D"
+						if /i "%%C"=="iconresource" call :FI-Remove-Act
+					)
+				)
+			POPD
 		)
-	POPD
+	)
+) ELSE (
+	FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
+		set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
+		PUSHD "%%~fD"
+			if exist "desktop.ini" (
+				FOR /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do (
+					set "%%C=%%D"
+					if /i "%%C"=="iconresource" call :FI-Remove-Act
+				)
+			)
+		POPD
+	)
 )
 EXIT /B
+
+:FI-Remove-Get-SubDir
+set "RemoverState=%w_%\%_%"
+call set "FolderName=%%Location:%CD%\=%%
+call set "FolderName=%%FolderName:\=%RemoverState%%%"
+exit /b
 
 :FI-Remove-Act                    
 if /i not "%delete%"=="confirm" (
 	if exist "%iconresource%" (
 		set /a result+=1
-		echo %ESC%%TAB%%y_%📁 %foldername%%ESC% &exit /b
+		echo %ESC%%TAB%%y_%📁 %_%%foldername%%ESC% &exit /b
 	)
 	exit /b
 )
@@ -1421,7 +1495,7 @@ if exist "%iconresource%" (
 	if /i "%delete%"=="confirm" (
 		if not defined timestart call :timer-start
 		echo %ESC%%TAB%%w_%📁 %_%%foldername%%ESC%
-		echo %TAB% %g_%Folder icon:%ESC%%c_%%iconresource%%ESC%
+		echo %TAB% %g_%Icon:%ESC%%c_%%iconresource%%ESC%
 		for %%I in ("%iconresource%") do (
 			if "%%~dpI"=="%cd%\" (
 				attrib -s -h "%iconresource%" 
@@ -2946,12 +3020,13 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.Edit.Config\command]
 	echo @="%cmd% set \"Context=Edit.Config\"%RCFIexe%"
 	
-	:REG-FI-Ver.Context.Click
-	echo [%RegExShell%\RCFI.Ver.Context.Click]
-	echo "MUIVerb"="                 %name% %version%"
+	:REG-FI-More.Context
+	echo [%RegExShell%\RCFI.More.Context]
+	echo "MUIVerb"="More ...      %name% %version%"
+	echo "Icon"="imageres.dll,-5323"
 	echo "CommandFlags"=dword:00000020
-	echo [%RegExShell%\RCFI.Ver.Context.Click\command]
-	echo @="%cmd% set \"Context=Ver.Context.Click\"%RCFIexe%"
+	echo [%RegExShell%\RCFI.More.Context\command]
+	echo @="%cmd% set \"Context=More.Context\"%RCFIexe% \"%%V\""
 	
 	:REG-Context_Menu-FI-Folder
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
@@ -2963,7 +3038,7 @@ rem Generating setup_*.reg
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.RefreshNR.Here;RCFI.Refresh.Here;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon.Here;RCFI.Scan.Here;RCFI.DefKey;RCFI.GenKey.Here;RCFI.GenJPG.Here;RCFI.GenPNG.Here;RCFI.GenPosterJPG.Here;RCFI.ActivateFolderIcon.Here;RCFI.DeactivateFolderIcon.Here;RCFI.RemFolderIcon.Here;RCFI.Edit.Template;RCFI.Edit.Config;RCFI.Ver.Context.Click;"
+	echo "SubCommands"="RCFI.RefreshNR.Here;RCFI.Refresh.Here;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon.Here;RCFI.Scan.Here;RCFI.DefKey;RCFI.GenKey.Here;RCFI.GenJPG.Here;RCFI.GenPNG.Here;RCFI.GenPosterJPG.Here;RCFI.ActivateFolderIcon.Here;RCFI.DeactivateFolderIcon.Here;RCFI.RemFolderIcon.Here;RCFI.Edit.Template;RCFI.Edit.Config;RCFI.More.Context;"
 	
 	:REG-Context_Menu-Images
 	echo [%RegExImage%\RCFI.Tools]
