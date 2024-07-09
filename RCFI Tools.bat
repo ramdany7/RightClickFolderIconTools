@@ -6,7 +6,8 @@
 :: 2024-06-29 Adding progess info on title bar when generating folder icon.
 :: 2024-07-06 Adding capability to scan, generate and remove folder icons on all subfolders (recursive).
 :: 2024-07-06 Adding "More ..." button to background right-click menu.
- 
+:: 2024-07-09 Adding ability to rename icon's file name.
+
 setlocal
 set name=RCFI Tools
 set version=v0.4
@@ -34,10 +35,12 @@ echo.
 echo %__%Open%_/_%o         %_I_% Open RCFI Tools folder.
 echo %__%Keyword%_/_%key    %_I_% Set the keywords to search and select the image inside each folder.
 echo %__%Scans%_/_%scs      %_I_% Scan and check which image will be selected to generate the folder icon.
-echo %__%Generates%_/_%gns  %_I_% Generate folder icons on current folder including all subfolders ^(recursive^).
-echo %__%Removes%_/_%rms    %_I_% Remove all folder icons on currrent folder including all subfolders ^(recursive^).
-echo %__%Renames%_/_%rns    %_I_% Rename all icons on currrent folder including all subfolders ^(recursive^).
-echo %__%Moves%_/_%mvs      %_I_% Move all icons on currrent folder including all subfolders ^(recursive^).
+echo %__%Generates%_/_%gens %_I_% Generate folder icons on current directory including all subfolders ^(recursive^).
+echo %__%Removes%_/_%rems   %_I_% Remove all folder icons on current directory including all subfolders ^(recursive^).
+echo %__%Renames%_/_%rens   %_I_% Rename all icons on current directory including all subfolders ^(recursive^).
+echo %__%Moves%_/_%movs     %_I_% Move all icons on current directory including all subfolders ^(recursive^).
+echo %__%Hides%_/_%hids     %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory 
+echo                     including all subfolders ^(recursive^).
 echo %__%Activate%_/_%act%g_%   %_I_% Activate Folder Icon Tools.
 echo %__%Deactivate%_/_%dct%g_% %_I_% Deactivate Folder Icon Tools.
 echo.
@@ -127,17 +130,22 @@ if /i "%Command%"=="keywords"	goto FI-Keyword
 if /i "%Command%"=="keyword:"	goto Status
 if /i "%Command%"=="ky"			goto FI-Keyword
 if /i "%Command%"=="key"			goto FI-Keyword
-if /i "%Command%"=="scan"		set "recursive=no"		&set "input=Scan"		&goto FI-Scan
-if /i "%Command%"=="sc"			set "recursive=no"		&set "input=Scan"		&goto FI-Scan
-if /i "%Command%"=="scans"		set "recursive=yes"		&set "input=Scan"		&goto FI-Scan
-if /i "%Command%"=="scs"			set "recursive=yes"		&set "input=Scan"		&goto FI-Scan
-if /i "%Command%"=="generate"	set "recursive=no"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
-if /i "%Command%"=="gn"			set "recursive=no"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
-if /i "%Command%"=="generates"	set "recursive=yes"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
-if /i "%Command%"=="gns"			set "recursive=yes"		&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
-if /i "%Command%"=="Remove"		set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
-if /i "%Command%"=="Rm"			set "delete=ask"			&set "cdonly=false"	&goto FI-Remove
-if /i "%Command%"=="Removes"		set "delete=ask"			&set "recursive=yes"	&goto FI-Remove
+if /i "%Command%"=="scan"		set "recursive=no"	&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="sc"			set "recursive=no"	&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="scans"		set "recursive=yes"	&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="scs"			set "recursive=yes"	&set "input=Scan"		&goto FI-Scan
+if /i "%Command%"=="generate"	set "recursive=no"	&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
+if /i "%Command%"=="gen"			set "recursive=no"	&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
+if /i "%Command%"=="generates"	set "recursive=yes"	&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
+if /i "%Command%"=="gens"		set "recursive=yes"	&set "cdonly=false"	&set "input=Generate"	&goto FI-Generate
+if /i "%Command%"=="Remove"		set "recursive=no" 	&set "cdonly=false"	&set "delete=ask"		&goto FI-Remove
+if /i "%Command%"=="Rem"			set "recursive=no" 	&set "cdonly=false"	&set "delete=ask"		&goto FI-Remove
+if /i "%Command%"=="Removes"		set "recursive=yes"	&set "cdonly=false"	&set "delete=ask"		&goto FI-Remove	
+if /i "%Command%"=="Rems"		set "recursive=yes"	&set "cdonly=false"	&set "delete=ask"		&goto FI-Remove	
+if /i "%Command%"=="Rename"		set "recursive=no"	&set "rename=Ask"		&goto FI-Rename
+if /i "%Command%"=="Ren"			set "recursive=no"	&set "rename=Ask"		&goto FI-Rename
+if /i "%Command%"=="Renames"		set "recursive=yes"	&set "rename=Ask"		&goto FI-Rename
+if /i "%Command%"=="Rens"		set "recursive=yes"	&set "rename=Ask"		&goto FI-Rename
 if /i "%Command%"=="on"			set "refreshopen=index"	&goto FI-Activate
 if /i "%Command%"=="off"			set "refreshopen=index"	&goto FI-Deactivate
 if /i "%Command%"=="copy"			goto CopyFolderIcon
@@ -284,13 +292,13 @@ if not exist desktop.ini (
 	goto DirectInput-Generate-Confirm
 )
 for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do set "%%C=%%D" 2>nul
-if not exist "%iconresource%" (
+if not exist "%IconResource:"=%" (
 	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 	goto DirectInput-Generate-Confirm
 )
 echo %TAB%%Y_%┌%Y_%📁%ESC%%w_%%foldername%%ESC%
-echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%iconresource%%ESC%
-attrib -s -h "%iconresource%"
+echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%IconResource:"=%%ESC%
+attrib -s -h "%IconResource:"=%"
 attrib |exit /b
 echo %TAB%%g_% This folder already has a folder icon.
 echo %TAB%%g_% Do you want to replace it%r_%^? %gn_%Y%_%/%gn_%N%bk_%
@@ -301,14 +309,14 @@ IF "%ERRORLEVEL%"=="1" (
 )
 IF "%ERRORLEVEL%"=="2" (
 	echo %_%%TAB% %I_%     Canceled     %_%
-	Attrib %Attrib% "%iconresource%"
+	Attrib %Attrib% "%IconResource:"=%"
 	attrib -|exit /b
 	goto options
 )
 IF "%ERRORLEVEL%"=="1" if defined Context cls &echo.&set "Direct=Confirm"&echo.&echo.&echo.&echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 
 :DirectInput-Generate-Confirm     
-set "ReplaceThis=%iconresource%"
+set "ReplaceThis=%IconResource:"=%"
 attrib -s -h "%filepath%%filename%"
 attrib |exit /b
 call :timer-start
@@ -408,25 +416,25 @@ if not defined iconresource (
 	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 	call :FI-Generate-Folder_Icon
 	exit /b
-) else if not exist "%iconresource%" (
+) else if not exist "%IconResource:"=%" (
 	echo %TAB%%W_%┌%Y_%📁%ESC%%YY_%%foldername%%ESC% 
 	call :FI-Generate-Folder_Icon
 )
 if /i "%replace%"=="all" (
-	set "ReplaceThis=%iconresource%"
+	set "ReplaceThis=%IconResource:"=%"
 	if not defined timestart call :Timer-start
 	echo %TAB%%W_%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
-if not exist "%iconresource%" (
+if not exist "%IconResource:"=%" (
 	if not defined timestart call :Timer-start
 	call :FI-Generate-Folder_Icon
 	exit /b
 )
 echo %TAB%%Y_%┌%Y_%📁%ESC%%w_%%foldername%%ESC%
-echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%iconresource%%ESC%
-attrib -s -h "%iconresource%"
+echo %TAB%%Y_%└%Y_%🏞%ESC%%y_%%IconResource:"=%%ESC%
+attrib -s -h "%IconResource:"=%"
 attrib |exit /b
 echo %TAB%%g_% This folder already has a folder icon.
 echo %TAB%%g_% Do you want to replace it%r_%^? %gn_%A%_%/%gn_%Y%_%/%gn_%N%bk_%
@@ -435,12 +443,12 @@ CHOICE /N /C AYN
 IF "%ERRORLEVEL%"=="1" set "replace=all"
 IF "%ERRORLEVEL%"=="3" (
 	echo %g_%%TAB% %I_%    Skip    %_%
-	Attrib %Attrib% "%iconresource%"
+	Attrib %Attrib% "%IconResource:"=%"
 	attrib -|exit /b
 	set "iconresource="
 	exit /b
 )
-set "ReplaceThis=%iconresource%"
+set "ReplaceThis=%IconResource:"=%"
 if not defined timestart call :Timer-start
 echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 call :FI-Generate-Folder_Icon
@@ -458,17 +466,26 @@ exit
 
 
 :FI-Scan                          
-set  "y_result=0"
-set  "g_result=0"
-set  "r_result=0"
-set  "h_result=0"
+set "y_result=0"
+set "g_result=0"
+set "r_result=0"
+set "h_result=0"
 set "yy_result=0"
 set "success_result=0"
 set "fail_result=0"
-set  "Y_d=1"
-set  "G_d=1"
-set  "R_d=1"
+set "Y_d=1"
+set "G_d=1"
+set "R_d=1"
 set "YY_d=1"
+set "Y_s="
+set "G_s="
+set "R_s="
+set "YY_s="
+set "Y_FolderDisplay="
+set "G_FolderDisplay="
+set "R_FolderDisplay="
+set "YY_FolderDisplay="
+
 echo %TAB%%TAB%%cc_%%i_%  Scanning Folders.. %-%
 Echo %TAB%Keywords  : %KeywordsPrint%
 echo %TAB%Directory :%ESC%%cd%%ESC%
@@ -501,11 +518,14 @@ set "result=0" &goto options
 
 :FI-GetDir                        
 set "locationCheck=Start"
+set "StartDir=%CD%"
 REM Current dir only
 if /i "%cdonly%"=="true" (
 	FOR %%D in (%xSelected%) do (
 		set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
-			call :FI-Scan-Desktop.ini
+		PUSHD "%%~fD"
+		call :FI-Scan-Desktop.ini
+		POPD
 	)
 	EXIT /B
 )
@@ -514,7 +534,9 @@ if /i "%Recursive%"=="yes" (
 	FOR /r %%D in (.) do (
 		if /i not "%%~fD"=="%CD%" (
 			set "location=%%D" &set "folderpath=%%~dpD" &set "foldername=%%~fD"
+			PUSHD "%%D"
 			call :FI-Scan-Desktop.ini
+			POPD
 		)
 	)
 	EXIT /B
@@ -522,9 +544,17 @@ if /i "%Recursive%"=="yes" (
 REM All inside current dir only
 FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
 	set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
-		call :FI-Scan-Desktop.ini
+	PUSHD "%%~fD"
+	call :FI-Scan-Desktop.ini
+	POPD
 )
 EXIT /B
+
+:FI-GetDir-SubDir
+set "SubDirSeparator=%w_%\%_%"
+call set "FolderNameCD=%%Location:%CD%\=%%
+call set "FolderName=%%FolderNameCD:\=%SubDirSeparator%%%"
+exit /b
 
 :FI-Scan-Display_Result           
 if not defined Selected (
@@ -587,10 +617,10 @@ REM IF %YY_d% GTR 99 (set "YY_s=%YY_d%")
 
 
 REM  Display folder name
-set    Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%foldername%%ESC%
-set    G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%foldername%%ESC%
-set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
-set   YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+set Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%foldername%%ESC%
+set G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%foldername%%ESC%
+set R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
+set YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%foldername%%ESC% 
 
 if /i "%recursive%"=="yes" call :FI-Scan-Desktop.ini-Recursive
 
@@ -598,99 +628,97 @@ if /i "%referer%"=="MultiFolderRightClick" (
 	set    R_FolderDisplay=echo %TAB%%W_%%R_s%%RR_%📁%ESC%%_%%foldername%%ESC%
 	set   YY_FolderDisplay=echo %TAB%%W_%%YY_s%%YY_%📁%ESC%%_%%foldername%%ESC% 
 )
-
-PUSHD "%location%"
 	
-	set "IconResource="
-	if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
-	if not defined IconResource (
-		for %%F in (%KeywordsFind%) do (
-			for %%X in (%ImageSupport%) do (
-				if /i "%%X"=="%%~xF" (
-					if exist "desktop.ini" (
-					REM "Access denied" if i put it up there, idk why?
-						attrib -s -h "desktop.ini"
-						attrib |EXIT /B
-						copy "desktop.ini" "desktop.backup.ini" >nul||echo %TAB%     %r_%%i_% copy fail! %-%
-						Attrib %Attrib% "desktop.ini"
-						Attrib %Attrib% "desktop.backup.ini"
-						attrib |EXIT /B
-					)
-					%YY_n%
-					%YY_FolderDisplay%
-					set /a YY_result+=1
-					set "Filename=%%~nxF"
-					set "FilePath=%%~dpF"
-					set "FileExt=%%~xF"
-					if /i "%input%"=="Scan" call :FI-Scan-Display_Result
-					if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
-					%YY_nx%
-					%YY_nxx%
-					POPD&EXIT /B
+set "IconResource="
+if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+if not defined IconResource (
+	for %%F in (%KeywordsFind%) do (
+		for %%X in (%ImageSupport%) do (
+			if /i "%%X"=="%%~xF" (
+				if exist "desktop.ini" (
+				REM "Access denied" if i put it up there, idk why?
+					attrib -s -h "desktop.ini"
+					attrib |EXIT /B
+					copy "desktop.ini" "desktop.backup.ini" 2>nul
+					Attrib %Attrib% "desktop.ini"
+					Attrib %Attrib% "desktop.backup.ini"
+					attrib |EXIT /B
 				)
+				%YY_n%
+				%YY_FolderDisplay%
+				set /a YY_result+=1
+				set "Filename=%%~nxF"
+				set "FilePath=%%~dpF"
+				set "FileExt=%%~xF"
+				if /i "%input%"=="Scan" call :FI-Scan-Display_Result
+				if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
+				%YY_nx%
+				%YY_nxx%
+				EXIT /B
 			)
 		)
-		REM %G_n%
-		%G_FolderDisplay%
-		set /a G_result+=1
-		set "newline=yes"
-		POPD&EXIT /B
 	)
-	
-	if exist "desktop.ini" if not exist "%iconresource%" (
-		for %%F in (%KeywordsFind%) do (
-			for %%X in (%ImageSupport%) do (
-				if /i "%%X"=="%%~xF" (
-					%R_n%
-					%R_FolderDisplay%
-					set /a R_result+=1
-					if /i not "%referer%"=="MultiFolderRightClick" (
-						echo %TAB%%w_%│%R_%🏞%ESC%%_%%iconresource% %g_%(file not found!)%ESC%
-						echo %TAB%%w_%│%G_%This folder previously had a folder icon, but the icon file is missing.%_%
-						echo %TAB%%w_%│%G_%The icon will be replaced with the selected image.%_%
-					)
-					set "newline=no"
-					set "Filename=%%~nxF"
-					set "FilePath=%%~dpF"
-					set "FileExt=%%~xF"
-					if /i "%input%"=="Scan" call :FI-Scan-Display_Result
-					if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
-					set "iconresource="
-					%R_nx%
-					%R_nxx%
-					POPD&EXIT /B
-				)
-			)
-		)
 	REM %G_n%
 	%G_FolderDisplay%
 	set /a G_result+=1
-	POPD&EXIT /B
+	set "newline=yes"
+	EXIT /B
+)
+
+if exist "desktop.ini" if not exist "%IconResource:"=%" (
+	for %%F in (%KeywordsFind%) do (
+		for %%X in (%ImageSupport%) do (
+			if /i "%%X"=="%%~xF" (
+				%R_n%
+				%R_FolderDisplay%
+				set /a R_result+=1
+				if /i not "%referer%"=="MultiFolderRightClick" (
+					echo %TAB%%w_%│%R_%🏞%ESC%%_%%IconResource:"=% %g_%(file not found!)%ESC%
+					echo %TAB%%w_%│%G_%This folder previously had a folder icon, but the icon file is missing.%_%
+					echo %TAB%%w_%│%G_%The icon will be replaced with the selected image.%_%
+				)
+				set "newline=no"
+				set "Filename=%%~nxF"
+				set "FilePath=%%~dpF"
+				set "FileExt=%%~xF"
+				if /i "%input%"=="Scan" call :FI-Scan-Display_Result
+				if /i "%input%"=="Generate" call :FI-Generate-Folder_Icon
+				set "iconresource="
+				%R_nx%
+				%R_nxx%
+				EXIT /B
+			)
+		)
 	)
-	
-	if exist "desktop.ini" if exist "%iconresource%" (
-		REM %Y_n%
-		%Y_FolderDisplay%
-		set /a Y_result+=1
-	)
-	
-	set "iconresource="
-	if /i "%Context%"=="Create" (
-		for %%F in (%KeywordsFind%) do (echo.&echo.&echo %r_%%TAB%   Something when wrong^?. :/  &pause>nul)
-	)
-POPD&EXIT /B
+REM %G_n%
+%G_FolderDisplay%
+set /a G_result+=1
+EXIT /B
+)
+
+if exist "desktop.ini" if exist "%IconResource:"=%" (
+	REM %Y_n%
+	%Y_FolderDisplay%
+	set /a Y_result+=1
+)
+
+set "iconresource="
+if /i "%Context%"=="Create" (
+	for %%F in (%KeywordsFind%) do (echo.&echo.&echo %r_%%TAB%   Something when wrong^?. :/  &pause>nul)
+)
+EXIT /B
 
 :FI-Scan-Desktop.ini-Recursive
-call set "FolderName=%%Location:%CD%\=%%
+call set "FolderName=%%Location:%StartDir%\=%%
 if /i "%FolderName:~-2%"=="\." set "FolderName=%FolderName:~0,-2%"
 call set "Y_FolderName=%%FolderName:\=%W_%\%_%%%"
 call set "G_FolderName=%%FolderName:\=%W_%\%_%%%"
 call set "R_FolderName=%%FolderName:\=%W_%\%R_%%%"
 call set "YY_FolderName=%%FolderName:\=%W_%\%YY_%%%"
-set    Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%Y_foldername%%ESC%
-set    G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%G_foldername%%ESC%
-set    R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%R_foldername%%ESC% 
-set   YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%YY_foldername%%ESC%
+set Y_FolderDisplay=echo %TAB%%Y_%%Y_s%📁%ESC%%_%%Y_foldername%%ESC%
+set G_FolderDisplay=echo %TAB%%G_%%G_s%📁%ESC%%_%%G_foldername%%ESC%
+set R_FolderDisplay=echo %TAB%%W_%%R_s%┌%YY_%📁%ESC%%YY_%%R_foldername%%ESC% 
+set YY_FolderDisplay=echo %TAB%%W_%%YY_s%┌%YY_%📁%ESC%%YY_%%YY_foldername%%ESC%
 exit /b
 
 :FI-Generate                      
@@ -1388,6 +1416,154 @@ echo.
 echo %TAB%%cc_% %i_%   Done!   %-%
 goto options
 
+:FI-Rename
+set result=0
+set renresult=0
+set RenDeny=0
+IF /I "%RENAME%"=="CONFIRM" goto FI-Rename-Confirm
+echo %TAB%%gg_%   %i_%  Rename Icon Files  %-%
+echo.
+echo %TAB%%w_%Directory:%ESC%%w_%%cd%%ESC%
+echo %TAB%%w_%==============================================================================%_%
+call :FI-Rename-GetDir
+Echo.
+echo %TAB%%w_%==============================================================================%_%
+IF %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%r_%%result%%_%%_%^) Couldn't find any folder icon. &goto options
+echo.  
+IF %renDeny% GTR 0 (
+	echo %_%%TAB%  ^(%y_%%result%%_%%_%^) Folder icon found.%_%  ^(%r_%%renDeny%%_%%_%^) icons can't be rename.%_%
+) else (
+echo %_%%TAB%  ^(%y_%%result%%_%%_%^) Folder icon found.%_%
+)
+echo.&echo.
+echo %TAB%%ast%%g_%Insert new icon name below then press Enter to continue.
+echo %TAB% Leave it empty to cancel.
+echo.
+set "NewIconName=(none)"
+set /p "NewIconName=%_%%TAB% %_%%i_%New icon name:%_%%bb_% "
+set "NewIconName=%NewIconName:"=%"
+if /i "%NewIconName%"=="(none)" echo.&echo.&echo %_%%TAB%   %g_%       %i_%     Canceled     %_% &goto options
+echo.
+echo.
+if /i "%NewIconName:~-4%"==".ico" set "NewIconName=%NewIconName:~0,-4%"
+echo %TAB% %w_%You are about to rename all icon's file name to "%bb_%%NewIconName%.ico%w_%" ?
+echo %TAB%%g_% Options:%_% %gn_%Y%_%/%gn_%N%_% %g_%^| Press %gg_%Y%g_% to confirm.%_%%bk_%
+echo.
+CHOICE /N /C YN
+echo.
+echo.
+echo.
+IF "%ERRORLEVEL%"=="1" set "RENAME=CONFIRM" &goto FI-Rename
+IF "%ERRORLEVEL%"=="2" echo %_%%TAB%   %g_%       %i_%     Canceled     %_% &goto options
+goto options
+
+:FI-Rename-Confirm
+set "RenSuccess=0"
+set "RenFail=0"
+echo %TAB%%gg_%   %i_%  Renaming Icon Files ...  %-%
+echo.
+echo %TAB%%w_%Directory:%ESC%%w_%%cd%%ESC%
+echo %TAB%%w_%==============================================================================%_%
+call :FI-Rename-GetDir
+Echo.
+echo %TAB%%w_%==============================================================================%_%
+echo %TAB% ^(%gg_%%RenSuccess%%_%^) icons has been renamed to%ESC%%bb_%%NewIconName%.ico%_%.%ESC%
+set "recursive="
+goto options
+
+
+:FI-Rename-GetDir
+if /i "%Recursive%"=="yes" (
+	FOR /r %%D in (.) do (
+		if /i not "%%~fD"=="%CD%" (
+			set "location=%%~fD"
+			set "folderpath=%%~dpD"
+			set "foldername=%%~nxD"
+			call :FI-GetDir-SubDir
+			PUSHD "%%~fD"
+			if /i "%rename%"=="confirm" (call :FI-Rename-Act) else call :FI-Rename-Display
+			POPD
+		)
+	)
+	EXIT /B
+)
+
+FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
+	set "location=%%~fD"
+	set "folderpath=%%~dpD"
+	set "foldername=%%~nxD"
+	PUSHD "%%~fD"
+	if /i "%rename%"=="confirm" (call :FI-Rename-Act) else call :FI-Rename-Display
+	POPD
+)
+EXIT /B
+
+:FI-Rename-Display
+title %name% %version%   "%FolderNameCD%"
+set "IconResource="
+if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+if not defined IconResource exit /b
+if not exist "%IconResource:"=%" exit /b
+echo.
+set /a Result+=1
+for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&set "IconExt=%%~xI"
+echo %TAB%%y_%📁%ESC%%FolderName%%ESC%
+if /i "%IconExt%"==".ico" echo %TAB%Icon:%ESC%%bb_%%IconName%%IconExt%%ESC%&exit /b
+echo %TAB%Icon:%ESC%%bb_%%IconName%%r_%%IconExt%%ESC% %r_%
+echo %TAB%%i_% %_%%g_% File extension other than .ico are not allowed to be rename.
+set /a RenDeny+=1
+exit /b
+
+:FI-Rename-Act
+title %name% %version%   "%FolderNameCD%"
+set "IconResource="
+set "RenDupCount="
+set "RenDup="
+if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+if not defined IconResource exit /b
+if not exist "%IconResource:"=%" exit /b
+echo.
+set /a Result+=1
+for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&set "IconExt=%%~xI"
+echo %TAB%%y_%📁%ESC%%FolderName%%ESC%
+if exist "%IconPath%%NewIconName%.ico" call :FI-Rename-Duplicate
+echo %TAB%%g_%renaming.. %ESC%%g_%%IconName%%IconExt% %gg_%-->%g_% %NewIconName%%RenDup%.ico  %r_%
+if /i "%IconExt%"==".ico" (
+	Attrib -s -h -r "%IconPath%%IconName%%IconExt%"
+	attrib |exit /b
+	ren "%IconPath%%IconName%%IconExt%" "%NewIconName%%RenDup%.ico"
+	if exist "%IconPath%%NewIconName%%RenDup%.ico" (
+		set /a RenSuccess+=1
+		attrib -s -h -r "desktop.ini"
+		>Desktop.ini	echo ^[.ShellClassInfo^]
+		>>Desktop.ini	echo IconResource="%IconPath%%NewIconName%%RenDup%.ico"
+		>>Desktop.ini	echo ^;Folder Icon generated using %name% %version%.
+		Attrib %Attrib% "%IconPath%%NewIconName%%RenDup%.ico"
+		Attrib %Attrib% "Desktop.ini"
+		attrib |exit /b
+		exit /b
+	) else (
+		set /a RenFail+=1
+		echo %TAB% %r_%%i_% Rename failed. %_%
+		echo %TAB% %g_%Original   :%ESC%%IconPath%%IconName%%IconExt%%ESC%
+		echo %TAB% %g_%Destination:%ESC%%IconPath%%NewIconName%%RenDup%.ico%ESC%
+		exit /b
+	)
+)
+echo %TAB%%_%^(%bb_%%IconExt%%_%^) %r_%File extension other than .ico is not allowed to be renamed.%_%
+exit /b
+
+:FI-Rename-Duplicate
+set /a RenDupCount+=1
+set "RenDup=-%RenDupCount%"
+if not exist "%IconPath%%NewIconName%%RenDup%.ico" (
+	echo   %ESC%%g_%%NewIconName%.ico already exist, changing name to %NewIconName%%RenDup%.ico%ESC%
+	exit /b
+)
+goto FI-Rename-Duplicate
+
+:FI-Move
+
 :FI-Remove                        
 @echo off
 set "result=0"
@@ -1450,7 +1626,7 @@ IF /i "%recursive%"=="yes" (
 	FOR /r %%D in (.) do (
 		if /i not "%%~fD"=="%CD%" (
 		set "location=%%~fD" &set "folderpath=%%~dpD" &set "foldername=%%~nxD"
-		call :FI-Remove-Get-SubDir
+		call :FI-GetDir-SubDir
 			PUSHD "%%~fD"
 				if exist "desktop.ini" (
 					FOR /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do (
@@ -1476,32 +1652,26 @@ IF /i "%recursive%"=="yes" (
 )
 EXIT /B
 
-:FI-Remove-Get-SubDir
-set "RemoverState=%w_%\%_%"
-call set "FolderName=%%Location:%CD%\=%%
-call set "FolderName=%%FolderName:\=%RemoverState%%%"
-exit /b
-
 :FI-Remove-Act                    
 if /i not "%delete%"=="confirm" (
-	if exist "%iconresource%" (
+	if exist "%IconResource:"=%" (
 		set /a result+=1
 		echo %ESC%%TAB%%y_%📁 %_%%foldername%%ESC% &exit /b
 	)
 	exit /b
 )
-if exist "%iconresource%" (
+if exist "%IconResource:"=%" (
 	set /a result+=1
 	if /i "%delete%"=="confirm" (
 		if not defined timestart call :timer-start
 		echo %ESC%%TAB%%w_%📁 %_%%foldername%%ESC%
-		echo %TAB% %g_%Icon:%ESC%%c_%%iconresource%%ESC%
-		for %%I in ("%iconresource%") do (
+		echo %TAB% %g_%Icon:%ESC%%c_%%IconResource:"=%%ESC%
+		for %%I in ("%IconResource:"=%") do (
 			if "%%~dpI"=="%cd%\" (
-				attrib -s -h "%iconresource%" 
+				attrib -s -h "%IconResource:"=%" 
 				attrib |exit /b
-				echo %TAB% %g_%Deleting%ESC%%g_%%iconresource%%ESC%%r_%
-				del /f /q "%iconresource%"			
+				echo %TAB% %g_%Deleting%ESC%%g_%%IconResource:"=%%ESC%%r_%
+				del /f /q "%IconResource:"=%"			
 			) else (echo %TAB%%ESC%%c_%%%~nxI%_% %g_%file is outside of %_%📁 %foldername%%g_%, %ESC%&echo %TAB% %g_%so it will not be deleted.)
 		)
 		echo %TAB% %g_%Deleting desktop.ini%r_%
@@ -1509,7 +1679,7 @@ if exist "%iconresource%" (
 		attrib -h -s "Desktop.ini"
 		attrib |exit /b		
 		del /f /q "Desktop.ini"
-		if not exist "desktop.ini" if not exist "%iconresource%" echo %TAB% %g_%%i_%  Done!  %-% &set /a delresult+=1 &echo.
+		if not exist "desktop.ini" if not exist "%IconResource:"=%" echo %TAB% %g_%%i_%  Done!  %-% &set /a delresult+=1 &echo.
 	)
 )
 EXIT /B
