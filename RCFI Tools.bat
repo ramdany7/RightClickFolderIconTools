@@ -7,6 +7,7 @@
 :: 2024-07-06 Adding capability to scan, generate and remove folder icons on all subfolders (recursive).
 :: 2024-07-06 Adding "More ..." button to background right-click menu.
 :: 2024-07-09 Adding ability to rename icon's file name.
+:: 2024-07-10 Adding config to set icon's file name when applying it to a folder.
 
 setlocal
 set name=RCFI Tools
@@ -791,14 +792,14 @@ goto options
 :FI-Generate-Folder_Icon          
 set /a GeneratingCount+=1
 title (%GeneratingCount%) "%FolderName%" ^| Generating folder icon ...
-if not defined Selected call :FI-ID
+if not defined Selected call :FI-Generate-Icon_Name
 if not defined Selected (
 	if not defined Context (
-		set "InputFile=%filepath%%filename%" &set "OutputFile=%cd%\foldericon(%FI-ID%).ico"
-		) else (
-			set "InputFile=%filepath%%filename%" &set "OutputFile=%filepath%foldericon(%FI-ID%).ico"
-			)
+		set "InputFile=%filepath%%filename%" &set "OutputFile=%cd%\%FolderIconName.ico%"
+	) else (
+		set "InputFile=%filepath%%filename%" &set "OutputFile=%filepath%%FolderIconName.ico%"
 	)
+)
 if not defined Selected (
 	
 	rem Removing READ ONLY attribute, hopfully it will refresh folder icon 
@@ -837,31 +838,31 @@ if not defined Selected (
 	if not exist "%OutputFile%" call "%Template%"
 	
 	rem Check icon size, if icon size is less then 200 byte then it's fail.
-	if exist "foldericon(%FI-ID%).ico" for %%S in ("foldericon(%FI-ID%).ico") do (
-		if %%~zS GTR 200 echo %TAB%%ESC%%g_%Convert success - foldericon(%FI-ID%).ico (%%~zS Bytes)%ESC%%r_%
+	if exist "%FolderIconName.ico%" for %%S in ("%FolderIconName.ico%") do (
+		if %%~zS GTR 200 echo %TAB%%ESC%%g_%Convert success - %FolderIconName.ico% (%%~zS Bytes)%ESC%%r_%
 		if %%~zS LSS 200 (
 			echo %r_%"%Filename%"
-			echo %r_%Convert error. Icon is less than 200 Bytes. -^> "foldericon(%FI-ID%).ico"%ESC%%g_%(%pp_%%%~zS Bytes%g_%)%ESC% 
-			echo %r_%Deleting "foldericon(%FI-ID%).ico" ..
-			del "foldericon(%FI-ID%).ico" >nul
+			echo %r_%Convert error. Icon is less than 200 Bytes. -^> "%FolderIconName.ico%"%ESC%%g_%(%pp_%%%~zS Bytes%g_%)%ESC% 
+			echo %r_%Deleting "%FolderIconName.ico%" ..
+			del "%FolderIconName.ico%" >nul
 			)
 		)
 	
 	rem Create desktop.ini
-	if exist "foldericon(%FI-ID%).ico" (
+	if exist "%FolderIconName.ico%" (
 		echo  %g_%%TAB%%g_%Applying resources and attributes..%r_%
 		if exist "desktop.ini" attrib -s -h "desktop.ini" &attrib |exit /b
 		>Desktop.ini	echo ^[.ShellClassInfo^]
-		>>Desktop.ini	echo IconResource=foldericon^(%FI-ID%^).ico
+		>>Desktop.ini	echo IconResource="%FolderIconName.ico%"
 		>>Desktop.ini	echo ^;Folder Icon generated using %name% %version%.
 	) else (echo %r_%%i_%Convert failed. %_%&set /a "fail_result+=1")
 	
 	rem Hiding "desktop.ini", "foldericon.ico" and adding READ ONLY attribute to folder
-	if exist "desktop.ini" if exist "foldericon(%FI-ID%).ico" (
+	if exist "desktop.ini" if exist "%FolderIconName.ico%" (
 		ren "Desktop.ini" "desktop.ini.temp"
 		ren "desktop.ini.temp" "desktop.ini"
 		Attrib %Attrib% "desktop.ini"
-		Attrib %Attrib% "foldericon(%FI-ID%).ico"
+		Attrib %Attrib% "%FolderIconName.ico%"
 		attrib +r "%cd%"
 		attrib |exit /b 
 		set /a "success_result+=1"
@@ -887,6 +888,34 @@ if not exist "%Template%" (
 	goto options
 )
 EXIT /B
+
+:FI-Generate-Icon_Name
+set "IconNameCount="
+if /i "%IconFileName%"=="%IconFileName:(ID)=%" (
+	set "FolderIconName.ico=%IconFileName%.ico"
+	if exist "%FilePath%%IconFileName%.ico" call :FI-Generate-Icon_Name-Conflict
+	exit /b
+)
+set "digit=6"
+set "string=C2DF5GHJ7KL8QRST9VXZ"
+set "string_lenght=20"
+set "digit_count="
+set "get_ID="
+
+:FI-ID-get                        
+set /a "digit_count+=1" &set /a "x=%random% %% %string_lenght%"
+call set "get_ID=%get_ID%%%string:~%x%,1%%"
+if not "%digit_count%"=="%digit%" goto FI-ID-get
+set "FI-ID=%get_ID%"
+call set "FolderIconName.ico=%%IconFileName:(ID)=(%FI-ID%)%%.ico"
+if exist "%FilePath%%IconFileName%.ico" call :FI-Generate-Icon_Name-Conflict
+exit /b
+
+:FI-Generate-Icon_Name-Conflict
+set /a IconNameCount+=1
+if exist "%FilePath%%FolderIconName.ico:~0,-4% -%IconNameCount%.ico" goto FI-Generate-Icon_Name-Conflict
+set "FolderIconName.ico=%FolderIconName.ico:~0,-4% -%IconNameCount%.ico"
+exit /b
 
 
 :FI-Template-AlwaysAsk             
@@ -1780,19 +1809,6 @@ del "%RCFI%\resources\refresh.RCFI" 2
 ping localhost -n 1 >nul
 exit
 
-:FI-ID                            
-set "digit=6"
-set "string=C2DF5GHJ7KL8QRST9VXZ"
-set "string_lenght=20"
-set "digit_count=" &set "get_ID="
-
-:FI-ID-get                        
-set /a "digit_count+=1" &set /a "x=%random% %% %string_lenght%"
-call set "get_ID=%get_ID%%%string:~%x%,1%%"
-if not "%digit_count%"=="%digit%" goto FI-ID-get
-set "FI-ID=%get_ID%"
-exit /b
-
 :IMG-Generate_icon
 if /i "%TemplateAlwaysAsk%"=="Yes" (call :FI-Template-AlwaysAsk&cls&echo.&echo.&echo.)
 call :timer-start
@@ -2489,6 +2505,7 @@ if not defined TemplateIconSize set "TemplateIconSize=Auto"
 	echo.
 	echo ---------  ADDITIONAL ------------
 	echo ExitWait="%ExitWait%"
+	echo IconFileName="%IconFileName%"
 	echo HideAsSystemFiles="%HideAsSystemFiles%"
 	echo DeleteOriginalFile="%DeleteOriginalFile%"
 	echo TextEditor="%TextEditor%"
@@ -2530,13 +2547,14 @@ set "TemplateAlwaysAsk=%TemplateAlwaysAsk:"=%"
 set "TemplateTestMode=%TemplateTestMode:"=%"
 set "TemplateTestMode-AutoExecute=%TemplateTestMode-AutoExecute:"=%"
 set "TemplateIconSize=%TemplateIconSize:"=%"
+set "IconFileName=%IconFileName:"=%"
 set "HideAsSystemFiles=%HideAsSystemFiles:"=%"
 set "DeleteOriginalFile=%DeleteOriginalFile:"=%"
 set "TextEditor=%TextEditor:"=%"
 
 
 if /i "%TemplateIconSize%"=="Auto" set "TemplateIconSize="
-
+if /i "%IconFileName%"=="" set "IconFileName=foldericon(ID)"
 if /i "%HideAsSystemFiles%"=="yes" (set "Attrib=+s +h") else (set Attrib=+h)
 
 REM "AlwaysGenerateSample=%AlwaysGenerateSample:"=%"
@@ -2558,6 +2576,7 @@ cd /d "%~dp0"
 	echo TemplateTestMode-AutoExecute="No"
 	echo TemplateIconSize="256"
 	echo ExitWait="100"
+	echo IconFileName="foldericon(ID)"
 	echo HideAsSystemFiles="No"
 	echo DeleteOriginalFile="No"
 	echo TextEditor="%windir%\notepad.exe"
