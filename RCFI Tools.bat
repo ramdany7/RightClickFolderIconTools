@@ -1,6 +1,5 @@
 @echo off
 :: Update v0.4
-:: 
 :: 2024-06-27 Fixing "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs and BeOrigin templates.
 :: 2024-06-27 Fixing Couldn’t open 'Choose template' and 'Define keywords' menu in root/drive directory.
 :: 2024-06-28 Fixing "The syntax of the command is incorrect." on 'Change folder icon' Folder right-click menu.
@@ -11,8 +10,13 @@
 :: 2024-07-10 Adding config to set icon's file name when applying it to a folder.
 :: 2024-07-11 Adding rules to folder icon remover to not delete icon file other than ".ico", avoiding it from accidently deleting important files.
 :: 2024-07-15 Resolving issue #12 Network drive/UNC paths not supported. [SOLVED]
-:: 2024-07-19 Adding ability to move icon's file path.
+:: 2024-07-19 Adding ability to move icon's path.
 :: 2024-07-24 Use "#ID" in config 'IconFileName' to generate a random 6-digit string. This random string may necessary to prevent the icon cache from displaying the previous icon instead of the newly assigned one—unless you do 'Refresh icon cache (restart explorer)'.
+:: 2024-07-30 Adding 'Move' and 'Rename' features to folder right-click menu.
+:: to do: Adding ability to hide and unhide "icon.ico" and "desktop.ini" files.
+:: to do: Fix 'move' and 'rename' functions to display the correct icon's file name and show the proper stats.
+:: to do: Adding ability to 'Generate from keywords' feature to store the keywords, choose the keyword, and have a history of previous keywords.
+:: to do: Seperate the "NFO-file extractor" function from all of the templates to 'resources\extract-nfo.bat'.
 
 setlocal
 set name=RCFI Tools
@@ -224,15 +228,15 @@ if /i "%Context%"=="FI.Search.Icon"				goto FI-Search
 if /i "%Context%"=="FI.Search.Folder.Icon.Here" set "Context="&goto FI-Search
 if /i "%Context%"=="Scan"						set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
 if /i "%Context%"=="DefKey"						goto FI-Keyword
-if /i "%Context%"=="Move"							goto FI-Move
-if /i "%Context%"=="Rename"							goto FI-Rename
+if /i "%Context%"=="Move"							set "cdonly=true"&goto FI-Move
+if /i "%Context%"=="Rename"						set "cdonly=true"&goto FI-Rename
 if /i "%Context%"=="GenKey"						set "input=Generate"&set "cdonly=true"&goto FI-Generate
 if /i "%Context%"=="GenJPG"						set "input=Generate"&set "Keywords=.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
 if /i "%Context%"=="GenPNG"						set "input=Generate"&set "Keywords=.png"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
 if /i "%Context%"=="GenPosterJPG"				set "input=Generate"&set "Keywords=Poster.jpg"	&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
 if /i "%Context%"=="GenLandscapeJPG"			set "input=Generate"&set "Keywords=Landscape.jpg"&call :Config-UpdateVar&set "cdonly=true"&goto FI-Generate
-if /i "%Context%"=="ActivateFolderIcon"		set "RefreshOpen=Select"&goto FI-Activate
-if /i "%Context%"=="DeactivateFolderIcon"		set "RefreshOpen=Select"&goto FI-Deactivate
+if /i "%Context%"=="ActivateFolderIcon"		set "cdonly=true"&goto FI-Activate-Ask
+if /i "%Context%"=="DeactivateFolderIcon"		set "cdonly=true"&goto FI-Deactivate
 if /i "%Context%"=="RemFolderIcon"				set "delete=confirm"&set "cdonly=true"		&goto FI-Remove
 REM Background Dir	                         	
 if /i "%Context%"=="DIRBG.Choose.Template"		set "refer=Choose.Template"		&goto FI-Template
@@ -1469,7 +1473,7 @@ if /i "%errorlevel%"=="2" cls&echo.&echo.&echo.&goto FI-Deactivate
 echo %TAB%%CC_%  Activating folder Icons.. %_%
 echo %TAB%%CC_%----------------------------------------%_%
 call :Timer-start
-if "%RefreshOpen%"=="Select" (
+if "%cdonly%"=="true" (
 	FOR %%D in (%xSelected%) do (
 		attrib +r "%%~fD" &attrib |EXIT /B
 		Echo  %TAB%%W_%📁%ESC%%%~nxD%ESC%
@@ -1488,7 +1492,7 @@ goto options
 echo %TAB%%CC_%    Deactivating folder Icons.. %_%
 echo %TAB%%CC_%----------------------------------------%_%
 call :Timer-start
-if "%RefreshOpen%"=="Select" (
+if "%cdonly%"=="true" (
 	FOR %%D in (%xSelected%) do (
 		attrib -r "%%~fD" &attrib |EXIT /B
 		Echo  %TAB%%G_%📁%ESC%%G_%%%~nxD%ESC%
@@ -1565,6 +1569,22 @@ goto options
 
 
 :FI-Rename-GetDir
+if /i "%cdonly%"=="true" (
+	FOR %%D in (%xSelected%) do (
+		if /i not "%%~fD"=="%CD%" (
+			set "location=%%~fD"
+			set "folderpath=%%~dpD"
+			set "foldername=%%~nxD"
+			title %name% %version%  "%%~nxD"
+			PUSHD "%%~fD"
+			if /i "%rename%"=="confirm" (call :FI-Rename-Act) else call :FI-Rename-Display
+			POPD
+		)
+	)
+	EXIT /B
+)
+
+
 if /i "%Recursive%"=="yes" (
 	FOR /r %%D in (.) do (
 		if /i not "%%~fD"=="%CD%" (
@@ -1745,6 +1765,22 @@ goto options
 
 
 :FI-Move-GetDir
+if /i "%cdonly%"=="true" (
+	FOR %%D in (%xSelected%) do (
+		if /i not "%%~fD"=="%CD%" (
+			set "location=%%~fD"
+			set "folderpath=%%~dpD"
+			set "foldername=%%~nxD"
+			set "foldernameORI=%%~nxD"
+			title %name% %version%  "%%~nxD"
+			PUSHD "%%~fD"
+			if /i "%Move%"=="confirm" (call :FI-Move-Act) else call :FI-Move-Display
+			POPD
+		)
+	)
+	EXIT /B
+)
+
 if /i "%Recursive%"=="yes" (
 	FOR /r %%D in (.) do (
 		if /i not "%%~fD"=="%CD%" (
@@ -3478,7 +3514,6 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.GenJPG]
 	echo "MUIVerb"="Generate from *.JPG"
 	echo "Icon"="shell32.dll,-241"
-	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.GenJPG\command]
 	echo @="%Scmd% set \"Context=GenJPG\"%SRCFIexe% \"%%V\""
 	
@@ -3503,11 +3538,25 @@ rem Generating setup_*.reg
 	echo [%RegExShell%\RCFI.GenLandscapeJPG\command]
 	echo @="%Scmd% set \"Context=GenLandscapeJPG\"%SRCFIexe% \"%%V\""
 	
+	:REG-FI-Move
+	echo [%RegExShell%\RCFI.Move]
+	echo "MUIVerb"="Move icon"
+	echo "Icon"="shell32.dll,-16784"
+	echo "CommandFlags"=dword:00000020
+	echo [%RegExShell%\RCFI.Move\command]
+	echo @="%Scmd% set \"Context=Move\"%SRCFIexe% \"%%V\""
+	
+	:REG-FI-Rename
+	echo [%RegExShell%\RCFI.Rename]
+	echo "MUIVerb"="Rename icon"
+	echo "Icon"="shell32.dll,-16784"
+	echo [%RegExShell%\RCFI.Rename\command]
+	echo @="%Scmd% set \"Context=Rename\"%SRCFIexe% \"%%V\""	
+	
 	:REG-FI-Activate_Folder_Icon
 	echo [%RegExShell%\RCFI.ActivateFolderIcon]
-	echo "MUIVerb"="Activate folder icons"
-	echo "Icon"="imageres.dll,-166"
-	echo "CommandFlags"=dword:00000020
+	echo "MUIVerb"="Activate/Deactivate folder icon"
+	echo "Icon"="imageres.dll,-3"
 	echo [%RegExShell%\RCFI.ActivateFolderIcon\command]
 	echo @="%Scmd% set \"Context=ActivateFolderIcon\"%SRCFIexe% \"%%V\""
 	
@@ -3520,9 +3569,8 @@ rem Generating setup_*.reg
 	
 	:REG-FI-Remove_Folder_Icon
 	echo [%RegExShell%\RCFI.RemFolderIcon]
-	echo "MUIVerb"="Remove folder icons"
+	echo "MUIVerb"="Remove folder icon"
 	echo "Icon"="shell32.dll,-145"
-	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.RemFolderIcon\command]
 	echo @="%Scmd% set \"Context=RemFolderIcon\"%SRCFIexe% \"%%V\""
 	
@@ -3648,7 +3696,7 @@ rem Generating setup_*.reg
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.GenPosterJPG;RCFI.Search.Folder.Icon;RCFI.Search.Poster;RCFI.Search.Icon;RCFI.ActivateFolderIcon;RCFI.DeactivateFolderIcon;RCFI.RemFolderIcon"
+	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.Search.Folder.Icon;RCFI.Search.Poster;RCFI.Search.Icon;RCFI.Move;RCFI.Rename;RCFI.RemFolderIcon;RCFI.ActivateFolderIcon"
 	
 	:REG-Context_Menu-FI-Background
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
