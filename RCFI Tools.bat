@@ -13,7 +13,7 @@
 :: 2024-07-19 Adding ability to move icon's path.
 :: 2024-07-24 Use "#ID" in config 'IconFileName' to generate a random 6-digit string. This random string may necessary to prevent the icon cache from displaying the previous icon instead of the newly assigned one—unless you do 'Refresh icon cache (restart explorer)'.
 :: 2024-07-30 Adding 'Move' and 'Rename' features to folder right-click menu.
-:: to do: Adding ability to hide and unhide "icon.ico" and "desktop.ini" files.
+:: 2024-07-31 Adding ability to hide and unhide "icon.ico" and "desktop.ini" files.
 :: to do: Fix 'move' and 'rename' functions to display the correct icon's file name and show the proper stats.
 :: to do: Adding ability to 'Generate from keywords' feature to store the keywords, choose the keyword, and have a history of previous keywords.
 :: to do: Seperate the "NFO-file extractor" function from all of the templates to 'resources\extract-nfo.bat'.
@@ -161,6 +161,12 @@ if /i "%Command%"=="Move"			set "recursive=no"	&set "rename=Ask"		&goto FI-Move
 if /i "%Command%"=="Mov"			set "recursive=no"	&set "Move=Ask"		&goto FI-Move
 if /i "%Command%"=="Moves"		set "recursive=yes"	&set "Move=Ask"		&goto FI-Move
 if /i "%Command%"=="Movs"		set "recursive=yes"	&set "Move=Ask"		&goto FI-Move
+
+if /i "%Command%"=="Hide"		set "recursive=no"	&goto FI-Hide
+if /i "%Command%"=="Hid"			set "recursive=no"	&goto FI-Hide
+if /i "%Command%"=="Hides"		set "recursive=yes"	&goto FI-Hide
+if /i "%Command%"=="Hids"		set "recursive=yes"	&goto FI-Hide
+
 if /i "%Command%"=="on"			set "refreshopen=index"	&goto FI-Activate
 if /i "%Command%"=="off"			set "refreshopen=index"	&goto FI-Deactivate
 if /i "%Command%"=="copy"			goto CopyFolderIcon
@@ -2147,6 +2153,127 @@ if exist "%IconResource:"=%" (
 	echo.
 )
 EXIT /B
+
+:FI-Hide
+set "Folders=0"
+set "HideCount=0"
+set "NotFI=0"
+set "HideAct="
+set "HideAttrib="
+echo.&echo.&echo.&echo.
+echo %_%                       Hide or Unhide the "desktop.ini" and "*.ico" files.
+echo %TAB%%G_%You can always hide or unhide the files; it will not move, remove or delete anything, 
+echo %TAB%%G_%nothing scary will happen. just making the files related to the folder icon hidden or not.
+echo.
+echo             %_%Press %GN_%H%_%%_% to Hide  %G_%^|%_%  Press %GN_%U%_% to Unhide%G_%
+echo.
+CHOICE /C:HU /N
+echo.&echo.&echo.
+if /i "%errorlevel%"=="2" set "HideAct=Unhide"&set "HideAttrib=-h -s"&goto FI-Hide-GetDir
+
+echo %TAB%%_%Would you you want to hide it as system file?
+echo %TAB%%G_%adding "system file" attribute to the file will make it extra hidden.
+echo %TAB%%G_%Options: %GN_%Y%G_%/%GN_%N%G_%   ^| Press %GN_%Y%G_% to make it extra hidden.
+CHOICE /C:YN /N
+echo.&echo.&echo.
+if /i "%errorlevel%"=="1" set "HideAct=Hide"&set "HideAttrib=+h +s"&goto FI-Hide-GetDir
+if /i "%errorlevel%"=="2" set "HideAct=Hide"&set "HideAttrib=+h -s"&goto FI-Hide-GetDir
+goto options
+
+:FI-Hide-GetDir
+echo %TAB%%GG_%          %I_%%W_%    Hide Icon Files    %-%
+echo.
+if /i "%recursive%"=="yes" echo %TAB%%U_%%W_%RECURSIVE MODE%_%
+set "HideActDisplay=%HideAttrib:-h -s=Unhide%
+set "HideActDisplay=%HideAttrib:+h +s=Hide as sytem files%
+set "HideActDisplay=%HideAttrib:+h -s=Hide%
+echo %TAB%%W_%Action:%ESC%%CC_%%HideActDisplay%%ESC%
+call :Timer-start
+echo %TAB%%W_%==============================================================================%_%
+if /i "%Recursive%"=="yes" (
+	FOR /r %%D in (.) do (
+		if /i not "%%~fD"=="%CD%" (
+			set "IconResource="
+			set "location=%%~fD"
+			set "folderpath=%%~dpD"
+			set "foldername=%%~nxD"
+			call :FI-GetDir-SubDir
+			PUSHD "%%~fD"
+			set /a Folders+=1
+			call :FI-Hide-Act
+			POPD
+		)
+	)
+) else (
+	FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
+		set "IconResource="
+		set "location=%%~fD"
+		set "folderpath=%%~dpD"
+		set "foldername=%%~nxD"
+		title %name% %version%  "%%~nxD"
+		PUSHD "%%~fD"
+		set /a Folders+=1
+		if exist "desktop.ini" (
+			for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+			call :FI-Hide-Act
+		) else (
+			set /a NotFI+=1
+			echo %TAB%%G_%📁%ESC%%%~nxD%ESC%
+		)
+		POPD
+	)
+)
+echo %TAB%%W_%==============================================================================%_%
+echo.
+
+set "num=%Folders%"&call :Spaces
+set "F__=%__%"
+
+set "num=%HideCount%"&call :Spaces
+set "H__=%__%"
+
+set "num=%NotFI%"&call :Spaces
+set "N__=%__%"
+
+
+echo %TAB%%F__%%U_%%Folders% Folders found.%_%
+echo %TAB%%H__%%_%%Y_%%HideCount%%_% Folders applied.
+echo %TAB%%N__%%_%%G_%%NotFI%%_% Folders have no icon resources. 
+Goto Options
+
+
+:FI-Hide-Act
+if /i "%Recursive%"=="yes" if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+
+if not defined IconResource (
+	echo %TAB%%G_%📁%ESC%%FolderName%%ESC%
+	set /a NotFI+=1
+	exit /b
+)
+
+if not exist "%IconResource:"=%" (
+	echo %TAB%%G_%📁%ESC%%FolderName%%ESC%
+	set /a NotFI+=1
+	exit /b
+)
+
+echo %TAB%%Y_%📁%ESC%%FolderName%%ESC%%R_%
+attrib %HideAttrib% "desktop.ini"
+attrib %HideAttrib% "%IconResource:"=%"
+ATTRIB |EXIT /B
+set /a HideCount+=1
+exit /b
+
+:Spaces
+if not defined num echo %R_%error: num is not defined.&exit /b
+set "__="
+set /a "TestNum=%num%+2" 2>nul||(echo %R_%Spaces counter fail!%_%&exit /b)
+if /i %num% LEQ 9     set "__=    "
+if /i %num% GTR 9     set "__=   "
+if /i %num% GTR 99    set "__=  "
+if /i %num% GTR 999   set "__= "
+if /i %num% GTR 9999  set "__="
+Exit /b
 
 :FI-Refresh                       
 call :timer-start
