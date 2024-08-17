@@ -14,7 +14,7 @@
 :: 2024-07-24 Use "#ID" in config 'IconFileName' to generate a random 6-digit string. This random string may necessary to prevent the icon cache from displaying the previous icon instead of the newly assigned one—unless you do 'Refresh icon cache (restart explorer)'.
 :: 2024-07-30 Adding 'Move' and 'Rename' features to folder right-click menu.
 :: 2024-07-31 Adding ability to hide and unhide "icon.ico" and "desktop.ini" files.
-:: to do: Fix 'move' and 'rename' functions to display the correct icon's file name and show the proper stats.
+:: 2024-08-14 Fix 'move' and 'rename' functions to display the correct icon's file name and show the proper stats.
 :: to do: Adding ability to 'Generate from keywords' feature to store the keywords, choose the keyword, and have a history of previous keywords.
 :: to do: Seperate the "NFO-file extractor" function from all of the templates to 'resources\extract-nfo.bat'.
 
@@ -525,12 +525,13 @@ set /a "hy_result=%yy_result%-%h_result%"
 echo.
 echo.
 
-IF /i %result%		LSS 10 (set "s=   "		) else (IF /i %result%		GTR 9 set "s=  "		&IF /i %result%		GTR 99	set "s= "		&IF /i %result%		GTR 999 set "s="	)
-IF /i %R_result%		LSS 10 (set "R_s=   "		) else (IF /i %R_result%		GTR 9 set "R_s=  "	&IF /i %R_result%		GTR 99	set "R_s= "	&IF /i %R_result%		GTR 999 set "R_s="	)		
-IF /i %Y_result%		LSS 10 (set "Y_s=   "		) else (IF /i %Y_result%		GTR 9 set "Y_s=  "	&IF /i %Y_result%		GTR 99 set "Y_s= "	&IF /i %Y_result%		GTR 999 set "Y_s="	)		
-IF /i %G_result%		LSS 10 (set "G_s=   "		) else (IF /i %G_result%		GTR 9 set "G_s=  "	&IF /i %G_result%		GTR 99 set "G_s= "	&IF /i %G_result%		GTR 999 set "G_s="	)		
-IF /i %YY_result%		LSS 10 (set "YY_s=   "	) else (IF /i %YY_result%		GTR 9 set "YY_s=  "	&IF /i %YY_result%	GTR 99 set "YY_s= "	&IF /i %YY_result%	GTR 999 set "YY_s="	)
-IF /i %H_result%		LSS 10 (set "H_s=   "	)	else (IF /i %H_result%		GTR 9 set "H_s=  "	&IF /i %H_result%	GTR 99 set "H_s= "	&IF /i %H_result%	GTR 999 set "H_s="	)
+set "num=%result%" &call :Spaces
+set "s=%__%"       &set "num=%R_result%"  &call :Spaces
+set "R_s=%__%"     &set "num=%Y_result%"  &call :Spaces
+set "Y_s=%__%"     &set "num=%G_result%"  &call :Spaces
+set "G_s=%__%"     &set "num=%YY_result%" &call :Spaces
+set "YY_s=%__%"    &set "num=%H_result%"  &call :Spaces
+set "H_s=%__%"
 
 echo %TAB%%s%%U_%%result% Folders found.%_%
 IF /i %YY_result%		GTR 0 IF NOT %hy_result% EQU 0 echo %TAB%%YY_%%YY_s%%HY_result%%_% Folders can be processed.
@@ -608,9 +609,6 @@ IF  %YY_result% NEQ %YY_d% (set "YY_n=echo."  ) else (set "YY_n="  )
 IF  %YY_result% EQU %YY_d% (set "YY_nx=echo." ) else (set "YY_nx=" )
 IF  %YY_result% LSS %YY_d% (set "YY_nxx=echo.") else (set "YY_nxx=")
 
-
-
-
 if /i "%referer%"=="MultiFolderRightClick" (
 	set "Y_n="   
 	set "G_n="   
@@ -621,7 +619,6 @@ if /i "%referer%"=="MultiFolderRightClick" (
 	set "YY_nx=" 
 	set "YY_nxx="
 )
-
 
 REM  display number correction +1
 IF  %Y_result% EQU %Y_d%  set /a  "Y_d+=1"
@@ -809,17 +806,22 @@ if /i "%cdonly%"=="true" if %result% EQU 1 if %g_result% EQU 1 (
 echo.
 echo.
 title %name% %version% ^| (%YY_result%) Folders processed. ^| "%SelectedThing%"
-IF /i %result%			LSS 10 (set "s=   "		) else (IF /i %result%		GTR 9 set "s=  "		&IF /i %result%		GTR 99	set "s= "		&IF /i %result%		GTR 999 set "s="	)
-IF /i %R_result%			LSS 10 (set "R_s=   "		) else (IF /i %R_result%		GTR 9 set "R_s=  "	&IF /i %R_result%		GTR 99	set "R_s= "	&IF /i %R_result%		GTR 999 set "R_s="	)		
-IF /i %Y_result%			LSS 10 (set "Y_s=   "		) else (IF /i %Y_result%		GTR 9 set "Y_s=  "	&IF /i %Y_result%		GTR 99 set "Y_s= "	&IF /i %Y_result%		GTR 999 set "Y_s="	)		
-IF /i %G_result%			LSS 10 (set "G_s=   "		) else (IF /i %G_result%		GTR 9 set "G_s=  "	&IF /i %G_result%		GTR 99 set "G_s= "	&IF /i %G_result%		GTR 999 set "G_s="	)		
-IF /i %YY_result%			LSS 10 (set "YY_s=   "	) else (IF /i %YY_result%		GTR 9 set "YY_s=  "	&IF /i %YY_result%	GTR 99 set "YY_s= "	&IF /i %YY_result%	GTR 999 set "YY_s="	)		
+set "num=%result%"   &call :Spaces
+set "s=%__%"         &set "num=%R_result%"         &call :Spaces
+set "R_s=%__%"       &set "num=%Y_result%"         &call :Spaces
+set "Y_s=%__%"       &set "num=%G_result%"         &call :Spaces
+set "G_s=%__%"       &set "num=%YY_result%"        &call :Spaces
+set "YY_s=%__%"      &set "num=%H_result%"         &call :Spaces
+set "H_s=%__%"       &set "num=%fail_result%"      &call :Spaces
+set "fail_s=%__%"    &set "num=%success_result%"   &call :Spaces
+set "success_s=%__%"
+
 IF /i %fail_result%		LSS 10 (set "fail_s=   "	) else (IF /i %fail_result%	GTR 9 set "fail_s=  "	&IF /i %fail_result%	GTR 99 set "fail_s= "	&IF /i %fail_result%	GTR 999 set "fail_s="	)
 IF /i %success_result%	LSS 10 (set "success_s=   ") else (IF /i %success_result% GTR 9 set "success_s=  " &IF /i %success_result% GTR 99 set "success_s= " &IF /i %success_result% LSS 999 set "success_s="	)
 
 echo %TAB%%s%%U_%%result% Folders found.%_%
 IF NOT "%YY_result%"=="%success_result%" IF %YY_result% GTR 0 IF %r_result% GTR 0 echo %TAB%%YY_%%YY_s%%YY_result%%_% Folders processed.
-IF /i %R_result%		GTR 0 echo %TAB%%R_%%R_s%%R_result%%_% Folders icon changed.
+IF /i %R_result%		GTR 0 echo %TAB%%R_%%R_s%%R_result%%_% Folder icons changed.
 IF /i %Y_result%		GTR 0 echo %TAB%%Y_%%Y_s%%Y_result%%_% Folders already have an icon.
 IF /i %G_result%		GTR 0 echo %TAB%%G_%%G_s%%G_result%%_% Folders have no files matching the keywords.
 IF /i %YY_result%		LSS 1 IF /i %success_result%	LSS 1 echo.&echo %TAB% ^(No folders to be processed.^)
@@ -1515,10 +1517,11 @@ echo %TAB%%CC_% %I_%   Done!   %-%
 goto options
 
 :FI-Rename
-set result=0
-set renresult=0
-set RenDeny=0
+set "result=0"
+set "renresult=0"
+set "renDeny=0"
 IF /I "%RENAME%"=="CONFIRM" goto FI-Rename-Confirm
+set "renID="
 echo %TAB%%GG_%   %I_%  Rename Icon Files  %-%
 echo.
 if /i "%recursive%"=="yes" echo %TAB%%U_%%W_%RECURSIVE MODE%_%
@@ -1545,7 +1548,14 @@ if /i "%NewIconName%"=="(none)" echo.&echo.&echo %_%%TAB%   %G_%       %I_%     
 echo.
 echo.
 if /i "%NewIconName:~-4%"==".ico" set "NewIconName=%NewIconName:~0,-4%"
-echo %TAB% %W_%You are about to rename all icon's file name to "%C_%%NewIconName%.ico%W_%" ?
+if /i not "%NewIconName%"=="%NewIconName:#ID=%" (
+	set "renID=yes"
+	set "IconFileName.bkp=%IconFileName%"
+	set "IconFileName=%NewIconName%"
+	call set "NewIconNameDisplay=%%NewIconName:#ID=%YY_%#ID%C_%%%"
+) else set "NewIconNameDisplay=%NewIconName%"
+echo %TAB% %W_%You are about to rename all icon files to "%C_%%NewIconNameDisplay%.ico%W_%" ?
+if defined renID echo %TAB% %YY_%#ID%G_% will be replaced with a 6-digit random string.
 echo %TAB%%G_% Options:%_% %GN_%Y%_%/%GN_%N%_% %G_%^| Press %GG_%Y%G_% to confirm.%_%%bk_%
 echo.
 CHOICE /N /C YN
@@ -1553,24 +1563,27 @@ echo.
 echo.
 echo.
 IF "%ERRORLEVEL%"=="1" set "RENAME=CONFIRM" &goto FI-Rename
-IF "%ERRORLEVEL%"=="2" echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &goto options
+set "IconFileName=%IconFileName.bkp%"
+echo %_%%TAB%   %G_%       %I_%     Canceled     %_%
 goto options
 
 :FI-Rename-Confirm
 set "RenSuccess=0"
 set "RenFail=0"
+if not defined command cls&echo.&echo.&echo.
 echo %TAB%%GG_%   %I_%  Renaming Icon Files ...  %-%
 echo.
 echo.
 if /i "%recursive%"=="yes" echo %TAB%%U_%%W_%RECURSIVE MODE%_%
-echo %TAB%%W_%Directory:%ESC%%W_%%cd%%ESC%
+echo %TAB%%W_%Directory:%ESC%%W.._%%cd%%ESC%
 echo %TAB%%W_%==============================================================================%_%
 call :Timer-start
 call :FI-Rename-GetDir
 Echo.
 echo %TAB%%W_%==============================================================================%_%
-echo %TAB% ^(%GG_%%RenSuccess%%_%^) icons has been renamed to%ESC%%C_%%NewIconName%.ico%_%.%ESC%
+echo %TAB% ^(%GG_%%RenSuccess%%_%^) Icons have been renamed to%ESC%%C_%%NewIconNameDisplay%.ico%_%.%ESC%
 set "recursive="
+set "IconFileName=%IconFileName.bkp%"
 goto options
 
 
@@ -1587,6 +1600,7 @@ if /i "%cdonly%"=="true" (
 			POPD
 		)
 	)
+	title %name% %version% "%CD%"
 	EXIT /B
 )
 
@@ -1603,6 +1617,7 @@ if /i "%Recursive%"=="yes" (
 			POPD
 		)
 	)
+	title %name% %version% "%CD%"
 	EXIT /B
 )
 
@@ -1615,6 +1630,7 @@ FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
 	if /i "%rename%"=="confirm" (call :FI-Rename-Act) else call :FI-Rename-Display
 	POPD
 )
+title %name% %version% "%CD%"
 EXIT /B
 
 :FI-Rename-Display
@@ -1643,6 +1659,8 @@ echo.
 set /a Result+=1
 for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&set "IconExt=%%~xI"
 echo %TAB%%Y_%📁%ESC%%FolderName%%ESC%
+if defined renID call :FI-Generate-Icon_Name
+if defined renID call set "NewIconName=%%IconFileName:#ID=%FI-ID%%%"
 if exist "%IconPath%%NewIconName%.ico" call :FI-Rename-Duplicate
 echo %TAB%%G_%renaming.. %ESC%%G_%%IconName%%IconExt% %GG_%-->%G_% %NewIconName%%RenDup%.ico  %R_%
 if /i "%IconExt%"==".ico" (
@@ -1674,15 +1692,27 @@ EXIT /B
 set /a RenDupCount+=1
 set "RenDup=-%RenDupCount%"
 if not exist "%IconPath%%NewIconName%%RenDup%.ico" (
-	echo   %ESC%%G_%%NewIconName%.ico already exist, changing name to %NewIconName%%RenDup%.ico%ESC%
+	echo    %R_%%I_% %ESC%%G_%%NewIconName%.ico already exist, changing name to %NewIconName%%RenDup%.ico%ESC%
 	EXIT /B
 )
 goto FI-Rename-Duplicate
 
 :FI-Move
-set result=0
-set movresult=0
-set MovDeny=0
+set "MovF=0"
+set "MovFG=0"
+set "MovFI=0"
+set "MovReady=0"
+set "MovDeny=0"
+set "MovSuccess=0"
+set "MovFail=0"
+set "MovAlready=0"
+set "MovMiss=0"
+set "MovMissFound=0"
+set "MovMissDeny=0"
+set "MovMissAlready=0"
+set "MovMissSuccess=0"
+set "MovMissFail=0"
+
 IF /I "%Move%"=="CONFIRM" goto FI-Move-Confirm
 echo %TAB%%GG_%   %I_%%BB_%  Move Icon Files  %-%
 echo.
@@ -1692,13 +1722,36 @@ echo %TAB%%W_%==================================================================
 call :FI-Move-GetDir
 Echo.
 echo %TAB%%W_%==============================================================================%_%
-IF %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%result%%_%%_%^) Couldn't find any folder icons. &goto options
-echo.  
-IF %movDeny% GTR 0 (
-	echo %_%%TAB%  ^(%Y_%%result%%_%%_%^) Folder icons found.%_%  ^(%R_%%movDeny%%_%%_%^) icons can't be Move.%_%
-) else (
-echo %_%%TAB%  ^(%Y_%%result%%_%%_%^) Folder icons found.%_%
-)
+
+
+echo.&echo.
+
+set /a MovAllDeny=%MovDeny%+%MovMissDeny%
+set /a MovFG=%MovF%-%MovFI%
+set num=%MovF%&call :Spaces
+set MovF__=%__%
+set num=%MovFG%&call :Spaces
+set MovFG__=%__%
+set num=%MovReady%&call :Spaces
+set MovReady__=%__%
+set num=%MovDeny%&call :Spaces
+set MovDeny__=%__%
+set num=%MovMiss%&call :Spaces
+set MovMiss__=%__%
+set num=%MovMissDeny%&call :Spaces
+set MovMissDeny__=%__%
+set num=%MovAllDeny%&call :Spaces
+set MovAllDeny__=%__%
+
+
+
+echo %TAB%%MovF__%%W_%%U_%%MovF% Folders found. %_%
+IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%Y_%%MovFI%%_%%_%^) Couldn't find any folder icons. &goto options
+IF %MovFG% GTR 0 echo %TAB%%MovFG__%%G_%%MovFG%%_% Folders have no icon resource.
+IF %MovReady% GTR 0 echo %TAB%%MovReady__%%Y_%%MovReady%%_% Icons can be moved.
+IF %MovMiss% GTR 0 echo %TAB%%MovMiss__%%YY_%%MovMiss%%_% Icons are missing from its path, the path will still be changed to the destination.
+IF %MovDeny% GTR 0 echo %TAB%%MovAllDeny__%%R_%%MovAllDeny%%_% Icons can't be moved because the icon file extension is not .ico.
+
 echo.&echo.
 echo %TAB%%ast%%G_% Insert the directory path below where you want to move the icon files to.
 echo %TAB%%ast%%G_% You can also drag and drop the folder to this window to insert the directory path.
@@ -1728,9 +1781,9 @@ POPD
 echo.
 echo.
 if /i "%MovtoCD%"=="Yes" (
-	echo %TAB% %W_%You are about to move all icon's file to %U_%each own folder%_%.
+	echo %TAB% %W_%You are about to move all icons to %U_%each own folder%_%.
 ) else (
-	echo %TAB% %W_%You are about to move all icon's file to:
+	echo %TAB% %W_%You are about to move all icons to:
 	for %%M in ("%MovDestination%") do set "MovDestination=%%~fM"&echo %TAB%%ESC%%YY_%%%~fM%ESC%
 	echo.
 )
@@ -1744,36 +1797,67 @@ IF "%ERRORLEVEL%"=="2" echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &got
 goto options
 
 :FI-Move-Confirm
-set "MovSuccess=0"
-set "MovFail=0"
-set "MovAlready=0"
-set "MovMiss=0"
-set "MovMissAlready=0"
-set "MovMissSuccess=0"
-echo %TAB%%GG_%   %I_%%GG_%  Moving Icon Files ...  %-%
+if not defined command cls&echo.&echo.&echo.
+echo %TAB%%BB_%   %I_%%BB_%  Moving Icon Files..  %-%
 echo.
 echo.
 if /i "%recursive%"=="yes" echo %TAB%%U_%%W_%RECURSIVE MODE%_%
+if /i "%MovDestination%"=="0" (set DstDisplay=Each own folder.) else set "DstDisplay=%MovDestination%"
 echo %TAB%%W_%Directory	:%ESC%%W_%%cd%%ESC%
-echo %TAB%%W_%Destination:%ESC%%YY_%%MovDestination%%ESC%
+echo %TAB%%W_%Destination	:%ESC%%YY_%%DstDisplay%%ESC%
 echo %TAB%%W_%==============================================================================%_%
 call :Timer-start
 call :FI-Move-GetDir
 Echo.
 echo %TAB%%W_%==============================================================================%_%
-echo %TAB% ^(%GG_%%MovSuccess%%_%^) icons has been moved.
-echo %TAB% ^(%GG_%%MovFail%%_%^) icons has been moved.
-echo %TAB% ^(%GG_%%MovAlready%%_%^) icons has been moved.
-echo %TAB% ^(%GG_%%MovMiss%%_%^) icons has been moved.
+echo %TAB%%W_%Destination	:%ESC%%YY_%%DstDisplay%%ESC%
+echo.&echo.
+
+set /a MovAllDeny=%MovDeny%+%MovMissDeny%
+set /a MovFG=%MovF%-%MovFI%
+
+set num=%MovF%&call :Spaces
+set MovF__=%__%
+set num=%MovFG%&call :Spaces
+set MovFG__=%__%
+set num=%MovAlready%&call :Spaces
+set MovAlready__=%__%
+set num=%MovMissFound%&call :Spaces
+set MovMissFound__=%__%
+set num=%MovSuccess%&call :Spaces
+set MovSuccess__=%__%
+set num=%MovFail%&call :Spaces
+set MovFail__=%__%
+set num=%MovDeny%&call :Spaces
+set MovDeny__=%__%
+set num=%MovMissSuccess%&call :Spaces
+set MovMissSuccess__=%__%
+set num=%MovMissFail%&call :Spaces
+set MovMissFail__=%__%
+set num=%MovMissDeny%&call :Spaces
+set MovMissDeny__=%__%
+set num=%MovAllDeny%&call :Spaces
+set MovAllDeny__=%__%
+
+echo %TAB%%MovF__%%W_%%U_%%MovF% Folders found. %_%
+IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%Y_%%MovFI%%_%%_%^) Couldn't find any folder icons. &goto options
+IF %MovFG% GTR 0 echo %TAB%%MovFG__%%G_%%MovFG%%_% Folders have no icon resource.
+IF %MovAlready% GTR 0 echo %TAB%%MovAlready__%%G_%%MovAlready%%_% Icons is already in the destination.
+IF %MovSuccess% GTR 0 echo %TAB%%MovSuccess__%%Y_%%MovSuccess%%_% Icons has been moved.
+IF %MovMissFound% GTR 0 echo %TAB%%MovMissFound__%%GG_%%MovMissFound%%_% Icons were missing and have been found in the destination.
+IF %MovMissSuccess% GTR 0 echo %TAB%%MovMissSuccess__%%RR_%%MovMissSuccess%%_% Icons were missing, but the icon path has been moved to the destination.
+IF %MovFail% GTR 0 echo %TAB%%MovFail__%%R_%%MovFail%%_% Icons failed to moved.
+IF %MovDeny% GTR 0 echo %TAB%%MovAllDeny__%%R_%%MovAllDeny%%_% Icons can't be moved because the icon file extension is not .ico.
+
 set "recursive="
 set "MovDestination="
 goto options
-
 
 :FI-Move-GetDir
 if /i "%cdonly%"=="true" (
 	FOR %%D in (%xSelected%) do (
 		if /i not "%%~fD"=="%CD%" (
+			set /a MovF+=1
 			set "location=%%~fD"
 			set "folderpath=%%~dpD"
 			set "foldername=%%~nxD"
@@ -1784,12 +1868,14 @@ if /i "%cdonly%"=="true" (
 			POPD
 		)
 	)
+	title %name% %version% "%CD%"
 	EXIT /B
 )
 
 if /i "%Recursive%"=="yes" (
 	FOR /r %%D in (.) do (
 		if /i not "%%~fD"=="%CD%" (
+			set /a MovF+=1
 			set "location=%%~fD"
 			set "folderpath=%%~dpD"
 			set "foldername=%%~nxD"
@@ -1800,10 +1886,12 @@ if /i "%Recursive%"=="yes" (
 			POPD
 		)
 	)
+	title %name% %version% "%CD%"
 	EXIT /B
 )
 
 FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
+	set /a MovF+=1
 	set "location=%%~fD"
 	set "folderpath=%%~dpD"
 	set "foldername=%%~nxD"
@@ -1813,81 +1901,53 @@ FOR /f "tokens=*" %%D in ('dir /b /a:d') do (
 	if /i "%Move%"=="confirm" (call :FI-Move-Act) else call :FI-Move-Display
 	POPD
 )
+title %name% %version% "%CD%"
 EXIT /B
 
 :FI-Move-Display
 set "IconResource="
+
 if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
 if not defined IconResource EXIT /B
-if /i "%MovtoCD%"=="Yes" set "MovDestination=%Location%"
 
+set /a MovFI+=1
 if not exist "%IconResource:"=%" (
 	echo %TAB% %W_%┌%R_%📁%ESC%%FolderName%%ESC%
-	set /a Result+=1
 	echo temporary file >"%IconResource:"=%"
 	for %%T in ("%IconResource:"=%") do (
-		if /i "%MovDestination%\"=="%%~dpT" (
-			echo %TAB%%ESC%%W_%│%G_%Icon path is already in the destination folder.%ESC%
-			echo %TAB%%ESC%%W_%└%C_%%FolderNameORI%.ico%ESC%%R_%
-			EXIT /B
-		)
+	
 		if /i "%%~xT"==".ico" (
-			if /i "%%~dpT"=="%Location%\" (
-				echo %TAB%%ESC%%W_%└%R_%%%~nxT%ESC%
-				echo %TAB%  %G_%Icon file is missing, but the icon's directory path will still be moved.
-			) else (
-				echo %TAB%%ESC%%W_%└%R_%%%~nxT%ESC%
-				echo %TAB%%ESC%%G_% %%~dpT%ESC%
-				echo %TAB%  %G_%Icon file is missing, but the icon's directory path will still be moved.
-			)
+			echo %TAB%%ESC%%W_%└%R_%%%~nxT%ESC%
+			if /i not "%%~dpT"=="%Location%\" echo %TAB%%ESC%%G_% %%~dpT%ESC%
+			echo %TAB%  %G_%Icon file is missing, but the icon's directory path will still be moved.
+			set /a MovMiss+=1
 		) else (
-			if /i "%IconPath%"=="%Location%\" (
-				echo %TAB%%ESC%%W_%└%_%%%~nT%R_%%%~xT%ESC%
-				echo %TAB%%I_%%R_% %_%%G_%  File extension other than .ico are not allowed to be moved.
-			) else (
-				echo %TAB%%ESC%%W_%└%G_%%%~nT%R_%%%~xT%ESC%
-				echo %TAB%%ESC%%G_% %%~dpT%ESC%
-				echo %TAB%%I_%%R_% %_%%G_%  File extension other than .ico are not allowed to be moved.
-			)
+			echo %TAB%%ESC%%W_%└%_%%%~nT%R_%%%~xT%ESC%
+			if /i not "%%~dpT"=="%Location%\" echo %TAB%%ESC%%G_% %%~dpT%ESC%
+			echo %TAB%%I_%%R_% %_%%G_%  File extension other than .ico are not allowed to be moved.
+			set /a MovMissDeny+=1
 		)
+	
 	)
 	del /q "%IconResource:"=%"
 	EXIT /B
 )
 echo.
 
-set /a Result+=1
 echo %TAB% %W_%┌%Y_%📁%ESC%%FolderName%%ESC%
 
 for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&set "IconExt=%%~xI"
 
-if /i "%MovDestination%\"=="%IconPath%" (
-	echo %TAB%%ESC%%W_%│%G_%Icon path is already in the destination folder.%ESC%
-	echo %TAB%%ESC%%W_%└%C_%%FolderNameORI%.ico%ESC%%R_%
-	EXIT /B
-)
-		
-
 if /i "%IconExt%"==".ico" (
-	if /i "%IconPath%"=="%Location%\" (
-		echo %TAB%%ESC%%W_%└%Y_%%IconName%%IconExt%%ESC%
-		EXIT /B
-	) else (
-		echo %TAB%%ESC%%W_%└%Y_%%IconName%%IconExt%%ESC%
-		echo %TAB%%ESC%%G_% %IconPath%%ESC%
-		EXIT /B
-	)
-)
-if /i "%IconPath%"=="%Location%\" (
-	echo %TAB%%ESC%%W_%└%Y_%%IconName%%R_%%IconExt%%ESC%
-	echo %TAB%%I_%%R_% %_%%G_%  File extension other than .ico are not allowed to be moved.
-	EXIT /B
+	echo %TAB%%ESC%%W_%└%Y_%%IconName%%IconExt%%ESC%
+	if /i not "%IconPath%"=="%Location%\" echo %TAB%%ESC%%G_% %IconPath%%ESC%
+	set /a MovReady+=1
 ) else (
 	echo %TAB%%ESC%%W_%└%Y_%%IconName%%R_%%IconExt%%ESC%
-	echo %TAB%%ESC%%G_% %IconPath%%ESC%
 	echo %TAB%%I_%%R_% %_%%G_%  File extension other than .ico are not allowed to be moved.
+	if /i not "%IconPath%"=="%Location%\" echo %TAB%%ESC%%G_% %IconPath%%ESC%
+	set /a MovDeny+=1
 )
-set /a MovDeny+=1
 EXIT /B
 
 :FI-Move-Act
@@ -1897,47 +1957,54 @@ set "MovDup="
 set "MovedFI="
 if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
 if not defined IconResource EXIT /B
-
+set /a MovFI+=1
 if /i "%MovtoCD%"=="Yes" call :FI-Generate-Icon_Name
-if /i "%MovtoCD%"=="Yes" set "MovDestination=%Location%"&set "MovedFI=%FolderIconName.ico%"
+if /i "%MovtoCD%"=="Yes" (
+	set "MovDestination=%Location%"
+	set "MovedFI=%FolderIconName.ico%"
+	set "MovIconName=%FolderIconName.ico:~,-4%"
+) else set "MovIconName=%FoldernameORI%"
 
 if not exist "%IconResource:"=%" (
-	set /a MovMiss+=1
-	if not defined MovedFI set "MovedFI=%MovDestination%\%FoldernameORI%.ico"
+	if not defined MovedFI set "MovedFI=%MovDestination%\%MovIconName%.ico"
 	echo %TAB% %W_%┌%Y_%📁%ESC%%FolderName%%ESC%
 	echo temporary file >"%IconResource:"=%"
 	for %%T in ("%IconResource:"=%") do (
 		if "%%~dpT"=="%MovDestination%\" (
-			set /a MovMissAlready+=1
-			echo %TAB%%ESC%%W_%│%G_%Icon path is already in the destination folder.%ESC%
-			echo %TAB%%ESC%%W_%└%Y_%%FolderNameORI%.ico%ESC%%R_%
+			set /a MovAlready+=1
+			echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
+			echo %TAB%%ESC%%W_% %G_%The icon file is missing, but the path is already in the destination.%ESC%
 			del /q "%IconResource:"=%" >nul
 			EXIT /B
 		)
 		if /i "%%~xT"==".ico" (
-		set /a MovMissSuccess+=1
 			if /i "%%~dpT"=="%Location%\" (
-				if exist "%MovDestination%\%FolderNameORI%.ico" (
-					echo %TAB%%ESC%%W_%│%BK_%─%%~nxT%ESC%
-					echo %TAB%%ESC%%W_%└%Y_%%FolderNameORI%.ico%ESC%%R_%
+				if exist "%MovDestination%\%MovIconName%.ico" (
+					echo %TAB%%ESC%%W_%│%G_%%%~nxT%ESC%
+					echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
 					call :FI-Move-Act-Desktop.ini
+					set /a MovMissFound+=1
 				) else (
-					echo %TAB%%ESC%%W_%│%BK_%─%%~nxT%ESC%
-					echo %TAB%%ESC%%W_%└%R_%%FolderNameORI%.ico%ESC%
+					echo %TAB%%ESC%%W_%│%G_%%%~nxT%ESC%
+					echo %TAB%%ESC%%W_%└%R_%%MovIconName%.ico%ESC%
 					call :FI-Move-Act-Desktop.ini
+					set /a MovMissSuccess+=1
 				)
 			) else (
-				if exist "%MovDestination%\%FolderNameORI%.ico" (
-					echo %TAB%%ESC%%W_%│%BK_%─%%~fT%ESC%
-					echo %TAB%%ESC%%W_%└%Y_%%FolderNameORI%.ico%ESC%%R_%
+				if exist "%MovDestination%\%MovIconName%.ico" (
+					echo %TAB%%ESC%%W_%│%G_%%%~fT%ESC%
+					echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
 					call :FI-Move-Act-Desktop.ini
+					set /a MovMissFound+=1
 				) else (
-					echo %TAB%%ESC%%W_%│%BK_%─%%~fT%ESC%
-					echo %TAB%%ESC%%W_%└%R_%%FolderNameORI%.ico%ESC%
+					echo %TAB%%ESC%%W_%│%G_%%%~fT%ESC%
+					echo %TAB%%ESC%%W_%└%R_%%MovIconName%.ico%ESC%
 					call :FI-Move-Act-Desktop.ini
+					set /a MovMissSuccess+=1
 				)
 			)
 		) else (
+			set /a MovMissDeny+=1
 			if /i "%%~dpT"=="%Location%\" (
 				echo %TAB%%ESC%%W_%└%G_%%%~nT%R_%%%~xT%ESC%
 				echo %TAB%%I_%%R_% %_%%G_% File extension other than .ico are not allowed to be moved.
@@ -1953,27 +2020,27 @@ if not exist "%IconResource:"=%" (
 	EXIT /B
 )
 
+for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&set "IconExt=%%~xI"
 
-if "%IconPath%"=="%MovDestination%\" (
+if /i "%IconPath%"=="%MovDestination%\" (
 	echo.
-	echo %TAB%%ESC%%W_%┌%Y_%📁 %FolderName%%ESC%
-	echo %TAB%%ESC%%W_%│%G_%Icon path is already in the destination folder.%ESC%
-	echo %TAB%%ESC%%W_%└%Y_%%FolderNameORI%.ico%ESC%%R_%
+	echo %TAB%%ESC%%W_%┌%Y_%📁 %_%%FolderName%%ESC%
+	echo %TAB%%ESC%%W_%│ %GG_%%G_%The icon is already in the destination.%ESC%
+	echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
 	set /a MovAlready+=1
 	EXIT /B
 )
 
 echo.
-echo %TAB%%ESC%%W_%┌%Y_%📁 %FolderName%%ESC%
-for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&set "IconExt=%%~xI"
-if not defined MovedFI set "MovedFI=%MovDestination%\%FolderNameORI%.ico"
+echo %TAB% %W_%┌%Y_%📁%ESC%%FolderName%%ESC%
+if not defined MovedFI set "MovedFI=%MovDestination%\%MovIconName%.ico"
 if exist "%MovedFI%" call :FI-Move-Duplicate
 Attrib -s -h -r "%IconPath%%IconName%%IconExt%"
 Attrib |EXIT /B
 if /i "%IconExt%"==".ico" (
 	if /i "%IconPath%"=="%Location%\" (
-		echo %TAB%%ESC%%W_%│%BK_%─%IconName%%IconExt%%ESC%
-		echo %TAB%%ESC%%W_%└%Y_%%FolderNameORI%.ico%ESC%%R_%
+		echo %TAB%%ESC%%W_%│%G_%%IconName%%IconExt%%ESC%
+		echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
 		Move "%IconResource:"=%" "%MovedFI%" >nul
 		if exist "%MovedFI%" (
 			call :FI-Move-Act-Desktop.ini
@@ -1984,11 +2051,12 @@ if /i "%IconExt%"==".ico" (
 		)
 	) else (
 		echo %TAB%%ESC%%W_%│%G_%%IconPath%%IconName%%IconExt%%ESC%
-		echo %TAB%%ESC%%W_%└%Y_%%FolderNameORI%.ico%ESC%%R_%
+		echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
 		Move "%IconResource:"=%" "%MovedFI%" >nul
 		if exist "%MovedFI%" (
 			call :FI-Move-Act-Desktop.ini
 			set /a MovSuccess+=1
+			
 		) else (
 			echo   %R_%%I_% Fail! %_%
 			set /a MovFail+=1
@@ -2003,15 +2071,16 @@ attrib -s -h -r "desktop.ini"
 >>Desktop.ini	echo IconResource="%MovedFI%"
 >>Desktop.ini	echo ^;Folder Icon generated using %name% %version%.
 Attrib %Attrib% "Desktop.ini"
+if defined MovtoCD Attrib %Attrib% "%MovedFI%"
 attrib |EXIT /B
 EXIT /B
 
 :FI-Move-Duplicate
 set /a MovDupCount+=1
 set "MovDup=-%RenDupCount%"
-set "MovedFI=%MovDestination%\%FolderNameORI%%MovDup%.ico"
+set "MovedFI=%MovDestination%\%MovIconName%%MovDup%.ico"
 if not exist "%MovedFI%" (
-	echo   %ESC%%G_% %FolderNameORI%.ico already exist, changing name to %FolderNameORI%%MovDup%.ico%ESC%
+	echo   %ESC%%G_% │ %R_%%I_% %_%%G_%%MovIconName%.ico already exist, changing name to %MovIconName%%MovDup%.ico%ESC%
 	EXIT /B
 )
 goto FI-Rename-Duplicate
@@ -2268,10 +2337,10 @@ exit /b
 if not defined num echo %R_%error: num is not defined.&exit /b
 set "__="
 set /a "TestNum=%num%+2" 2>nul||(echo %R_%Spaces counter fail!%_%&exit /b)
-if /i %num% LEQ 9     set "__=    "
-if /i %num% GTR 9     set "__=   "
-if /i %num% GTR 99    set "__=  "
-if /i %num% GTR 999   set "__= "
+if /i %num% LEQ 9     set "__=   "
+if /i %num% GTR 9     set "__=  "
+if /i %num% GTR 99    set "__= "
+if /i %num% GTR 999   set "__="
 if /i %num% GTR 9999  set "__="
 Exit /b
 
