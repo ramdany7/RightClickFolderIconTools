@@ -15,8 +15,10 @@
 :: 2024-07-30 Adding 'Move' and 'Rename' features to folder right-click menu.
 :: 2024-07-31 Adding ability to hide and unhide "icon.ico" and "desktop.ini" files.
 :: 2024-08-14 Fix 'move' and 'rename' functions to display the correct icon's file name and show the proper stats.
-:: to do: Adding ability to 'Generate from keywords' feature to store the keywords, choose the keyword, and have a history of previous keywords.
+:: 2024-08-24 Adding ability to 'Define keywords', 'Rename Icons' and 'Move Icons' feature to have a history of previous inserted value.
 :: to do: Seperate the "NFO-file extractor" function from all of the templates to 'resources\extract-nfo.bat'.
+
+
 
 setlocal
 set name=RCFI Tools
@@ -72,14 +74,14 @@ goto Options-Input
 
 :Status                           
 %p1%
-echo   %_%------- Status ----------------------------------------
-echo   Directory           :%ESC%%U_%%cd%%-%%ESC%
-echo   Target Folder Icon  : %KeywordsPrint%
+echo   %_%------- Current Status ----------------------------------------
+echo   Directory	:%ESC%%U_%%cd%%-%%ESC%
+echo   Keywords	: %KeywordsPrint%
 if exist "%Template%" ^
-echo   Folder Icon Template:%ESC%%CC_%%templatename%%_%%ESC%
+echo   Template	:%ESC%%CC_%%templatename%%_%%ESC%
 if not exist "%Template%" ^
-echo   Folder Icon Template: %R_%%I_% Not Found! %ESC%%R_%%U_%%Template%%ESC%
-echo   %_%-------------------------------------------------------
+echo   Template	: %R_%%I_% Not Found! %ESC%%R_%%U_%%Template%%ESC%
+echo   %_%---------------------------------------------------------------
 goto Options-Input
 
 :Options                          
@@ -233,7 +235,7 @@ if /i "%Context%"=="FI.Search.Logo"				goto FI-Search
 if /i "%Context%"=="FI.Search.Icon"				goto FI-Search
 if /i "%Context%"=="FI.Search.Folder.Icon.Here" set "Context="&goto FI-Search
 if /i "%Context%"=="Scan"						set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
-if /i "%Context%"=="DefKey"						goto FI-Keyword
+if /i "%Context%"=="DefKey"						%Dir% &goto FI-Keyword
 if /i "%Context%"=="Move"							set "cdonly=true"&goto FI-Move
 if /i "%Context%"=="Rename"						set "cdonly=true"&goto FI-Rename
 if /i "%Context%"=="GenKey"						set "input=Generate"&set "cdonly=true"&goto FI-Generate
@@ -247,6 +249,7 @@ if /i "%Context%"=="RemFolderIcon"				set "delete=confirm"&set "cdonly=true"		&g
 REM Background Dir	                         	
 if /i "%Context%"=="DIRBG.Choose.Template"		set "refer=Choose.Template"		&goto FI-Template
 if /i "%Context%"=="Scan.Here"					%Dir% &set "input=Scan" 			&goto FI-Scan
+if /i "%Context%"=="DefKey.Here"				%DIR% &goto FI-Keyword
 if /i "%Context%"=="GenKey.Here"				%Dir% &set "input=Generate"		&set "cdonly=false" 		&goto FI-Generate
 if /i "%Context%"=="GenJPG.Here"				%Dir% &set "input=Generate"		&set "Keywords=.jpg"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
 if /i "%Context%"=="GenPNG.Here"				%Dir% &set "input=Generate"		&set "Keywords=.png"&call :Config-UpdateVar&set "cdonly=false" &goto FI-Generate
@@ -1420,30 +1423,52 @@ if /i not "%Context%"=="" exit
 goto FI-Search
 
 :FI-Keyword                       
-echo                 %W_%%I_%     K E Y W O R D S     %_%
+echo                  %W_%%I_%     K E Y W O R D S     %_%
 echo.
 echo.
 call :Config-UpdateVar
 rem echo.
 rem echo %TAB%%Keywords%
 rem echo %TAB%%KeywordsFind%
-echo %TAB%%R_%*%G_%Certain characters can causing an error, such as: 
-echo %TAB%%R_% %G_%%G_%%C_%%%%G_% %C_%"%G_% %C_%(%G_% %C_%)%G_% %C_%<%G_% %C_%>%G_% %C_%[%G_% %C_%&%G_%%_%
-echo %TAB%%R_%*%G_%Use comma to separate multiple keywords, for example:
-echo %TAB%%R_% %C_%folder icon.ico, folder art.png, favorite image.jpg
-echo %TAB%%R_%*%G_%Spaces, dots, hypens, underscores will be interpreted as a wildcard.
-echo.
+echo %TAB%%_%• %G_%Spaces and dots, will  be interpreted as  a wildcard.
+echo %TAB%%_%• %G_%Use comma to separate multiple keywords, for example:
+echo %TAB%%_%%C_%  folder icon.ico,  folder art.png, favorite image.jpg
+echo %TAB%%_%• %G_%Certain  characters can  causing an  error,  such as: 
+echo %TAB%%_%%G_%  %G_%%C_%%%%G_% %C_%"%G_% %C_%(%G_% %C_%)%G_% %C_%<%G_% %C_%>%G_% %C_%[%G_% %C_%&%G_%%_%
 echo.
 echo.
 echo %TAB%%W_%Current keywords:%_% %KeywordsPrint%
 echo.
+if defined Keywords1 echo %TAB%  %G_%Keywords list%_%
+if defined Keywords1 echo %TAB%  %GN_%1 %G_%^>%ESC%%G_%%Keywords1%%ESC%
+if defined Keywords2 echo %TAB%  %GN_%2 %G_%^>%ESC%%G_%%Keywords2%%ESC%
+if defined Keywords3 echo %TAB%  %GN_%3 %G_%^>%ESC%%G_%%Keywords3%%ESC%
+if defined Keywords4 echo %TAB%  %GN_%4 %G_%^>%ESC%%G_%%Keywords4%%ESC%
+if defined Keywords5 echo %TAB%  %GN_%5 %G_%^>%ESC%%G_%%Keywords5%%ESC%
+if defined Keywords6 echo %TAB%  %GN_%6 %G_%^>%ESC%%G_%%Keywords6%%ESC%
+if defined Keywords7 echo %TAB%  %GN_%7 %G_%^>%ESC%%G_%%Keywords7%%ESC%
+if defined Keywords8 echo %TAB%  %GN_%8 %G_%^>%ESC%%G_%%Keywords8%%ESC%
+if defined Keywords9 echo %TAB%  %GN_%9 %G_%^>%ESC%%G_%%Keywords9%%ESC%
+echo.
+if defined Keywords1 echo %TAB%%G_%Type a keywords or choose from the list.&echo.
+set "keyHis="
 set "newKeywords=*"
-set /p "newKeywords=%-%%-%%-%%G_%%I_%Change  keywords:%_% %C_%"
-if "%newKeywords%"=="*" set "newKeyword=%Keywords%"
+set /p "newKeywords=%-%%-%%-%%G_%%I_%keywords:%_% %C_%"
+set "newKeywords=%newKeywords:"=%"
+if /i "%newKeywords%"=="*" set "newKeywords=%Keywords%" &set "KeyHis=yes"
+if /i "%newKeywords%"=="1" set "newKeywords=%Keywords1%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="2" set "newKeywords=%Keywords2%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="3" set "newKeywords=%Keywords3%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="4" set "newKeywords=%Keywords4%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="5" set "newKeywords=%Keywords5%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="6" set "newKeywords=%Keywords6%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="7" set "newKeywords=%Keywords7%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="8" set "newKeywords=%Keywords8%"&set "KeyHis=yes"
+if /i "%newKeywords%"=="9" set "newKeywords=%Keywords9%"&set "KeyHis=yes"
 set "Keywords=%newKeywords%"
-
+if not defined KeyHis call :FI-Keyword-History
 goto FI-Keyword-Selected
-echo %TAB%%R_%%I_%  Somthing when wrong :/ ^?.  %-%
+echo %TAB%%R_%%I_%  Somthing whent worng :/ ^?.  %-%
 echo.
 goto options
 
@@ -1454,17 +1479,86 @@ EXIT /B
 :FI-Keyword-Selected              
 call :Config-Save
 call :Config-UpdateVar
-if "%Context%"=="DefKey" (
-	cls &echo.&echo.&echo.&echo.&echo.&echo.&echo.
-	echo %TAB%%TAB%%W_%%I_% Keywords %_%
-	echo %TAB%%KeywordsPrint%
-	echo.
-	echo %TAB%%G_%The keywords will be use to find and generate folder icon.
-	ping localhost -n 2 >nul
-	goto options
-)
+%p1%
 echo.&echo.
-goto Status
+echo %W_%%TAB%%G_%%I_% Keywords updated! %_%
+echo.&echo.
+%p1%
+echo %TAB%%_%-------%W_%%I_% Current Status %_%----------------------------------------
+echo %TAB%Directory	:%ESC%%U_%%cd%%-%%ESC%
+echo %TAB%Keywords	: %KeywordsPrint%
+if exist "%Template%" ^
+echo %TAB%Template	:%ESC%%CC_%%templatename%%_%%ESC%
+if not exist "%Template%" ^
+echo %TAB%Template	: %R_%%I_% Not Found! %ESC%%R_%%U_%%Template%%ESC%
+echo %TAB%%_%---------------------------------------------------------------
+echo.&echo.&echo.
+echo %TAB%%W_%%I_% %_%%W_% Continue to generate folder icons%R_%?%_%
+echo %TAB%%W_%%I_% %_%%G_% Press %GG_%Y%G_% to Confirm / %GG_%N%G_% to Cancel / %GG_%S%G_% to Scan%G_% / %GG_%X%G_% to Close%BK_%
+CHOICE /N /C YNSX
+IF "%ERRORLEVEL%"=="1" (
+	if /i "%Context%"=="Defkey.Here" (
+		set "Context=GenKey.Here"
+		cls&goto Input-Context
+	)
+	if /i "%Context%"=="Defkey" (
+		set "Context=GenKey"
+		cls&goto Input-Context
+	)
+	set "Command=generate"
+	cls&goto Input-Command
+)
+
+IF "%ERRORLEVEL%"=="2" (
+	if defined Context cls&goto Input-Context
+	echo.&echo.&echo.
+	goto FI-Keyword
+)
+
+IF "%ERRORLEVEL%"=="3" (
+	if /i "%Context%"=="Defkey.Here" (
+		set "Context=Scan.Here"
+		cls&goto Input-Context
+	)
+	if /i "%Context%"=="Defkey" (
+		set "Context=Scan"
+		cls&goto Input-Context
+	)
+	set "Command=scan"
+	cls&goto Input-Command
+)
+if defined Context exit
+goto Options
+
+:FI-Keyword-History
+if /i "%Keywords1%"=="%newKeywords%" exit /b
+if /i "%Keywords2%"=="%newKeywords%" exit /b
+if /i "%Keywords3%"=="%newKeywords%" exit /b
+if /i "%Keywords4%"=="%newKeywords%" exit /b
+if /i "%Keywords5%"=="%newKeywords%" exit /b
+if /i "%Keywords6%"=="%newKeywords%" exit /b
+if /i "%Keywords7%"=="%newKeywords%" exit /b
+if /i "%Keywords8%"=="%newKeywords%" exit /b
+if /i "%Keywords9%"=="%newKeywords%" exit /b
+if not defined Keywords1 set "Keywords1=%newKeywords%" &exit /b
+if not defined Keywords2 set "Keywords2=%newKeywords%" &exit /b
+if not defined Keywords3 set "Keywords3=%newKeywords%" &exit /b
+if not defined Keywords4 set "Keywords4=%newKeywords%" &exit /b
+if not defined Keywords5 set "Keywords5=%newKeywords%" &exit /b
+if not defined Keywords6 set "Keywords6=%newKeywords%" &exit /b
+if not defined Keywords7 set "Keywords7=%newKeywords%" &exit /b
+if not defined Keywords8 set "Keywords8=%newKeywords%" &exit /b
+if not defined Keywords9 set "Keywords9=%newKeywords%" &exit /b
+set "Keywords1=%Keywords2%"
+set "Keywords2=%Keywords3%"
+set "Keywords3=%Keywords4%"
+set "Keywords4=%Keywords5%"
+set "Keywords5=%Keywords6%"
+set "Keywords6=%Keywords7%"
+set "Keywords7=%Keywords8%"
+set "Keywords8=%Keywords9%"
+set "Keywords9=%newKeywords%"
+exit /b
 
 :FI-Activate-Ask
 echo.&echo.&echo.&echo.
@@ -1537,14 +1631,40 @@ IF %renDeny% GTR 0 (
 ) else (
 echo %_%%TAB%  ^(%Y_%%result%%_%%_%^) Folder icon found.%_%
 )
+
+if defined Rename1 echo.&echo.&echo.&echo %TAB%%G_%%I_%  Icon name list  %_%
+if defined Rename1 echo %TAB%%GN_%1 %G_%^>%ESC%%G_%%Rename1%%ESC%
+if defined Rename2 echo %TAB%%GN_%2 %G_%^>%ESC%%G_%%Rename2%%ESC%
+if defined Rename3 echo %TAB%%GN_%3 %G_%^>%ESC%%G_%%Rename3%%ESC%
+if defined Rename4 echo %TAB%%GN_%4 %G_%^>%ESC%%G_%%Rename4%%ESC%
+if defined Rename5 echo %TAB%%GN_%5 %G_%^>%ESC%%G_%%Rename5%%ESC%
+if defined Rename6 echo %TAB%%GN_%6 %G_%^>%ESC%%G_%%Rename6%%ESC%
+if defined Rename7 echo %TAB%%GN_%7 %G_%^>%ESC%%G_%%Rename7%%ESC%
+if defined Rename8 echo %TAB%%GN_%8 %G_%^>%ESC%%G_%%Rename8%%ESC%
+if defined Rename9 echo %TAB%%GN_%9 %G_%^>%ESC%%G_%%Rename9%%ESC%
 echo.&echo.
-echo %TAB%%ast%%G_%Insert new icon name below then press Enter to continue.
-echo %TAB% Leave it empty to cancel.
+if defined Rename1 echo %TAB%%_%• %C_%T%G_%ype a new icon name or insert the %GN_%n%G_%umber to select it from the list.
+if not defined Rename1 echo %TAB%%_%• %G_%Type a new icon name.
+echo %TAB%%_%• %G_%use "%YY_%#ID%G_%" to  generate 6-digit random string. This may  help to prevent  explorer displaying
+echo %TAB%%_%  %G_%the previous icon from the icon cache, unless you do 'Refresh icon cache (restart explorer)'.
+echo %TAB%%_%• %G_%Leave it empty to cancel.
+echo %TAB%%_%• %G_%Press Enter to continue.
 echo.
+set "RenHis="
 set "NewIconName=(none)"
-set /p "NewIconName=%_%%TAB% %_%%I_%New icon name:%_%%C_% "
+set /p "NewIconName=%_%%TAB%%_%%I_%New icon name:%_%%C_% "
 set "NewIconName=%NewIconName:"=%"
 if /i "%NewIconName%"=="(none)" echo.&echo.&echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &goto options
+if /i "%NewIconName%"=="1" set "NewIconName=%Rename1%"&set "RenHis=yes"
+if /i "%NewIconName%"=="2" set "NewIconName=%Rename2%"&set "RenHis=yes"
+if /i "%NewIconName%"=="3" set "NewIconName=%Rename3%"&set "RenHis=yes"
+if /i "%NewIconName%"=="4" set "NewIconName=%Rename4%"&set "RenHis=yes"
+if /i "%NewIconName%"=="5" set "NewIconName=%Rename5%"&set "RenHis=yes"
+if /i "%NewIconName%"=="6" set "NewIconName=%Rename6%"&set "RenHis=yes"
+if /i "%NewIconName%"=="7" set "NewIconName=%Rename7%"&set "RenHis=yes"
+if /i "%NewIconName%"=="8" set "NewIconName=%Rename8%"&set "RenHis=yes"
+if /i "%NewIconName%"=="9" set "NewIconName=%Rename9%"&set "RenHis=yes"
+if not defined RenHis call :FI-Rename-History
 echo.
 echo.
 if /i "%NewIconName:~-4%"==".ico" set "NewIconName=%NewIconName:~0,-4%"
@@ -1555,7 +1675,7 @@ if /i not "%NewIconName%"=="%NewIconName:#ID=%" (
 	call set "NewIconNameDisplay=%%NewIconName:#ID=%YY_%#ID%C_%%%"
 ) else set "NewIconNameDisplay=%NewIconName%"
 echo %TAB% %W_%You are about to rename all icon files to "%C_%%NewIconNameDisplay%.ico%W_%" ?
-if defined renID echo %TAB% %YY_%#ID%G_% will be replaced with a 6-digit random string.
+if defined renID echo %TAB% %YY_%#ID%G_% will be replaced with a 6-digit random string.&echo.
 echo %TAB%%G_% Options:%_% %GN_%Y%_%/%GN_%N%_% %G_%^| Press %GG_%Y%G_% to confirm.%_%%bk_%
 echo.
 CHOICE /N /C YN
@@ -1568,6 +1688,7 @@ echo %_%%TAB%   %G_%       %I_%     Canceled     %_%
 goto options
 
 :FI-Rename-Confirm
+call :Config-Save
 set "RenSuccess=0"
 set "RenFail=0"
 if not defined command cls&echo.&echo.&echo.
@@ -1586,6 +1707,35 @@ set "recursive="
 set "IconFileName=%IconFileName.bkp%"
 goto options
 
+:FI-Rename-History
+if /i "%Rename1%"=="%NewIconName%" exit /b
+if /i "%Rename2%"=="%NewIconName%" exit /b
+if /i "%Rename3%"=="%NewIconName%" exit /b
+if /i "%Rename4%"=="%NewIconName%" exit /b
+if /i "%Rename5%"=="%NewIconName%" exit /b
+if /i "%Rename6%"=="%NewIconName%" exit /b
+if /i "%Rename7%"=="%NewIconName%" exit /b
+if /i "%Rename8%"=="%NewIconName%" exit /b
+if /i "%Rename9%"=="%NewIconName%" exit /b
+if not defined Rename1 set "Rename1=%NewIconName%" &exit /b
+if not defined Rename2 set "Rename2=%NewIconName%" &exit /b
+if not defined Rename3 set "Rename3=%NewIconName%" &exit /b
+if not defined Rename4 set "Rename4=%NewIconName%" &exit /b
+if not defined Rename5 set "Rename5=%NewIconName%" &exit /b
+if not defined Rename6 set "Rename6=%NewIconName%" &exit /b
+if not defined Rename7 set "Rename7=%NewIconName%" &exit /b
+if not defined Rename8 set "Rename8=%NewIconName%" &exit /b
+if not defined Rename9 set "Rename9=%NewIconName%" &exit /b
+set "Rename1=%Rename2%"
+set "Rename2=%Rename3%"
+set "Rename3=%Rename4%"
+set "Rename4=%Rename5%"
+set "Rename5=%Rename6%"
+set "Rename6=%Rename7%"
+set "Rename7=%Rename8%"
+set "Rename8=%Rename9%"
+set "Rename9=%newRename%"
+exit /b
 
 :FI-Rename-GetDir
 if /i "%cdonly%"=="true" (
@@ -1746,25 +1896,48 @@ set MovAllDeny__=%__%
 
 
 echo %TAB%%MovF__%%W_%%U_%%MovF% Folders found. %_%
-IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%Y_%%MovFI%%_%%_%^) Couldn't find any folder icons. &goto options
+IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%MovFI%%_%%_%^) Couldn't find any folder icons. &goto options
 IF %MovFG% GTR 0 echo %TAB%%MovFG__%%G_%%MovFG%%_% Folders have no icon resource.
 IF %MovReady% GTR 0 echo %TAB%%MovReady__%%Y_%%MovReady%%_% Icons can be moved.
 IF %MovMiss% GTR 0 echo %TAB%%MovMiss__%%YY_%%MovMiss%%_% Icons are missing from its path, the path will still be changed to the destination.
 IF %MovDeny% GTR 0 echo %TAB%%MovAllDeny__%%R_%%MovAllDeny%%_% Icons can't be moved because the icon file extension is not .ico.
 
 echo.&echo.
-echo %TAB%%ast%%G_% Insert the directory path below where you want to move the icon files to.
-echo %TAB%%ast%%G_% You can also drag and drop the folder to this window to insert the directory path.
-echo %TAB%%ast%%G_% Insert %YY_%0%G_% to move the icon files to each own folder.
-echo %TAB%%ast%%G_% Leave it empty to cancel. Press Enter to continue.
-
 :FI-Move-InputDir
+if defined MoveDst1 echo.&echo.&echo.&echo %TAB%%G_%%I_%  Destination list  %_%
+if defined MoveDst1 echo %TAB%%GN_%1 %G_%^>%ESC%%G_%%MoveDst1%%ESC%
+if defined MoveDst2 echo %TAB%%GN_%2 %G_%^>%ESC%%G_%%MoveDst2%%ESC%
+if defined MoveDst3 echo %TAB%%GN_%3 %G_%^>%ESC%%G_%%MoveDst3%%ESC%
+if defined MoveDst4 echo %TAB%%GN_%4 %G_%^>%ESC%%G_%%MoveDst4%%ESC%
+if defined MoveDst5 echo %TAB%%GN_%5 %G_%^>%ESC%%G_%%MoveDst5%%ESC%
+if defined MoveDst6 echo %TAB%%GN_%6 %G_%^>%ESC%%G_%%MoveDst6%%ESC%
+if defined MoveDst7 echo %TAB%%GN_%7 %G_%^>%ESC%%G_%%MoveDst7%%ESC%
+if defined MoveDst8 echo %TAB%%GN_%8 %G_%^>%ESC%%G_%%MoveDst8%%ESC%
+if defined MoveDst9 echo %TAB%%GN_%9 %G_%^>%ESC%%G_%%MoveDst9%%ESC%
+echo.&echo.
+echo %TAB%%_%• %G_%%YY_%I%G_%nsert the directory path below where you want to move the icon files to.
+if defined MoveDst1 echo %TAB%%_%• %G_%Insert the %GN_%n%G_%umber to select it from the list.
+echo %TAB%%_%• %G_%You can also %P_%drag and drop%G_% the folder to this window to insert the directory path.
+echo %TAB%%_%• %G_%Insert %YY_%0%G_% to move the icon files to %Y_%each own folder%G_%.
+echo %TAB%%_%• %G_%Leave it empty to cancel. 
+echo %TAB%%_%• %G_%Press Enter to continue.
 echo.
 set "MovtoCD="
+set "MovHis="
 set "MovDestination=(none)"
 set /p "MovDestination=%_%%TAB% %_%%I_%Destination:%_%%YY_% "
 set "MovDestination=%MovDestination:"=%"
 echo.
+if /i "%MovDestination%"=="(none)" echo.&echo.&echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &goto options
+if /i "%MovDestination%"=="1" set "MovDestination=%MoveDst1%"&set "MovHis=yes"
+if /i "%MovDestination%"=="2" set "MovDestination=%MoveDst2%"&set "MovHis=yes"
+if /i "%MovDestination%"=="3" set "MovDestination=%MoveDst3%"&set "MovHis=yes"
+if /i "%MovDestination%"=="4" set "MovDestination=%MoveDst4%"&set "MovHis=yes"
+if /i "%MovDestination%"=="5" set "MovDestination=%MoveDst5%"&set "MovHis=yes"
+if /i "%MovDestination%"=="6" set "MovDestination=%MoveDst6%"&set "MovHis=yes"
+if /i "%MovDestination%"=="7" set "MovDestination=%MoveDst7%"&set "MovHis=yes"
+if /i "%MovDestination%"=="8" set "MovDestination=%MoveDst8%"&set "MovHis=yes"
+if /i "%MovDestination%"=="9" set "MovDestination=%MoveDst9%"&set "MovHis=yes"
 if /i "%MovDestination%"=="(none)" echo.&echo.&echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &goto options
 if /i "%MovDestination%"=="0" (set "MovtoCD=yes"&goto FI-Move-Ask)
 if /i "%MovDestination%"=="." (set "MovtoCD=yes"&goto FI-Move-Ask)
@@ -1778,6 +1951,7 @@ PUSHD "%MovDestination%" 2>nul||(
 POPD
 
 :FI-Move-Ask
+if not defined MovHis call :FI-Move-History
 echo.
 echo.
 if /i "%MovtoCD%"=="Yes" (
@@ -1796,7 +1970,39 @@ IF "%ERRORLEVEL%"=="1" set "Move=CONFIRM" &goto FI-Move
 IF "%ERRORLEVEL%"=="2" echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &goto options
 goto options
 
+:FI-Move-History
+if /i "%MovDestination%"=="0" exit /b
+if /i "%MoveDst1%"=="%MovDestination%" exit /b
+if /i "%MoveDst2%"=="%MovDestination%" exit /b
+if /i "%MoveDst3%"=="%MovDestination%" exit /b
+if /i "%MoveDst4%"=="%MovDestination%" exit /b
+if /i "%MoveDst5%"=="%MovDestination%" exit /b
+if /i "%MoveDst6%"=="%MovDestination%" exit /b
+if /i "%MoveDst7%"=="%MovDestination%" exit /b
+if /i "%MoveDst8%"=="%MovDestination%" exit /b
+if /i "%MoveDst9%"=="%MovDestination%" exit /b
+if not defined MoveDst1 set "MoveDst1=%MovDestination%" &exit /b
+if not defined MoveDst2 set "MoveDst2=%MovDestination%" &exit /b
+if not defined MoveDst3 set "MoveDst3=%MovDestination%" &exit /b
+if not defined MoveDst4 set "MoveDst4=%MovDestination%" &exit /b
+if not defined MoveDst5 set "MoveDst5=%MovDestination%" &exit /b
+if not defined MoveDst6 set "MoveDst6=%MovDestination%" &exit /b
+if not defined MoveDst7 set "MoveDst7=%MovDestination%" &exit /b
+if not defined MoveDst8 set "MoveDst8=%MovDestination%" &exit /b
+if not defined MoveDst9 set "MoveDst9=%MovDestination%" &exit /b
+set "MoveDst1=%MoveDst2%"
+set "MoveDst2=%MoveDst3%"
+set "MoveDst3=%MoveDst4%"
+set "MoveDst4=%MoveDst5%"
+set "MoveDst5=%MoveDst6%"
+set "MoveDst6=%MoveDst7%"
+set "MoveDst7=%MoveDst8%"
+set "MoveDst8=%MoveDst9%"
+set "MoveDst9=%MovDestination%"
+exit /b
+
 :FI-Move-Confirm
+call :Config-Save
 if not defined command cls&echo.&echo.&echo.
 echo %TAB%%BB_%   %I_%%BB_%  Moving Icon Files..  %-%
 echo.
@@ -3141,6 +3347,10 @@ if not defined TemplateIconSize set "TemplateIconSize=Auto"
 	echo DeleteOriginalFile="%DeleteOriginalFile%"
 	echo TextEditor="%TextEditor%"
 	echo ----------------------------------
+	echo.
+	echo.
+	echo.
+	echo ===========  HISTORY  ============
 	echo DrivePath="%cd%"	
 )>"%RCFI.config.ini%"
 if /i "%TemplateIconSize%"=="Auto" set "TemplateIconSize="
@@ -3148,6 +3358,58 @@ set "Template=%RCFI%\templates\%Template:"=%.bat"
 set "TemplateForICO=%RCFI%\templates\%TemplateForICO:"=%.bat"
 set "TemplateForPNG=%RCFI%\templates\%TemplateForPNG:"=%.bat"
 set "TemplateForJPG=%RCFI%\templates\%TemplateForJPG:"=%.bat"
+
+
+if defined keywords1 (
+	(
+		echo.
+		echo ---------  Keywords --------------
+		echo keywords1="%keywords1%"
+	) >>"%RCFI.config.ini%"
+)
+if defined keywords2 echo keywords2="%keywords2%">>"%RCFI.config.ini%"
+if defined keywords3 echo keywords3="%keywords3%">>"%RCFI.config.ini%"
+if defined keywords4 echo keywords4="%keywords4%">>"%RCFI.config.ini%"
+if defined keywords5 echo keywords5="%keywords5%">>"%RCFI.config.ini%"
+if defined keywords6 echo keywords6="%keywords6%">>"%RCFI.config.ini%"
+if defined keywords7 echo keywords7="%keywords7%">>"%RCFI.config.ini%"
+if defined keywords8 echo keywords8="%keywords8%">>"%RCFI.config.ini%"
+if defined keywords9 echo keywords9="%keywords9%">>"%RCFI.config.ini%"
+
+if defined MoveDst1 (
+	(
+		echo.
+		echo.
+		echo ---------  Move  -----------------
+		echo MoveDst1="%MoveDst1%"
+	) >>"%RCFI.config.ini%"
+)
+if defined MoveDst2 echo MoveDst2="%MoveDst2%">>"%RCFI.config.ini%"
+if defined MoveDst3 echo MoveDst3="%MoveDst3%">>"%RCFI.config.ini%"
+if defined MoveDst4 echo MoveDst4="%MoveDst4%">>"%RCFI.config.ini%"
+if defined MoveDst5 echo MoveDst5="%MoveDst5%">>"%RCFI.config.ini%"
+if defined MoveDst6 echo MoveDst6="%MoveDst6%">>"%RCFI.config.ini%"
+if defined MoveDst7 echo MoveDst7="%MoveDst7%">>"%RCFI.config.ini%"
+if defined MoveDst8 echo MoveDst8="%MoveDst8%">>"%RCFI.config.ini%"
+if defined MoveDst9 echo MoveDst9="%MoveDst9%">>"%RCFI.config.ini%"
+
+if defined Rename1 (
+	(
+		echo.
+		echo.
+		echo ---------  Rename  ---------------
+		echo Rename1="%Rename1%"
+	) >>"%RCFI.config.ini%"
+)
+if defined Rename2 echo Rename2="%Rename2%">>"%RCFI.config.ini%"
+if defined Rename3 echo Rename3="%Rename3%">>"%RCFI.config.ini%"
+if defined Rename4 echo Rename4="%Rename4%">>"%RCFI.config.ini%"
+if defined Rename5 echo Rename5="%Rename5%">>"%RCFI.config.ini%"
+if defined Rename6 echo Rename6="%Rename6%">>"%RCFI.config.ini%"
+if defined Rename7 echo Rename7="%Rename7%">>"%RCFI.config.ini%"
+if defined Rename8 echo Rename8="%Rename8%">>"%RCFI.config.ini%"
+if defined Rename9 echo Rename9="%Rename9%">>"%RCFI.config.ini%"
+
 EXIT /B
 
 :Config-Load                      
@@ -3182,6 +3444,40 @@ set "IconFileName=%IconFileName:"=%"
 set "HideAsSystemFiles=%HideAsSystemFiles:"=%"
 set "DeleteOriginalFile=%DeleteOriginalFile:"=%"
 set "TextEditor=%TextEditor:"=%"
+
+
+if defined Keywords1 set "Keywords1=%Keywords1:"=%"
+if defined Keywords2 set "Keywords2=%Keywords2:"=%"
+if defined Keywords3 set "Keywords3=%Keywords3:"=%"
+if defined Keywords4 set "Keywords4=%Keywords4:"=%"
+if defined Keywords5 set "Keywords5=%Keywords5:"=%"
+if defined Keywords6 set "Keywords6=%Keywords6:"=%"
+if defined Keywords7 set "Keywords7=%Keywords7:"=%"
+if defined Keywords8 set "Keywords8=%Keywords8:"=%"
+if defined Keywords9 set "Keywords9=%Keywords9:"=%"
+
+
+if defined Rename1 set "Rename1=%Rename1:"=%"
+if defined Rename2 set "Rename2=%Rename2:"=%"
+if defined Rename3 set "Rename3=%Rename3:"=%"
+if defined Rename4 set "Rename4=%Rename4:"=%"
+if defined Rename5 set "Rename5=%Rename5:"=%"
+if defined Rename6 set "Rename6=%Rename6:"=%"
+if defined Rename7 set "Rename7=%Rename7:"=%"
+if defined Rename8 set "Rename8=%Rename8:"=%"
+if defined Rename9 set "Rename9=%Rename9:"=%"
+
+
+if defined MoveDst1 set "MoveDst1=%MoveDst1:"=%"
+if defined MoveDst2 set "MoveDst2=%MoveDst2:"=%"
+if defined MoveDst3 set "MoveDst3=%MoveDst3:"=%"
+if defined MoveDst4 set "MoveDst4=%MoveDst4:"=%"
+if defined MoveDst5 set "MoveDst5=%MoveDst5:"=%"
+if defined MoveDst6 set "MoveDst6=%MoveDst6:"=%"
+if defined MoveDst7 set "MoveDst7=%MoveDst7:"=%"
+if defined MoveDst8 set "MoveDst8=%MoveDst8:"=%"
+if defined MoveDst9 set "MoveDst9=%MoveDst9:"=%"
+
 
 
 if /i "%TemplateIconSize%"=="Auto" set "TemplateIconSize="
@@ -3240,8 +3536,6 @@ set "result=0"
 set "keywordsFind=*%keywords%*"
 set "keywordsFind=%keywordsFind: =*%"
 set "keywordsFind=%keywordsFind:.=*%
-set "keywordsFind=%keywordsFind:_=*%
-set "keywordsFind=%keywordsFind:-=*%
 set "keywordsFind=%keywordsFind:(=%"
 set "keywordsFind=%keywordsFind:)=%"
 set "keywordsFind=%keywordsFind:!=%"
@@ -3697,7 +3991,7 @@ rem Generating setup_*.reg
 	echo "MUIVerb"="Define keywords"
 	echo "Icon"="shell32.dll,-242"
 	echo [%RegExShell%\RCFI.DefKey\command]
-	echo @="%scmd% set \"Context=DefKey\"%sRCFIexe% \"%RCFITools%\""
+	echo @="%Scmd% set \"Context=DefKey\"%SRCFIexe% \"%%V\""
 	
 	:REG-FI-Generate_Keyword
 	echo [%RegExShell%\RCFI.GenKey]
@@ -3793,6 +4087,13 @@ rem Generating setup_*.reg
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.Scan.Here\command]
 	echo @="%cmd% set \"Context=Scan.Here\"%RCFIexe% \"%%V\""
+	
+	:REG-FI-Define.Keyword.Here
+	echo [%RegExShell%\RCFI.DefKey.Here]
+	echo "MUIVerb"="Define keywords"
+	echo "Icon"="shell32.dll,-242"
+	echo [%RegExShell%\RCFI.DefKey.Here\command]
+	echo @="%cmd% set \"Context=DefKey.Here\"%RCFIexe% \"%%V\""
 	
 	:REG-FI-Generate_Keyword_here
 	echo [%RegExShell%\RCFI.GenKey.Here]
@@ -3898,7 +4199,7 @@ rem Generating setup_*.reg
 	echo [%RegExBG%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"
 	echo "Icon"="imageres.dll,-190"
-	echo "SubCommands"="RCFI.RefreshNR.Here;RCFI.Refresh.Here;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon.Here;RCFI.Scan.Here;RCFI.DefKey;RCFI.GenKey.Here;RCFI.GenJPG.Here;RCFI.GenPNG.Here;RCFI.Move.Here;RCFI.Rename.Here;RCFI.RemFolderIcon.Here;RCFI.ActivateFolderIcon.Here;RCFI.Edit.Template;RCFI.Edit.Config;RCFI.More.Context;"
+	echo "SubCommands"="RCFI.RefreshNR.Here;RCFI.Refresh.Here;RCFI.DIR.Choose.Template;RCFI.Search.Folder.Icon.Here;RCFI.Scan.Here;RCFI.DefKey.Here;RCFI.GenKey.Here;RCFI.GenJPG.Here;RCFI.GenPNG.Here;RCFI.Move.Here;RCFI.Rename.Here;RCFI.RemFolderIcon.Here;RCFI.ActivateFolderIcon.Here;RCFI.Edit.Template;RCFI.Edit.Config;RCFI.More.Context;"
 	
 	:REG-Context_Menu-Images
 	echo [%RegExImage%\RCFI.Tools]
