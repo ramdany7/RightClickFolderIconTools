@@ -15,6 +15,7 @@ set "use-GlobalConfig=Yes"
 ::--------- Movie Info ---------------------
 set "display-movieinfo=yes"
 set "show-Rating=yes"
+set "preferred-rating=imdb"
 set "show-Genre=yes"
 set "genre-characters-limit=32"
 
@@ -164,7 +165,7 @@ exit /b
 
 :LAYER-RATING
 if /i not "%display-movieinfo%" EQU "yes" exit /b
-if not exist "*.nfo" (exit /b) else call :GetInfo-nfo_file
+if not exist "*.nfo" (exit /b) else call "%RCFI%\resources\extract-NFO.bat"
 if /i not "%Show-Rating%" EQU "yes" exit /b
 
 set CODE-STAR-IMAGE= ( ^
@@ -341,53 +342,6 @@ set CODE-FOLDER-NAME-LONG= ^
 	 ) -composite
 	 
 if "%FolderNameLong-characters-limit%"=="0" set "CODE-FOLDER-NAME-LONG="
-exit /b
-
-
-:GetInfo-nfo_file
-for %%N in (*.nfo) do (
-	set "nfoName=%%~nxN"
-	echo %TAB%%ESC%%g_%Movie info  :%%~nxN%ESC%
-	for /f "usebackq tokens=1,2,3,4 delims=<>" %%C in ("%%N") do (
-		if /i not "%%D"=="" (
-			if /i not "%%D"=="genre" (set "%%D=%%E") else (
-				set "genre=%%E" 
-				call :GetInfo-Collect
-			)
-		)
-	)
-)
-
-if not defined value if defined userrating if not "%userrating%"=="0" set "value=%userrating%"
-if defined value (
-	set "rating=%value:~0,3%"
-) else echo %TAB% %r_%%i_% %_%%g_% Error: No rating value provided in "%nfoName%"%r_%
-
-if "%rating%"=="0.0" echo %TAB% %r_%%i_% %_%%g_% Error: No rating value provided in "%nfoName%"%r_%&set "rating="
-if "%rating%"=="10." set "rating=10"
-
-if not defined genre (
-	echo %TAB% %r_%%i_% %_%%g_% Error: No genre provided in "%nfoName%"%r_%
-	exit /b
-)
-set "genre=__%_genre%"
-set "genre=%genre:__, =%"
-set "genre=%genre:Science Fiction=SciFi%"
-set "GenreLimit=%genre-characters-limit%"
-set /a "GenreLimit=%GenreLimit%+1"
-
-:GetInfo-Genre
-set /a GenreCount+=1
-if not "%_genre%"=="%genre%" (
-	call set "_genre=%%genre:~0,%GenreCount%%%"
-	goto GetInfo-Genre
-)
-set /A "GenreLimiter=%GenreLimit%-4"
-if %GenreCount% GTR %GenreLimit% call set "genre=%%genre:~0,%GenreLimiter%%%..."
-exit /b
-
-:GetInfo-Collect
-set "_genre=%_genre%, %genre%"
 exit /b
 
 :::::::::::::::::::::::::::   CODE END   ::::::::::::::::::::::::::::::::::

@@ -1,23 +1,30 @@
 @echo off
 :: Update v0.4
-:: 2024-06-27 Fixing "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs and BeOrigin templates.
-:: 2024-06-27 Fixing Couldn’t open 'Choose template' and 'Define keywords' menu in root/drive directory.
-:: 2024-06-28 Fixing "The syntax of the command is incorrect." on 'Change folder icon' Folder right-click menu.
-:: 2024-06-29 Adding progess info on title bar when generating folder icon.
-:: 2024-07-06 Adding capability to scan, generate and remove folder icons on all subfolders (recursive).
-:: 2024-07-06 Adding "More ..." button to background right-click menu to open RCFI Tools extended features.
-:: 2024-07-09 Adding ability to rename icon's file name.
-:: 2024-07-10 Adding config to set icon's file name when applying it to a folder.
-:: 2024-07-11 Adding rules to folder icon remover to not delete icon file other than ".ico", avoiding it from accidently deleting important files.
-:: 2024-07-15 Resolving issue #12 Network drive/UNC paths not supported. [SOLVED]
-:: 2024-07-19 Adding ability to move icon's path.
-:: 2024-07-24 Use "#ID" in config 'IconFileName' to generate a random 6-digit string. This random string may necessary to prevent the icon cache from displaying the previous icon instead of the newly assigned one—unless you do 'Refresh icon cache (restart explorer)'.
-:: 2024-07-30 Adding 'Move' and 'Rename' features to folder right-click menu.
-:: 2024-07-31 Adding ability to hide and unhide "icon.ico" and "desktop.ini" files.
-:: 2024-08-14 Fix 'move' and 'rename' functions to display the correct icon's file name and show the proper stats.
-:: 2024-08-24 Adding ability to 'Define keywords', 'Rename Icons' and 'Move Icons' feature to have a history of previous inserted value.
-:: to do: Seperate the "NFO-file extractor" function from all of the templates to 'resources\extract-nfo.bat'.
-
+:: 2024-06-27 Fixed: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11, DVDBox, and BeOrigin templates.
+:: 2024-06-27 Fixed: Couldn't open 'Choose template' and 'Define keywords' menus in the root/drive directory.
+:: 2024-06-28 Fixed: "The syntax of the command is incorrect." on the 'Change folder icon' right-click menu.
+:: 2024-06-29 Added: Progress info on the title bar when generating folder icons.
+:: 2024-07-06 Added: Capability to scan, generate, and remove folder icons in all subfolders (recursive).
+:: 2024-07-06 Added: "More..." button to the background right-click menu to open RCFI Tools extended features.
+:: 2024-07-09 Added: Ability to rename the icon's file name.
+:: 2024-07-10 Added: Config option to set the icon's file name when applying it to a folder.
+:: 2024-07-11 Added: Rules to the folder icon remover to avoid deleting non-.ico files, preventing accidental deletion of important files.
+:: 2024-07-15 Resolved: Issue #12 – Network drive/UNC paths not supported. [SOLVED]
+:: 2024-07-19 Added: Ability to move the icon's path.
+:: 2024-07-24 Added: Use "#ID" in config 'IconFileName' to generate a random 6-digit string, which helps avoid the icon cache displaying the previous icon instead of the newly assigned one (unless you refresh the icon cache by restarting Explorer).
+:: 2024-07-30 Added: 'Move' and 'Rename' features to the folder right-click menu.
+:: 2024-07-31 Added: Ability to hide and unhide "icon.ico" and "desktop.ini" files.
+:: 2024-08-14 Fixed: 'Move' and 'Rename' functions to display the correct icon file name and show the proper stats.
+:: 2024-09-20 Removed: [Template: Win11Folderify] "Picture-opacity" option because it caused transparency to render as black. 
+::            (Might fix and add it back later if anyone needs it?)
+:: 2024-09-20 Added: [Template: Win11Folderify] config "Picture-Drawing=original" to display the picture as is. Requested #13
+:: 2024-09-20 Added: [Template: Win11Folderify] config to change the shadow.
+:: 2024-08-24 Added: Ability to 'Define keywords', 'Rename Icons', and 'Move Icons' features to maintain a history of previously inserted values.
+:: 2024-09-30 Added: [Template: Kometa] New template. Requested #11
+:: 2024-09-30 Relocated: [Template: All] "NFO-file extractor" script to /resources/extract-NFO.bat.
+:: 2024-09-30 Added: [Template: All] Option to choose the preferred rating available inside the .nfo file.
+:: 2024-09-30 Fixed: Unable to replace the folder icon when IconFileName doesn’t include #ID.
+:: to do: Move "EnableShellShortcutIconRemotePath" and "MultipleInvokePromptMinimum" to "Setup_Install.reg"
 
 
 setlocal
@@ -36,40 +43,21 @@ call :Setup
 if defined Context goto Input-Context
 
 :Intro                            
-set "__=   %GG_%"
-set "_/_=%G_%/%GG_%"
-set "_I_=%G_%^:"
 echo.
 echo.
 echo.
-echo                             %I_% %name% %version% %_%%-%
+echo. 
+if not defined OpenFrom (
+	echo                             %I_% %name% %version% %_%%-%
+	echo.
+	echo                %GN_%Activate%G_%/%GN_%Act%G_%   to activate Folder Icon Tools.
+	echo                %GN_%Deactivate%G_%/%GN_%Dct%G_% to deactivate Folder Icon Tools. 
+	echo.
+) else (
+echo %TAB%                  %PP_%Drag and  drop%_%%G_% an %C_%image%G_% into  this  window,
+echo %TAB%                  then press Enter to change the folder icon.%_%
 echo.
-echo %__%Open%_/_%o         %_I_% Open RCFI Tools folder.
-echo %__%Keyword%_/_%key    %_I_% Set the keywords to search and select the image inside each folder.
-echo %__%Scans%_/_%scs      %_I_% Scan and check which image will be selected to generate the folder icon.
-echo %__%Generates%_/_%gens %_I_% Generate folder icons on current directory including all subfolders ^(recursive^).
-echo %__%Removes%_/_%rems   %_I_% Remove all folder icons on current directory including all subfolders ^(recursive^).
-echo %__%Renames%_/_%rens   %_I_% Rename all icons on current directory including all subfolders ^(recursive^).
-echo %__%Moves%_/_%movs     %_I_% Move all icons on current directory including all subfolders ^(recursive^).
-echo %__%Hides%_/_%hids     %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory 
-echo                     including all subfolders ^(recursive^).
-echo %__%Activate%_/_%act%G_%   %_I_% Activate Folder Icon Tools.
-echo %__%Deactivate%_/_%dct%G_% %_I_% Deactivate Folder Icon Tools.
-echo.
-echo %G_%Template:%ESC%%CC_%%TemplateName%%ESC%   %G_%Keywords:%ESC%%KeywordsPrint%%ESC%
-
-rem echo. 
-rem if not defined OpenFrom (
-rem 	echo                             %I_% %name% %version% %_%%-%
-rem 	echo.
-rem 	echo                %GN_%Activate%G_%/%GN_%Act%G_%   to activate Folder Icon Tools.
-rem 	echo                %GN_%Deactivate%G_%/%GN_%Dct%G_% to deactivate Folder Icon Tools. 
-rem 	echo.
-rem ) else (
-rem echo %TAB%                  %PP_%Drag and  drop%_%%G_%  an %C_%image%G_%  to  this  window
-rem echo %TAB%                  then press Enter to change the folder icon.%_%
-rem echo.
-rem )
+)
 goto Options-Input
 
 :Status                           
@@ -134,7 +122,8 @@ call :Config-Load
 for %%F in ("%cd%") do set "FolderName=%%~nxF"
 if not defined OpenFrom set "FolderName=%cd%"
 set "Command=(none)"
-echo %FolderName%
+set "FolderName=%FolderName:&=^&%"
+echo %G_%%FolderName%
 set /p "Command=%I_%%GN_% %_%%GN_% "
 set "Command=%Command:"=%"
 echo %-% &echo %-% &echo %-%
@@ -279,9 +268,27 @@ rem echo %TAB%Use %GN_%Help%G_% to see available commands.
 goto options
 
 :FI-More_Tools
+set "__=   %GG_%"
+set "_/_=%G_%/%GG_%"
+set "_I_=%G_%^:"
 PUSHD    "%SelectedThing%"
 set "Context="
-goto Intro
+echo                             %I_% %name% %version% %_%%-%
+echo.
+echo %__%Open%_/_%o         %_I_% Open RCFI Tools folder.
+echo %__%Keyword%_/_%key    %_I_% Set the keywords to search and select the image inside each folder.
+echo %__%Scans%_/_%scs      %_I_% Scan and check which image will be selected to generate the folder icon.
+echo %__%Generates%_/_%gens %_I_% Generate folder icons on current directory including all subfolders ^(recursive^).
+echo %__%Removes%_/_%rems   %_I_% Remove all folder icons on current directory including all subfolders ^(recursive^).
+echo %__%Renames%_/_%rens   %_I_% Rename all icons on current directory including all subfolders ^(recursive^).
+echo %__%Moves%_/_%movs     %_I_% Move all icons on current directory including all subfolders ^(recursive^).
+echo %__%Hides%_/_%hids     %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory 
+echo                     including all subfolders ^(recursive^).
+echo %__%Activate%_/_%act%G_%   %_I_% Activate Folder Icon Tools.
+echo %__%Deactivate%_/_%dct%G_% %_I_% Deactivate Folder Icon Tools.
+echo.
+echo %G_%Template:%ESC%%CC_%%TemplateName%%ESC%   %G_%Keywords:%ESC%%KeywordsPrint%%ESC%
+goto Options-Input
 
 :DirectInput                      
 set "cdonly=true"
@@ -395,14 +402,16 @@ if %FolderCount% EQU 1 set "Context=Change.Folder.Icon"&set "xSelected=%Selected
 echo %TAB%%_%--------------------------------------------------------------------%_%
 echo %TAB%%G_%Template:%ESC%%CC_%%TemplateName%%ESC%
 echo.
-echo %G_% %G_%Press %GN_%1%G_% then hit Enter to change them separatly in each different window.%_%
 EXIT /B
 
 :FI-Selected_folder-Input
 set "referer="
-if not exist "%input%" echo  %G_%To enter the image path you can drag and drop the image here, then press Enter. ^
- &echo %G_%------------------------------------------------------------------------------- ^
- &set /p "Input=%_%%W_%Enter the image path:%_%%C_%"
+if not exist "%input%" (
+	echo  %_%• %G_%%PP_%Drag and drop%_%%G_% an %C_%image%G_% into this window, then press Enter to change the folder icon.%_%
+	echo  %_%• %G_%%G_%Press %C_%1%G_%, then hit Enter to change them separately in each different window.%_%
+	echo %G_%-------------------------------------------------------------------------------
+	set /p "Input=%_%%W_%Enter the image path:%_%%C_%"
+)
 set "Input=%Input:"=%"
 if "%input%"=="1" goto FI-Selected_folder-Separate
 echo.
@@ -447,6 +456,7 @@ if not defined iconresource (
 ) else if not exist "%IconResource:"=%" (
 	echo %TAB%%W_%┌%Y_%📁%ESC%%YY_%%foldername%%ESC% 
 	call :FI-Generate-Folder_Icon
+	EXIT /B
 )
 if /i "%replace%"=="all" (
 	set "ReplaceThis=%IconResource:"=%"
@@ -484,6 +494,7 @@ EXIT /B
 
 
 :FI-Selected_folder-Separate
+set "referer=MultiSelectFolder"
 for %%S in (%xSelected%) do (
 	PUSHD "%%~fS" 2>nul &&(
 		start "" cmd.exe /c set "Context=Change.Folder.Icon"^&call "%~f0" "%%~fS"
@@ -542,7 +553,7 @@ IF /i %h_result%		GTR 0 echo %TAB%%rr_%%H_s%%H_result%%_% Folders can't be proce
 IF /i %R_result%		GTR 0 echo %TAB%%R_%%R_s%%R_result%%_% Folder's icons are missing and can be changed.
 IF /i %Y_result%		GTR 0 echo %TAB%%Y_%%Y_s%%Y_result%%_% Folders already have an icon.
 IF /i %G_result%		GTR 0 echo %TAB%%G_%%G_s%%G_result%%_% Folders have no files matching the keywords.
-IF /i %YY_result%		LSS 1 echo.&echo %TAB% Couldn't find any files matching the keywords. No folder icons to be generated.
+IF /i %YY_result%		LSS 1 echo.&echo %TAB%%R_% Couldn't find any files matching the keywords. No folder icons to be generated.%_%
 echo.
 set "result=0" &goto options
 
@@ -840,12 +851,17 @@ title (%GeneratingCount%) "%FolderName%" ^| Generating folder icon ...
 if not defined Selected call :FI-Generate-Icon_Name
 if not defined Selected (
 	if not defined Context (
-		set "InputFile=%filepath%%filename%" &set "OutputFile=%cd%\%FolderIconName.ico%"
+		set "InputFile=%filepath%%filename%" 
+		set "OutputFile=%cd%\%FolderIconName.ico%"
+		ATTRIB -s -h -r "%cd%\%FolderIconName.ico%" >nul
+		ATTRIB |EXIT /B
 	) else (
-		set "InputFile=%filepath%%filename%" &set "OutputFile=%filepath%%FolderIconName.ico%"
+		set "InputFile=%filepath%%filename%"
+		set "OutputFile=%filepath%%FolderIconName.ico%"
+		ATTRIB -s -h -r "%filepath%%FolderIconName.ico%" >nul
+		ATTRIB |EXIT /B
 	)
 )
-
 
 if not defined Selected (
 	
@@ -892,6 +908,7 @@ if not defined Selected (
 			echo %R_%Convert error. Icon is less than 200 Bytes. -^> "%FolderIconName.ico%"%ESC%%G_%(%PP_%%%~zS Bytes%G_%)%ESC% 
 			echo %R_%Deleting "%FolderIconName.ico%" ..
 			del "%FolderIconName.ico%" >nul
+			ren "%ReplaceAfter%" "%ReplaceBefore%" >nul
 			)
 		)
 	
@@ -914,9 +931,8 @@ if not defined Selected (
 		attrib |EXIT /B 
 		set /a "success_result+=1"
 		if exist "%ReplaceThis%" for %%R in ("%ReplaceThis%") do (
-			attrib "%ReplaceThis%" -s -h
-			attrib |EXIT /B
-			if /i "%%~xR"==".ico" del "%ReplaceThis%">nul&set "ReplaceThis="
+			if /i "%%~xR"==".ico" if /i not "%OutputFile%"=="%%~fR" del "%ReplaceThis%" >nul
+			set "ReplaceThis="
 		)
 		if /i "%DeleteOriginalFile%"=="yes" del "%InputFile%"&&echo %TAB%%g_% "%FileName%" deleted.
 		echo %TAB% %i_%%g_%  Success!  %-%
@@ -938,11 +954,22 @@ EXIT /B
 
 :FI-Generate-Icon_Name
 set "IconNameCount="
+
+if defined ReplaceThis for %%R in ("%ReplaceThis%") do (
+	ATTRIB -s -h -r "%%~fR" >nul
+	ATTRIB |EXIT /B
+	set "ReplaceBefore=%%~nxR"
+	set "ReplaceAfter=%%~nR(replace).ico"
+	if /i "%%~xR"==".ico" (ren "%%~nxR" "%%~nR(replace).ico" >nul) else set "ReplaceThis="
+	if exist "%%~dpnR(replace).ico" set "ReplaceThis=%%~dpnR(replace).ico"
+)
+
 if /i "%IconFileName%"=="%IconFileName:#ID=%" (
 	set "FolderIconName.ico=%IconFileName%.ico"
 	if exist "%FilePath%%IconFileName%.ico" call :FI-Generate-Icon_Name-Conflict
 	EXIT /B
 )
+
 set "digit=6"
 set "string=C2DF5GHJ7KL8QRST9VXZ"
 set "string_lenght=20"
@@ -1482,8 +1509,8 @@ call :Config-UpdateVar
 %p1%
 echo.&echo.
 echo %W_%%TAB%%G_%%I_% Keywords updated! %_%
+%p2%
 echo.&echo.
-%p1%
 echo %TAB%%_%-------%W_%%I_% Current Status %_%----------------------------------------
 echo %TAB%Directory	:%ESC%%U_%%cd%%-%%ESC%
 echo %TAB%Keywords	: %KeywordsPrint%
@@ -1624,7 +1651,7 @@ echo %TAB%%W_%==================================================================
 call :FI-Rename-GetDir
 Echo.
 echo %TAB%%W_%==============================================================================%_%
-IF %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%result%%_%%_%^) Couldn't find any folder icon. &goto options
+IF %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%result%%_%%_%^) Couldn't find folder icon. &goto options
 echo.  
 IF %renDeny% GTR 0 (
 	echo %_%%TAB%  ^(%Y_%%result%%_%%_%^) Folder icon found.%_%  ^(%R_%%renDeny%%_%%_%^) icons can't be rename.%_%
@@ -1896,7 +1923,7 @@ set MovAllDeny__=%__%
 
 
 echo %TAB%%MovF__%%W_%%U_%%MovF% Folders found. %_%
-IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%MovFI%%_%%_%^) Couldn't find any folder icons. &goto options
+IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%MovFI%%_%%_%^) Couldn't find folder icons. &goto options
 IF %MovFG% GTR 0 echo %TAB%%MovFG__%%G_%%MovFG%%_% Folders have no icon resource.
 IF %MovReady% GTR 0 echo %TAB%%MovReady__%%Y_%%MovReady%%_% Icons can be moved.
 IF %MovMiss% GTR 0 echo %TAB%%MovMiss__%%YY_%%MovMiss%%_% Icons are missing from its path, the path will still be changed to the destination.
@@ -2306,7 +2333,7 @@ echo %TAB%%W_%==================================================================
 call :FI-Remove-Get
 echo %TAB%%W_%==============================================================================%_%
 IF /i %result% LSS 1 if defined Context cls
-IF /i %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%result%%_%%_%^) Couldn't find any folder icon. &goto options
+IF /i %result% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%result%%_%%_%^) Couldn't find folder icon. &goto options
 echo. &echo %_%%TAB%  ^(%Y_%%result%%_%%_%^) Folder icon found.%_% &echo.&echo.
 echo       %_%%R_%Continue to Remove (%Y_%%result%%_%%R_%^) folder icons^?%-% 
 echo %TAB%%ast%%G_%The folder icon will be deactivated from the folder, "desktop.ini"
@@ -3311,6 +3338,7 @@ if /i "%ImgSizeInput%"=="2" echo %TAB%%_%Exiting configuration.. &goto options
 goto options
 
 :Config-Save                      
+if /i "%referer%"=="MultiSelectFolder" exit /b
 REM Save current config to RCFI.config.ini
 if exist "%Template%"        (for %%T in ("%Template%")        do set "Template=%%~nT")       else (set "Template=%RCFI%\templates\(none).bat")
 if exist "%TemplateForICO%"	(for %%T in ("%TemplateForICO%") do set "TemplateForICO=%%~nT") else (set "TemplateForICO=(none)")

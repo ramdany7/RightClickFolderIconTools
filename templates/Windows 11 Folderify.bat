@@ -1,6 +1,11 @@
-:: Template-Version=v1.1
+:: Template-Version=v1.2
 :: 2024-06-22 Fix: The star image was rendered in the generated folder icon even when the “.nfo” file didn’t exist.
-:: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
+:: 2024-06-24 Added "Global Config" to override template config using 'RCFI.template.ini'.
+:: 2024-10-20 Removed "Picture-opacity" option because it caused transparency to render as black. 
+::            (Might fix and add it back later if anyone needs it?)
+:: 2024-10-20 Added config "Picture-Drawing=original" to display the picture as is.
+:: 2024-10-20 Added config to change the shadow.
+
 
 ::                Template Info
 ::========================================================
@@ -16,6 +21,7 @@ set "use-GlobalConfig=Yes"
 ::--------- Movie Info ---------------------
 set "display-movieinfo=yes"
 set "show-Rating=yes"
+set "preferred-rating=imdb"
 set "show-Genre=yes"
 set "genre-characters-limit=32"
 
@@ -54,8 +60,10 @@ set "FolderName-Center=Auto"
 
 ::--------- Picture Config -----------------
 set "Picture-Drawing=yes"
-set "Picture-Opacity=100%"
-
+   :: Options: original = display the picture as is.
+   ::               yes = display as a grayscale picture.
+   ::               no  = convert everything to black, except for transparency.
+   
 set "Picture-TrimTransparentSpace=yes"
 set "Picture-Width=400"
 set "Picture-Height=230"
@@ -76,6 +84,11 @@ set "Picture-Position-Y=+20"
 	  set "Picture-Drawing-OFF-Exposure=60"
 	  set "Picture-Drawing-OFF-Saturation=100"
 	  set "Picture-Drawing-OFF-Smoothness=15"
+
+set "Picture-Shadow=yes"
+set "Shadow-Color=BLACK"
+set "Shadow-Opacity=20"
+set "Shadow-Blur=0.6"
 
 set "ReAdjust-BG-position=yes"
 ::========================================================
@@ -141,8 +154,9 @@ if /i not "%ReAdjust-BG-position%"=="yes" (
 	 -extent 512x512!
 )
 
-set /a "PicOp=255*%Picture-Opacity%/100"
-set "Picture-Opacity=-alpha set -channel A -evaluate set %PicOp% +channel"
+rem need to fix "Picture-Transparency" option, cant render "Picture-Drawing".
+rem set /a "PicOp=255*%Picture-Transparency%/100"
+rem set "Picture-Transparency=-alpha set -channel RGB -evaluate set %PicOp% +channel"
 
 set CODE-FOLDERIFY= ( "%Win11Folderify-BG%" %ReAdjust-Position% ) -compose over -composite
 
@@ -154,42 +168,55 @@ set "Win11FolderifyMask=Win11FolderifyMask(%FI-ID%).png"
 if /i "%Picture-Drawing%"=="yes" (
 	set "PictureIntensity=-modulate %Picture-Drawing-ON-Exposure%,%Picture-Drawing-ON-Saturation% -brightness-contrast %Picture-Drawing-ON-Brightness%x%Picture-Drawing-ON-Contrast% -blur 0x%Picture-Drawing-ON-Smoothness%"
 	set "Picture-Drawing=-modulate 95,70 -brightness-contrast 0x10 -background white -channel a -alpha remove -channel rgb -negate -alpha shape"
-) else (
+) else if /i not "%Picture-Drawing%"=="original" (
 	set "Picture-Drawing="
 	set "PictureIntensity=-modulate %Picture-Drawing-OFF-Exposure%,%Picture-Drawing-OFF-Saturation% -brightness-contrast %Picture-Drawing-OFF-Brightness%x%Picture-Drawing-OFF-Contrast% -blur 0x%Picture-Drawing-OFF-Smoothness%"	
 	)
 
-"%Converter%" ( "%canvas%" ^
+if /i not "%Picture-Shadow%"=="no" set Picture-Shadow-Code= ^
+	 ( +clone -background %Shadow-Color% -shadow %Shadow-Opacity%x%Shadow-Blur%+4.5+2.0 ) +swap -background none -layers merge ^
+	 ( +clone -background %Shadow-Color% -shadow %Shadow-Opacity%x%Shadow-Blur%-0.1-0.1 ) +swap -background none -layers merge ^
+	 ( +clone -background %Shadow-Color% -shadow %Shadow-Opacity%x%Shadow-Blur%-0.1+0.1 ) +swap -background none -layers merge ^
+	 ( +clone -background %Shadow-Color% -shadow %Shadow-Opacity%x%Shadow-Blur%+0.1-0.1 ) +swap -background none -layers merge
+	 
+if /i "%Picture-Shadow%"=="no" set "Picture-Shadow-Code="
+
+
+if /i not "%Picture-Drawing%"=="original" "%Converter%" ( "%canvas%" ^
 	-scale 512x512! ^
 	-background none ^
 	-extent 512x512 ^
  ) -compose Over ^
-	( "%InputFile%" %Picture-Opacity% %TrimPNG% ^
-	 ( +clone -background BLACK -shadow 20x0.6+4.5+2.0 ) +swap -background none -layers merge ^
-	 ( +clone -background BLACK -shadow 20x0.6-0.1-0.1 ) +swap -background none -layers merge ^
-	 ( +clone -background BLACK -shadow 20x0.6-0.1+0.1 ) +swap -background none -layers merge ^
-	 ( +clone -background BLACK -shadow 20x0.6+0.1-0.1 ) +swap -background none -layers merge ^
+	( "%InputFile%" %Picture-Transparency% %TrimPNG% ^
 	 %Picture-Drawing% ^
 	 -scale %Picture-Width%x%Picture-Height%^ ^
 	 -gravity %Picture-Gravity% ^
 	 -geometry %Picture-Position-X%%Picture-Position-Y% ^
+	 %Picture-Shadow-Code% ^
 	) -compose over -composite "%Win11FolderifyMask%"
-
 	 
 set CODE-PICTURE=	( ^
-	 "%Win11Folderify-BG%" %ReAdjust-Position% ^
-	 -scale 512x512! ^
-	 %PictureIntensity% ^
-	 "%Win11FolderifyMask%" ) -compose Over  -composite
-	  
+	"%Win11Folderify-BG%" %ReAdjust-Position% ^
+	-scale 512x512! ^
+	%PictureIntensity% ^
+	"%Win11FolderifyMask%" ) -compose Over  -composite
+
+if /i "%Picture-Drawing%"=="original" set CODE-PICTURE= ( ^
+	"%InputFile%" ^
+	-scale %Picture-Width%x%Picture-Height%^ ^
+	-gravity %Picture-Gravity% ^
+	-geometry %Picture-Position-X%%Picture-Position-Y% ^
+	%Picture-Shadow-Code% ^
+	) -compose Over -composite
+
 set CODE-ICON-SIZE=-define icon:auto-resize="%TemplateIconSize%"
 
-set deltemp=del "Win11FolderifyMask(%FI-ID%).png" "Win11FolderifyLogoMask(%FI-ID%).png" 2>nul
+if /i not "%Picture-Drawing%"=="original" set deltemp=del "Win11FolderifyMask(%FI-ID%).png" "Win11FolderifyLogoMask(%FI-ID%).png" >nul
 exit /b
 
 :LAYER-RATING
 if /i not "%display-movieinfo%" EQU "yes" exit /b
-if not exist "*.nfo" (exit /b) else call :GetInfo-nfo_file
+if not exist "*.nfo" (exit /b) else call "%RCFI%\resources\extract-NFO.bat"
 if /i not "%Show-Rating%" EQU "yes" exit /b
 
 set CODE-STAR-IMAGE= ( ^
@@ -366,53 +393,6 @@ set CODE-FOLDER-NAME-LONG= ^
 	 ) -composite
 
 if "%FolderNameLong-characters-limit%"=="0" set "CODE-FOLDER-NAME-LONG="
-exit /b
-
-
-:GetInfo-nfo_file
-for %%N in (*.nfo) do (
-	set "nfoName=%%~nxN"
-	echo %TAB%%ESC%%g_%Movie info  :%%~nxN%ESC%
-	for /f "usebackq tokens=1,2,3,4 delims=<>" %%C in ("%%N") do (
-		if /i not "%%D"=="" (
-			if /i not "%%D"=="genre" (set "%%D=%%E") else (
-				set "genre=%%E" 
-				call :GetInfo-Collect
-			)
-		)
-	)
-)
-
-if not defined value if defined userrating if not "%userrating%"=="0" set "value=%userrating%"
-if defined value (
-	set "rating=%value:~0,3%"
-) else echo %TAB% %r_%%i_% %_%%g_% Error: No rating value provided in "%nfoName%"%r_%
-
-if "%rating%"=="0.0" echo %TAB% %r_%%i_% %_%%g_% Error: No rating value provided in "%nfoName%"%r_%&set "rating="
-if "%rating%"=="10." set "rating=10"
-
-if not defined genre (
-	echo %TAB% %r_%%i_% %_%%g_% Error: No genre provided in "%nfoName%"%r_%
-	exit /b
-)
-set "genre=__%_genre%"
-set "genre=%genre:__, =%"
-set "genre=%genre:Science Fiction=SciFi%"
-set "GenreLimit=%genre-characters-limit%"
-set /a "GenreLimit=%GenreLimit%+1"
-
-:GetInfo-Genre
-set /a GenreCount+=1
-if not "%_genre%"=="%genre%" (
-	call set "_genre=%%genre:~0,%GenreCount%%%"
-	goto GetInfo-Genre
-)
-set /A "GenreLimiter=%GenreLimit%-4"
-if %GenreCount% GTR %GenreLimit% call set "genre=%%genre:~0,%GenreLimiter%%%..."
-exit /b
-
-:GetInfo-Collect
-set "_genre=%_genre%, %genre%"
 exit /b
 
 :::::::::::::::::::::::::::   CODE END   ::::::::::::::::::::::::::::::::::
