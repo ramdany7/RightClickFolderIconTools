@@ -15,16 +15,18 @@
 :: 2024-07-30 Added: 'Move' and 'Rename' features to the folder right-click menu.
 :: 2024-07-31 Added: Ability to hide and unhide "icon.ico" and "desktop.ini" files.
 :: 2024-08-14 Fixed: 'Move' and 'Rename' functions to display the correct icon file name and show the proper stats.
+:: 2024-08-24 Added: Ability to 'Define keywords', 'Rename Icons', and 'Move Icons' features to maintain a history of previously inserted values.
 :: 2024-09-20 Removed: [Template: Win11Folderify] "Picture-opacity" option because it caused transparency to render as black. 
 ::            (Might fix and add it back later if anyone needs it?)
 :: 2024-09-20 Added: [Template: Win11Folderify] config "Picture-Drawing=original" to display the picture as is. Requested #13
 :: 2024-09-20 Added: [Template: Win11Folderify] config to change the shadow.
-:: 2024-08-24 Added: Ability to 'Define keywords', 'Rename Icons', and 'Move Icons' features to maintain a history of previously inserted values.
 :: 2024-09-30 Added: [Template: Kometa] New template. Requested #11
 :: 2024-09-30 Relocated: [Template: All] "NFO-file extractor" script to /resources/extract-NFO.bat.
 :: 2024-09-30 Added: [Template: All] Option to choose the preferred rating available inside the .nfo file.
 :: 2024-09-30 Fixed: Unable to replace the folder icon when IconFileName doesn’t include #ID.
-:: to do: Move "EnableShellShortcutIconRemotePath" and "MultipleInvokePromptMinimum" to "Setup_Install.reg"
+:: 2024-10-01 Fixed: Unable to use "*" (wildcard only) as a keyword.
+:: 2024-10-01 Fixed: No need to run as admin to install or uninstall RCFI Tools.
+:: to do: fix -> multi select folders 'define keywords' menu.
 
 
 setlocal
@@ -1479,10 +1481,10 @@ if defined Keywords9 echo %TAB%  %GN_%9 %G_%^>%ESC%%G_%%Keywords9%%ESC%
 echo.
 if defined Keywords1 echo %TAB%%G_%Type a keywords or choose from the list.&echo.
 set "keyHis="
-set "newKeywords=*"
+set "newKeywords=."
 set /p "newKeywords=%-%%-%%-%%G_%%I_%keywords:%_% %C_%"
 set "newKeywords=%newKeywords:"=%"
-if /i "%newKeywords%"=="*" set "newKeywords=%Keywords%" &set "KeyHis=yes"
+if /i "%newKeywords%"=="." set "newKeywords=%Keywords%" &set "KeyHis=yes"
 if /i "%newKeywords%"=="1" set "newKeywords=%Keywords1%"&set "KeyHis=yes"
 if /i "%newKeywords%"=="2" set "newKeywords=%Keywords2%"&set "KeyHis=yes"
 if /i "%newKeywords%"=="3" set "newKeywords=%Keywords3%"&set "KeyHis=yes"
@@ -3741,37 +3743,12 @@ if "%setup_select%"=="1" (
 	echo %G_%Activating RCFI Tools%_%
 	set "Setup_action=install"
 	set "HKEY=HKEY"
-	
-	echo %G_%Changing REG key to be able to select more than 15 items.
-	echo %G_%MultipleInvokePromptMinimum: 1000%R_%
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v MultipleInvokePromptMinimum /t REG_DWORD /d 0x000003e8 /f >nul||(
-		echo you might need to re-run the setup and execute the script as an administrator.
-	)
-	
-	echo %G_%Changing REG key to be able to retrieve shorcut icons from remote paths. 
-	echo %G_%ShellShortcutIconRemotePath: 1%R_%
-	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v "EnableShellShortcutIconRemotePath" /t REG_DWORD /d 1 /f >nul||(
-		echo you might need to re-run the setup and execute the script as an administrator.
-	)
-	
 	goto Setup_process
 )
 if "%setup_select%"=="2" (
 	echo %G_%Deactivating RCFI Tools%_%
 	set "Setup_action=uninstall"
 	set "HKEY=-HKEY"
-	
-	echo %G_%Reverting MultipleInvokePromptMinimum to default.%R_%
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v MultipleInvokePromptMinimum /t REG_DWORD /d 0x0000000f /f >nul||(
-		echo you might need to re-run the setup and execute the script as an administrator.
-	)
-	
-	echo %G_%Reverting ShellShortcutIconRemotePath to default.%R_%
-	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v "EnableShellShortcutIconRemotePath" /t REG_DWORD /d 0 /f >nul||(
-		echo you might need to re-run the setup and execute the script as an administrator.
-	)
-	
-	
 	goto Setup_process
 )
 if "%setup_select%"=="3" goto options
@@ -3817,6 +3794,37 @@ del "%RCFI%\Setup_%Setup_action%.reg" 2>nul
 del "%RCFI%\resources\deactivating.RCFI" 2>nul
 pause>nul&exit
 
+:Setup_RegFix-Install
+echo %G_%Changing REG key to be able to select more than 15 items.
+echo %G_%MultipleInvokePromptMinimum: 1000%R_%
+
+(
+echo [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer]
+echo "MultipleInvokePromptMinimum"=dword:000003e8
+)>>"%Setup_Write%"
+
+echo %G_%Changing REG key to be able to retrieve shorcut icons from remote paths. 
+echo %G_%ShellShortcutIconRemotePath: 1%R_%
+
+(
+echo [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer]
+echo "EnableShellShortcutIconRemotePath"=dword:00000001
+)>>"%Setup_Write%"
+exit /b
+
+:Setup_RegFix-Uninstall
+echo %G_%Reverting MultipleInvokePromptMinimum to default.%R_%
+(
+echo [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer]
+echo "MultipleInvokePromptMinimum"=dword:0000000f
+)>>"%Setup_Write%"
+
+echo %G_%Reverting ShellShortcutIconRemotePath to default.%R_%
+(
+echo [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer]
+echo "EnableShellShortcutIconRemotePath"=dword:00000000
+)>>"%Setup_Write%"
+exit /b
 
 :Setup_Writing                    
 echo %G_%Preparing registry entry ..%_%
@@ -4248,4 +4256,6 @@ rem Generating setup_*.reg
 	echo "SubCommands"="RCFI.IMG-Set.As.Folder.Icon;RCFI.IMG-Choose.and.Set.As;RCFI.IMG.Generate.Icon;RCFI.IMG.Generate.PNG;RCFI.IMG.Template.Samples;RCFI.IMG.Choose.Template;RCFI.IMG.Edit.Template;RCFI.IMG-Convert;RCFI.IMG-Compress;RCFI.IMG-Resize;"
 	
 )>"%Setup_Write%"
+if "%setup_select%"=="1" call :Setup_RegFix-Install
+if "%setup_select%"=="2" call :Setup_RegFix-Uninstall
 EXIT /B
