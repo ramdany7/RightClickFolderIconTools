@@ -11,7 +11,8 @@
 :: 2024-07-11 Added: Rules to the folder icon remover to avoid deleting non-.ico files, preventing accidental deletion of important files.
 :: 2024-07-15 Resolved: Issue #12 – Network drive/UNC paths not supported. [SOLVED]
 :: 2024-07-19 Added: Ability to move the icon's path.
-:: 2024-07-24 Added: Use "#ID" in config 'IconFileName' to generate a random 6-digit string, which helps avoid the icon cache displaying the previous icon instead of the newly assigned one (unless you refresh the icon cache by restarting Explorer).
+:: 2024-07-24 Added: Use "#ID" in config 'IconFileName' to generate a random 6-digit string, which helps avoid the icon cache displaying 
+::            the previous icon instead of the newly assigned one (unless you refresh the icon cache by restarting Explorer).
 :: 2024-07-30 Added: 'Move' and 'Rename' features to the folder right-click menu.
 :: 2024-07-31 Added: Ability to hide and unhide "icon.ico" and "desktop.ini" files.
 :: 2024-08-14 Fixed: 'Move' and 'Rename' functions to display the correct icon file name and show the proper stats.
@@ -26,7 +27,7 @@
 :: 2024-09-30 Fixed: Unable to replace the folder icon when IconFileName doesn’t include #ID.
 :: 2024-10-01 Fixed: Unable to use "*" (wildcard only) as a keyword.
 :: 2024-10-01 Fixed: No need to run as admin to install or uninstall RCFI Tools.
-:: to do: fix -> multi select folders 'define keywords' menu.
+:: 2024-10-11 Fixed: Opening 'Define Keywords' from the folder right-click menu didn't display correctly.
 
 
 setlocal
@@ -226,7 +227,7 @@ if /i "%Context%"=="FI.Search.Logo"				goto FI-Search
 if /i "%Context%"=="FI.Search.Icon"				goto FI-Search
 if /i "%Context%"=="FI.Search.Folder.Icon.Here" set "Context="&goto FI-Search
 if /i "%Context%"=="Scan"						set "input=Scan" 			&set "cdonly=true" &goto FI-Scan
-if /i "%Context%"=="DefKey"						%Dir% &goto FI-Keyword
+if /i "%Context%"=="DefKey"						goto FI-Keyword
 if /i "%Context%"=="Move"							set "cdonly=true"&goto FI-Move
 if /i "%Context%"=="Rename"						set "cdonly=true"&goto FI-Rename
 if /i "%Context%"=="GenKey"						set "input=Generate"&set "cdonly=true"&goto FI-Generate
@@ -555,7 +556,7 @@ IF /i %h_result%		GTR 0 echo %TAB%%rr_%%H_s%%H_result%%_% Folders can't be proce
 IF /i %R_result%		GTR 0 echo %TAB%%R_%%R_s%%R_result%%_% Folder's icons are missing and can be changed.
 IF /i %Y_result%		GTR 0 echo %TAB%%Y_%%Y_s%%Y_result%%_% Folders already have an icon.
 IF /i %G_result%		GTR 0 echo %TAB%%G_%%G_s%%G_result%%_% Folders have no files matching the keywords.
-IF /i %YY_result%		LSS 1 echo.&echo %TAB%%R_% Couldn't find any files matching the keywords. No folder icons to be generated.%_%
+IF /i %YY_result%		LSS 1 echo %TAB%%R_% Couldn't find any files matching the keywords.%_%
 echo.
 set "result=0" &goto options
 
@@ -1455,6 +1456,7 @@ goto FI-Search
 echo                  %W_%%I_%     K E Y W O R D S     %_%
 echo.
 echo.
+if /i "%Context%"=="Defkey" call :FI-Keyword-Folder_Selected
 call :Config-UpdateVar
 rem echo.
 rem echo %TAB%%Keywords%
@@ -1587,6 +1589,15 @@ set "Keywords6=%Keywords7%"
 set "Keywords7=%Keywords8%"
 set "Keywords8=%Keywords9%"
 set "Keywords9=%newKeywords%"
+exit /b
+
+:FI-Keyword-Folder_Selected
+set SelectedFolderCount=0
+for %%F in (%xSelected%) do (
+	set "SelectedCurrentPath=%%~dpF"
+	set /a SelectedFolderCount+=1
+)
+PUSHD    "%SelectedCurrentPath%"
 exit /b
 
 :FI-Activate-Ask
