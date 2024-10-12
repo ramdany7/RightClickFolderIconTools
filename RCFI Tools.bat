@@ -28,6 +28,8 @@
 :: 2024-10-01 Fixed: Unable to use "*" (wildcard only) as a keyword.
 :: 2024-10-01 Fixed: No need to run as admin to install or uninstall RCFI Tools.
 :: 2024-10-11 Fixed: Opening 'Define Keywords' from the folder right-click menu didn't display correctly.
+:: 2024-10-12 Fixed: 'Rename icon' changing "IconResource" to the full path instead of directly to the "*.ico" file.
+:: 2024-10-12 Fixed: 'Rename icon' sometimes doesn’t save the previous name to history.
 
 
 setlocal
@@ -1011,7 +1013,11 @@ EXIT /B
 
 :FI-Template-AlwaysAsk             
 if /i "%Already%"=="Asked" EXIT /B
-if /i not "%Context%"=="Edit.Template" echo.&echo.&echo %TAB%  %W_%Choose Template to Generate Folder Icons:%_%
+if /i not "%Context%"=="Edit.Template" (
+	echo.
+	echo %TAB%%_%  ------------------------------------------------------------------------
+	echo %TAB%   %W_%Choose Template to Generate Folder Icons:%_%
+	)
 set "TSelector=GetList"&set "TCount=0"
 PUSHD "%RCFI%\templates"
 	FOR %%T in (*.bat) do (
@@ -1112,7 +1118,7 @@ goto options
 rem Input template options
 set "TemplateChoice=NotSelected"
 set /p "TemplateChoice=%_%%W_%%TAB%%TAB%Select option:%_%%GN_%"
-
+if /i not "%Context%"=="Edit.Template" echo %TAB%%_%  ------------------------------------------------------------------------
 if /i "%TemplateChoice%"=="NotSelected" echo %_%%TAB%   %I_%  CANCELED  %-%&%p2%&goto options
 if /i "%TemplateChoice%"=="r" cls&echo.&echo.&echo.&goto FI-Template
 if /i "%TemplateChoice%"=="a" set "template=%RCFI.templates.ini%"&EXIT /B
@@ -1468,7 +1474,7 @@ echo %TAB%%_%• %G_%Certain  characters can  causing an  error,  such as:
 echo %TAB%%_%%G_%  %G_%%C_%%%%G_% %C_%"%G_% %C_%(%G_% %C_%)%G_% %C_%<%G_% %C_%>%G_% %C_%[%G_% %C_%&%G_%%_%
 echo.
 echo.
-echo %TAB%%W_%Current keywords:%_% %KeywordsPrint%
+echo %TAB%%_%► Current keywords: %KeywordsPrint%
 echo.
 if defined Keywords1 echo %TAB%  %G_%Keywords list%_%
 if defined Keywords1 echo %TAB%  %GN_%1 %G_%^>%ESC%%G_%%Keywords1%%ESC%
@@ -1481,7 +1487,7 @@ if defined Keywords7 echo %TAB%  %GN_%7 %G_%^>%ESC%%G_%%Keywords7%%ESC%
 if defined Keywords8 echo %TAB%  %GN_%8 %G_%^>%ESC%%G_%%Keywords8%%ESC%
 if defined Keywords9 echo %TAB%  %GN_%9 %G_%^>%ESC%%G_%%Keywords9%%ESC%
 echo.
-if defined Keywords1 echo %TAB%%G_%Type a keywords or choose from the list.&echo.
+if defined Keywords1 echo %TAB%%G_%Type a %C_%k%G_%eywords or choose from the %GG_%l%G_%ist above.&echo.
 set "keyHis="
 set "newKeywords=."
 set /p "newKeywords=%-%%-%%-%%G_%%I_%keywords:%_% %C_%"
@@ -1774,7 +1780,7 @@ set "Rename5=%Rename6%"
 set "Rename6=%Rename7%"
 set "Rename7=%Rename8%"
 set "Rename8=%Rename9%"
-set "Rename9=%newRename%"
+set "Rename9=%NewIconName%"
 exit /b
 
 :FI-Rename-GetDir
@@ -1853,6 +1859,7 @@ if defined renID call :FI-Generate-Icon_Name
 if defined renID call set "NewIconName=%%IconFileName:#ID=%FI-ID%%%"
 if exist "%IconPath%%NewIconName%.ico" call :FI-Rename-Duplicate
 echo %TAB%%G_%renaming.. %ESC%%G_%%IconName%%IconExt% %GG_%-->%G_% %NewIconName%%RenDup%.ico  %R_%
+if /i "%CD%\"=="%IconPath%" set "IconPath="
 if /i "%IconExt%"==".ico" (
 	Attrib -s -h -r "%IconPath%%IconName%%IconExt%"
 	attrib |EXIT /B
