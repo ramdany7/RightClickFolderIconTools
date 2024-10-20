@@ -30,7 +30,7 @@
 :: 2024-10-11 Fixed: Opening 'Define Keywords' from the folder right-click menu didn't display correctly.
 :: 2024-10-12 Fixed: 'Rename icon' changing "IconResource" to the full path instead of directly to the "*.ico" file.
 :: 2024-10-12 Fixed: 'Rename icon' sometimes doesn’t save the previous name to history.
-
+:: 2024-10-16 Fixed: In some cases, 'Scan' displayed incorrect results.
 
 setlocal
 set name=RCFI Tools
@@ -287,8 +287,11 @@ echo %__%Generates%_/_%gens %_I_% Generate folder icons on current directory inc
 echo %__%Removes%_/_%rems   %_I_% Remove all folder icons on current directory including all subfolders ^(recursive^).
 echo %__%Renames%_/_%rens   %_I_% Rename all icons on current directory including all subfolders ^(recursive^).
 echo %__%Moves%_/_%movs     %_I_% Move all icons on current directory including all subfolders ^(recursive^).
+echo %__%Hide%_/_%hid       %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory.
 echo %__%Hides%_/_%hids     %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory 
 echo                     including all subfolders ^(recursive^).
+rem echo %__%FileHide%_/_%fhid  %_I_% Hide/Unhide any files matching the keyword in all folders in current directory only.
+rem echo %__%FileHides%_/_%fhids%_I_% Hide/Unhide any files matching the keyword in all folders including all subfolders ^(recursive^).
 echo %__%Activate%_/_%act%G_%   %_I_% Activate Folder Icon Tools.
 echo %__%Deactivate%_/_%dct%G_% %_I_% Deactivate Folder Icon Tools.
 echo.
@@ -540,7 +543,9 @@ call :timer-start
 call :FI-GetDir
 echo %TAB%%W_%==============================================================================%_%
 set /a "result=%yy_result%+%y_result%+%g_result%+%r_result%"
+set /a "FileMatchResult=%YY_result%+%R_result%"
 set /a "hy_result=%yy_result%-%h_result%"
+
 echo.
 echo.
 
@@ -558,7 +563,7 @@ IF /i %h_result%		GTR 0 echo %TAB%%rr_%%H_s%%H_result%%_% Folders can't be proce
 IF /i %R_result%		GTR 0 echo %TAB%%R_%%R_s%%R_result%%_% Folder's icons are missing and can be changed.
 IF /i %Y_result%		GTR 0 echo %TAB%%Y_%%Y_s%%Y_result%%_% Folders already have an icon.
 IF /i %G_result%		GTR 0 echo %TAB%%G_%%G_s%%G_result%%_% Folders have no files matching the keywords.
-IF /i %YY_result%		LSS 1 echo %TAB%%R_% Couldn't find any files matching the keywords.%_%
+IF /i %FileMatchResult%	LSS 1 echo %TAB%%R_% Couldn't find any files matching the keywords.%_%
 echo.
 set "result=0" &goto options
 
@@ -1679,22 +1684,21 @@ echo %_%%TAB%  ^(%Y_%%result%%_%%_%^) Folder icon found.%_%
 )
 
 if defined Rename1 echo.&echo.&echo.&echo %TAB%%G_%%I_%  Icon name list  %_%
-if defined Rename1 echo %TAB%%GN_%1 %G_%^>%ESC%%G_%%Rename1%%ESC%
-if defined Rename2 echo %TAB%%GN_%2 %G_%^>%ESC%%G_%%Rename2%%ESC%
-if defined Rename3 echo %TAB%%GN_%3 %G_%^>%ESC%%G_%%Rename3%%ESC%
-if defined Rename4 echo %TAB%%GN_%4 %G_%^>%ESC%%G_%%Rename4%%ESC%
-if defined Rename5 echo %TAB%%GN_%5 %G_%^>%ESC%%G_%%Rename5%%ESC%
-if defined Rename6 echo %TAB%%GN_%6 %G_%^>%ESC%%G_%%Rename6%%ESC%
-if defined Rename7 echo %TAB%%GN_%7 %G_%^>%ESC%%G_%%Rename7%%ESC%
-if defined Rename8 echo %TAB%%GN_%8 %G_%^>%ESC%%G_%%Rename8%%ESC%
-if defined Rename9 echo %TAB%%GN_%9 %G_%^>%ESC%%G_%%Rename9%%ESC%
+if defined Rename1 echo %TAB%%GN_%1 %G_%^>%ESC%%C_%%Rename1%%ESC%
+if defined Rename2 echo %TAB%%GN_%2 %G_%^>%ESC%%C_%%Rename2%%ESC%
+if defined Rename3 echo %TAB%%GN_%3 %G_%^>%ESC%%C_%%Rename3%%ESC%
+if defined Rename4 echo %TAB%%GN_%4 %G_%^>%ESC%%C_%%Rename4%%ESC%
+if defined Rename5 echo %TAB%%GN_%5 %G_%^>%ESC%%C_%%Rename5%%ESC%
+if defined Rename6 echo %TAB%%GN_%6 %G_%^>%ESC%%C_%%Rename6%%ESC%
+if defined Rename7 echo %TAB%%GN_%7 %G_%^>%ESC%%C_%%Rename7%%ESC%
+if defined Rename8 echo %TAB%%GN_%8 %G_%^>%ESC%%C_%%Rename8%%ESC%
+if defined Rename9 echo %TAB%%GN_%9 %G_%^>%ESC%%C_%%Rename9%%ESC%
 echo.&echo.
 if defined Rename1 echo %TAB%%_%• %C_%T%G_%ype a new icon name or insert the %GN_%n%G_%umber to select it from the list.
 if not defined Rename1 echo %TAB%%_%• %G_%Type a new icon name.
 echo %TAB%%_%• %G_%use "%YY_%#ID%G_%" to  generate 6-digit random string. This may  help to prevent  explorer displaying
 echo %TAB%%_%  %G_%the previous icon from the icon cache, unless you do 'Refresh icon cache (restart explorer)'.
-echo %TAB%%_%• %G_%Leave it empty to cancel.
-echo %TAB%%_%• %G_%Press Enter to continue.
+echo %TAB%%_%• %G_%Leave it empty to cancel. %G_%Press Enter to continue.
 echo.
 set "RenHis="
 set "NewIconName=(none)"
@@ -1952,22 +1956,20 @@ IF %MovDeny% GTR 0 echo %TAB%%MovAllDeny__%%R_%%MovAllDeny%%_% Icons can't be mo
 echo.&echo.
 :FI-Move-InputDir
 if defined MoveDst1 echo.&echo.&echo.&echo %TAB%%G_%%I_%  Destination list  %_%
-if defined MoveDst1 echo %TAB%%GN_%1 %G_%^>%ESC%%G_%%MoveDst1%%ESC%
-if defined MoveDst2 echo %TAB%%GN_%2 %G_%^>%ESC%%G_%%MoveDst2%%ESC%
-if defined MoveDst3 echo %TAB%%GN_%3 %G_%^>%ESC%%G_%%MoveDst3%%ESC%
-if defined MoveDst4 echo %TAB%%GN_%4 %G_%^>%ESC%%G_%%MoveDst4%%ESC%
-if defined MoveDst5 echo %TAB%%GN_%5 %G_%^>%ESC%%G_%%MoveDst5%%ESC%
-if defined MoveDst6 echo %TAB%%GN_%6 %G_%^>%ESC%%G_%%MoveDst6%%ESC%
-if defined MoveDst7 echo %TAB%%GN_%7 %G_%^>%ESC%%G_%%MoveDst7%%ESC%
-if defined MoveDst8 echo %TAB%%GN_%8 %G_%^>%ESC%%G_%%MoveDst8%%ESC%
-if defined MoveDst9 echo %TAB%%GN_%9 %G_%^>%ESC%%G_%%MoveDst9%%ESC%
+if defined MoveDst1 echo %TAB%%GN_%1 %G_%^>%ESC%%YY_%%MoveDst1%%ESC%
+if defined MoveDst2 echo %TAB%%GN_%2 %G_%^>%ESC%%YY_%%MoveDst2%%ESC%
+if defined MoveDst3 echo %TAB%%GN_%3 %G_%^>%ESC%%YY_%%MoveDst3%%ESC%
+if defined MoveDst4 echo %TAB%%GN_%4 %G_%^>%ESC%%YY_%%MoveDst4%%ESC%
+if defined MoveDst5 echo %TAB%%GN_%5 %G_%^>%ESC%%YY_%%MoveDst5%%ESC%
+if defined MoveDst6 echo %TAB%%GN_%6 %G_%^>%ESC%%YY_%%MoveDst6%%ESC%
+if defined MoveDst7 echo %TAB%%GN_%7 %G_%^>%ESC%%YY_%%MoveDst7%%ESC%
+if defined MoveDst8 echo %TAB%%GN_%8 %G_%^>%ESC%%YY_%%MoveDst8%%ESC%
+if defined MoveDst9 echo %TAB%%GN_%9 %G_%^>%ESC%%YY_%%MoveDst9%%ESC%
 echo.&echo.
-echo %TAB%%_%• %G_%%YY_%I%G_%nsert the directory path below where you want to move the icon files to.
-if defined MoveDst1 echo %TAB%%_%• %G_%Insert the %GN_%n%G_%umber to select it from the list.
-echo %TAB%%_%• %G_%You can also %P_%drag and drop%G_% the folder to this window to insert the directory path.
+if defined MoveDst1 echo %TAB%%_%• %G_%Insert the %GN_%n%G_%umber to %YY_%s%G_%elect it from the list.
+echo %TAB%%_%• %G_%You can %P_%drag and drop%G_% the folder to this window to insert the directory path.
 echo %TAB%%_%• %G_%Insert %YY_%0%G_% to move the icon files to %Y_%each own folder%G_%.
-echo %TAB%%_%• %G_%Leave it empty to cancel. 
-echo %TAB%%_%• %G_%Press Enter to continue.
+echo %TAB%%_%• %G_%Leave it empty to cancel. %G_%Press Enter to continue.
 echo.
 set "MovtoCD="
 set "MovHis="
@@ -2483,23 +2485,27 @@ set "NotFI=0"
 set "HideAct="
 set "HideAttrib="
 echo.&echo.&echo.&echo.
-echo %_%                       Hide or Unhide the "desktop.ini" and "*.ico" files.
-echo %TAB%%G_%You can always hide or unhide the files; it will not move, remove or delete anything, 
+echo %_%                     %I_%  Hide or Unhide the "desktop.ini" and "*.ico" files.  %_%
+echo.
+echo %TAB%%G_%You can  always  hide or unhide the  files; it will  not move, remove or delete  anything, 
 echo %TAB%%G_%nothing scary will happen. just making the files related to the folder icon hidden or not.
 echo.
-echo             %_%Press %GN_%H%_%%_% to Hide  %G_%^|%_%  Press %GN_%U%_% to Unhide%G_%
+echo                           %_%Press %GN_%H%_%%_% to Hide  %G_%^|%_%  Press %GN_%U%_% to Unhide%G_%
+echo                                      %G_%Press %G_%C%G_% to Cancel%BK_%
 echo.
-CHOICE /C:HU /N
+CHOICE /C:HUC /N
 echo.&echo.&echo.
 if /i "%errorlevel%"=="2" set "HideAct=Unhide"&set "HideAttrib=-h -s"&goto FI-Hide-GetDir
+if /i "%errorlevel%"=="3" echo %TAB%%G_%%I_%  CANCELED  %_%&goto Options
 
-echo %TAB%%_%Would you you want to hide it as system file?
+echo %TAB%%_%Hide it as system file%R_%?%_%
 echo %TAB%%G_%adding "system file" attribute to the file will make it extra hidden.
-echo %TAB%%G_%Options: %GN_%Y%G_%/%GN_%N%G_%   ^| Press %GN_%Y%G_% to make it extra hidden.
-CHOICE /C:YN /N
+echo %TAB%%G_%Options: %GN_%Y%G_%/%GN_%N%G_%   ^| Press %GN_%Y%G_% to make it extra hidden.%BK_%
+CHOICE /C:YNC /N
 echo.&echo.&echo.
 if /i "%errorlevel%"=="1" set "HideAct=Hide"&set "HideAttrib=+h +s"&goto FI-Hide-GetDir
-if /i "%errorlevel%"=="2" set "HideAct=Hide"&set "HideAttrib=+h -s"&goto FI-Hide-GetDir
+if /i "%errorlevel%"=="2" set "HideAct=Hide"&set "HideAttrib=+h -s"&goto FI-Hide-GetDir 
+echo %TAB%%G_%%I_%  CANCELED  %_%
 goto options
 
 :FI-Hide-GetDir
