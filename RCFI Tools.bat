@@ -31,6 +31,8 @@
 :: 2024-10-12 Fixed: 'Rename icon' changing "IconResource" to the full path instead of directly to the "*.ico" file.
 :: 2024-10-12 Fixed: 'Rename icon' sometimes doesn’t save the previous name to history.
 :: 2024-10-16 Fixed: In some cases, 'Scan' displayed incorrect results.
+:: 2024-10-21 Fixed: Removed comma (,) as a delimiter in 'Move folder icons' to prevent failure in detecting the icon file.
+:: 2024-10-26 Fixed: Removed some unnecessary error messages in 'Move folder icons'.
 
 setlocal
 set name=RCFI Tools
@@ -1950,7 +1952,7 @@ echo %TAB%%MovF__%%W_%%U_%%MovF% Folders found. %_%
 IF %MovFI% LSS 1 echo.&echo.&echo. &echo %_%%TAB%^(%R_%%MovFI%%_%%_%^) Couldn't find folder icons. &goto options
 IF %MovFG% GTR 0 echo %TAB%%MovFG__%%G_%%MovFG%%_% Folders have no icon resource.
 IF %MovReady% GTR 0 echo %TAB%%MovReady__%%Y_%%MovReady%%_% Icons can be moved.
-IF %MovMiss% GTR 0 echo %TAB%%MovMiss__%%YY_%%MovMiss%%_% Icons are missing from its path, the path will still be changed to the destination.
+IF %MovMiss% GTR 0 echo %TAB%%MovMiss__%%RR_%%MovMiss%%_% Icons are missing from its path, the path will still be changed to the destination.
 IF %MovDeny% GTR 0 echo %TAB%%MovAllDeny__%%R_%%MovAllDeny%%_% Icons can't be moved because the icon file extension is not .ico.
 
 echo.&echo.
@@ -2162,13 +2164,12 @@ EXIT /B
 :FI-Move-Display
 set "IconResource="
 
-if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==" %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
 if not defined IconResource EXIT /B
-
 set /a MovFI+=1
 if not exist "%IconResource:"=%" (
+	echo.
 	echo %TAB% %W_%┌%R_%📁%ESC%%FolderName%%ESC%
-	echo temporary file >"%IconResource:"=%"
 	for %%T in ("%IconResource:"=%") do (
 	
 		if /i "%%~xT"==".ico" (
@@ -2184,7 +2185,6 @@ if not exist "%IconResource:"=%" (
 		)
 	
 	)
-	del /q "%IconResource:"=%"
 	EXIT /B
 )
 echo.
@@ -2210,7 +2210,7 @@ set "IconResource="
 set "MovDupCount="
 set "MovDup="
 set "MovedFI="
-if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==," %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
+if exist "desktop.ini" for /f "usebackq tokens=1,2 delims==" %%C in ("desktop.ini") do if not "%%D"=="" set "%%C=%%D"
 if not defined IconResource EXIT /B
 set /a MovFI+=1
 if /i "%MovtoCD%"=="Yes" call :FI-Generate-Icon_Name
@@ -2221,15 +2221,14 @@ if /i "%MovtoCD%"=="Yes" (
 ) else set "MovIconName=%FoldernameORI%"
 
 if not exist "%IconResource:"=%" (
+	echo.
 	if not defined MovedFI set "MovedFI=%MovDestination%\%MovIconName%.ico"
 	echo %TAB% %W_%┌%Y_%📁%ESC%%FolderName%%ESC%
-	echo temporary file >"%IconResource:"=%"
 	for %%T in ("%IconResource:"=%") do (
 		if "%%~dpT"=="%MovDestination%\" (
 			set /a MovAlready+=1
 			echo %TAB%%ESC%%W_%└%Y_%%MovIconName%.ico%ESC%%R_%
 			echo %TAB%%ESC%%W_% %G_%The icon file is missing, but the path is already in the destination.%ESC%
-			del /q "%IconResource:"=%" >nul
 			EXIT /B
 		)
 		if /i "%%~xT"==".ico" (
@@ -2270,7 +2269,6 @@ if not exist "%IconResource:"=%" (
 			)
 		)
 	)
-	del /q "%IconResource:"=%" >nul
 	echo.
 	EXIT /B
 )
