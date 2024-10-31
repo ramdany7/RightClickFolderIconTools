@@ -33,6 +33,8 @@
 :: 2024-10-16 Fixed: In some cases, 'Scan' displayed incorrect results.
 :: 2024-10-21 Fixed: Removed comma (,) as a delimiter in 'Move folder icons' to prevent failure in detecting the icon file.
 :: 2024-10-26 Fixed: Removed some unnecessary error messages in 'Move folder icons'.
+:: 2024-10-31 Fixed: "The system cannot find the file specified." error when replacing the folder icon.
+:: 2024-10-31 Updated: SingleInstanceAccumulator v1.0.0.5 – more stable, no false alerts by antivirus.
 
 setlocal
 set name=RCFI Tools
@@ -130,8 +132,13 @@ for %%F in ("%cd%") do set "FolderName=%%~nxF"
 if not defined OpenFrom set "FolderName=%cd%"
 set "Command=(none)"
 set "FolderName=%FolderName:&=^&%"
-echo %G_%%FolderName%
-set /p "Command=%I_%%GN_% %_%%GN_% "
+
+if defined OpenFrom echo %W_%┌%YY_%📁 %_%%FolderName%
+if defined OpenFrom set /p "Command=%W_%└%C_%🏞%C_% "
+
+if not defined OpenFrom echo %G_%%FolderName%
+if not defined OpenFrom set /p "Command=%I_%%GN_% %_%%GN_% "
+
 set "Command=%Command:"=%"
 echo %-% &echo %-% &echo %-%
 if /i "%Command%"=="keyword"		goto FI-Keyword
@@ -283,18 +290,18 @@ set "Context="
 echo                             %I_% %name% %version% %_%%-%
 echo.
 echo %__%Open%_/_%o         %_I_% Open RCFI Tools folder.
-echo %__%Keyword%_/_%key    %_I_% Set the keywords to search and select the image inside each folder.
+echo %__%Keyword%_/_%key    %_I_% Set the keywords  to  search  and  select the image  inside each folder.
 echo %__%Scans%_/_%scs      %_I_% Scan and check which image will be selected to generate the folder icon.
-echo %__%Generates%_/_%gens %_I_% Generate folder icons on current directory including all subfolders ^(recursive^).
+echo %__%Generates%_/_%gens %_I_% Generate folder icons on current  directory  including all subfolders ^(recursive^).
 echo %__%Removes%_/_%rems   %_I_% Remove all folder icons on current directory including all subfolders ^(recursive^).
 echo %__%Renames%_/_%rens   %_I_% Rename all icons on current directory including all subfolders ^(recursive^).
-echo %__%Moves%_/_%movs     %_I_% Move all icons on current directory including all subfolders ^(recursive^).
+echo %__%Moves%_/_%movs     %_I_% Move all icons on current  directory including  all subfolders ^(recursive^).
 echo %__%Hide%_/_%hid       %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory.
 echo %__%Hides%_/_%hids     %_I_% Hide/Unhide "desktop.ini" and "icon.ico" for all folders on current directory 
 echo                     including all subfolders ^(recursive^).
 rem echo %__%FileHide%_/_%fhid  %_I_% Hide/Unhide any files matching the keyword in all folders in current directory only.
 rem echo %__%FileHides%_/_%fhids%_I_% Hide/Unhide any files matching the keyword in all folders including all subfolders ^(recursive^).
-echo %__%Activate%_/_%act%G_%   %_I_% Activate Folder Icon Tools.
+echo %__%Activate%_/_%act%G_%   %_I_% Activate  Folder  Icon Tools.
 echo %__%Deactivate%_/_%dct%G_% %_I_% Deactivate Folder Icon Tools.
 echo.
 echo %G_%Template:%ESC%%CC_%%TemplateName%%ESC%   %G_%Keywords:%ESC%%KeywordsPrint%%ESC%
@@ -421,6 +428,7 @@ if not exist "%input%" (
 	echo  %_%• %G_%%G_%Press %C_%1%G_%, then hit Enter to change them separately in each different window.%_%
 	echo %G_%-------------------------------------------------------------------------------
 	set /p "Input=%_%%W_%Enter the image path:%_%%C_%"
+	set "GeneratingCount=0"
 )
 set "Input=%Input:"=%"
 if "%input%"=="1" goto FI-Selected_folder-Separate
@@ -950,7 +958,7 @@ if not defined Selected (
 		echo %TAB% %i_%%g_%  Success!  %-%
 	)
 )
-title %name% %version% ^| (%YY_result%) Folders processed. ^| "%SelectedThing%"
+title %name% %version% ^| (%GeneratingCount%) Folders processed. ^| "%SelectedThing%"
 EXIT /B
 
 :FI-Generate-Get_Template         
@@ -966,16 +974,14 @@ EXIT /B
 
 :FI-Generate-Icon_Name
 set "IconNameCount="
-
 if defined ReplaceThis for %%R in ("%ReplaceThis%") do (
 	ATTRIB -s -h -r "%%~fR" >nul
 	ATTRIB |EXIT /B
 	set "ReplaceBefore=%%~nxR"
 	set "ReplaceAfter=%%~nR(replace).ico"
-	if /i "%%~xR"==".ico" (ren "%%~nxR" "%%~nR(replace).ico" >nul) else set "ReplaceThis="
+	if /i "%%~xR"==".ico" (ren "%%~dpnxR" "%%~nR(replace).ico" >nul) else set "ReplaceThis="
 	if exist "%%~dpnR(replace).ico" set "ReplaceThis=%%~dpnR(replace).ico"
 )
-
 if /i "%IconFileName%"=="%IconFileName:#ID=%" (
 	set "FolderIconName.ico=%IconFileName%.ico"
 	if exist "%FilePath%%IconFileName%.ico" call :FI-Generate-Icon_Name-Conflict
@@ -1481,18 +1487,18 @@ echo %TAB%%_%• %G_%Certain  characters can  causing an  error,  such as:
 echo %TAB%%_%%G_%  %G_%%C_%%%%G_% %C_%"%G_% %C_%(%G_% %C_%)%G_% %C_%<%G_% %C_%>%G_% %C_%[%G_% %C_%&%G_%%_%
 echo.
 echo.
-echo %TAB%%_%► Current keywords: %KeywordsPrint%
+echo %TAB%%G_%► Current keywords: %_%%KeywordsPrint%%_%
 echo.
 if defined Keywords1 echo %TAB%  %G_%Keywords list%_%
-if defined Keywords1 echo %TAB%  %GN_%1 %G_%^>%ESC%%G_%%Keywords1%%ESC%
-if defined Keywords2 echo %TAB%  %GN_%2 %G_%^>%ESC%%G_%%Keywords2%%ESC%
-if defined Keywords3 echo %TAB%  %GN_%3 %G_%^>%ESC%%G_%%Keywords3%%ESC%
-if defined Keywords4 echo %TAB%  %GN_%4 %G_%^>%ESC%%G_%%Keywords4%%ESC%
-if defined Keywords5 echo %TAB%  %GN_%5 %G_%^>%ESC%%G_%%Keywords5%%ESC%
-if defined Keywords6 echo %TAB%  %GN_%6 %G_%^>%ESC%%G_%%Keywords6%%ESC%
-if defined Keywords7 echo %TAB%  %GN_%7 %G_%^>%ESC%%G_%%Keywords7%%ESC%
-if defined Keywords8 echo %TAB%  %GN_%8 %G_%^>%ESC%%G_%%Keywords8%%ESC%
-if defined Keywords9 echo %TAB%  %GN_%9 %G_%^>%ESC%%G_%%Keywords9%%ESC%
+if defined Keywords1 echo %TAB%  %GN_%1 %G_%^>%ESC%%C_%%Keywords1%%ESC%
+if defined Keywords2 echo %TAB%  %GN_%2 %G_%^>%ESC%%C_%%Keywords2%%ESC%
+if defined Keywords3 echo %TAB%  %GN_%3 %G_%^>%ESC%%C_%%Keywords3%%ESC%
+if defined Keywords4 echo %TAB%  %GN_%4 %G_%^>%ESC%%C_%%Keywords4%%ESC%
+if defined Keywords5 echo %TAB%  %GN_%5 %G_%^>%ESC%%C_%%Keywords5%%ESC%
+if defined Keywords6 echo %TAB%  %GN_%6 %G_%^>%ESC%%C_%%Keywords6%%ESC%
+if defined Keywords7 echo %TAB%  %GN_%7 %G_%^>%ESC%%C_%%Keywords7%%ESC%
+if defined Keywords8 echo %TAB%  %GN_%8 %G_%^>%ESC%%C_%%Keywords8%%ESC%
+if defined Keywords9 echo %TAB%  %GN_%9 %G_%^>%ESC%%C_%%Keywords9%%ESC%
 echo.
 if defined Keywords1 echo %TAB%%G_%Type a %C_%k%G_%eywords or choose from the %GG_%l%G_%ist above.&echo.
 set "keyHis="
