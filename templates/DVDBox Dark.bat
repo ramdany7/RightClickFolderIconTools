@@ -30,7 +30,7 @@ set "genre-characters-limit=31"
 
 ::                Images Source
 ::========================================================
-set "frame-image=%rcfi%\images\dvdbox-dark3.png"
+set "frame-image=%rcfi%\images\dvdbox-dark.png"
 set "star-image=%rcfi%\images\star.png"
 set "disc-image=%rcfi%\images\disc-vinyl.png"
 set "canvas=%rcfi%\images\- canvas.png"

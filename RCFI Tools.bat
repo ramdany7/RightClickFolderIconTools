@@ -1,6 +1,6 @@
 @echo off
 :: Update v0.4
-:: 2024-06-27 Fixed: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11, DVDBox, and BeOrigin templates.
+:: 2024-06-27 Fixed: "LabelExpected ' @ error/annotate.c/GetMultilineTypeMetrics/804." on Windows 11s, DVDBoxs, and BeOrigin templates.
 :: 2024-06-27 Fixed: Couldn't open 'Choose template' and 'Define keywords' menus in the root/drive directory.
 :: 2024-06-28 Fixed: "The syntax of the command is incorrect." on the 'Change folder icon' right-click menu.
 :: 2024-06-29 Added: Progress info on the title bar when generating folder icons.
@@ -34,7 +34,11 @@
 :: 2024-10-21 Fixed: Removed comma (,) as a delimiter in 'Move folder icons' to prevent failure in detecting the icon file.
 :: 2024-10-26 Fixed: Removed some unnecessary error messages in 'Move folder icons'.
 :: 2024-10-31 Fixed: "The system cannot find the file specified." error when replacing the folder icon.
-:: 2024-10-31 Updated: SingleInstanceAccumulator v1.0.0.5 – more stable, no false alerts by antivirus.
+:: 2024-10-31 Updated: SingleInstanceAccumulator v1.0.0.5 – more stable, no false alerts from antivirus.
+:: 2024-11-03 Added: modifications to the 'Choose template' page and added some extra features.
+::                   - You can set "TemplateAlwaysAsk" ON or OFF through the 'Choose template' page.
+::                   - When "TemplateAlwaysAsk" is active, "TemplateTestMode" is also active.
+:: 2024-11-08 Fixed: [Template: Windows 11s] couldn't display folder name.
 
 setlocal
 set name=RCFI Tools
@@ -920,7 +924,7 @@ if not defined Selected (
 	rem Executing "general template" to convert and edit the selected image
 	if not exist "%OutputFile%" call "%Template%"
 	
-	rem Check icon size, if icon size is less then 200 byte then it's fail.
+	rem Check icon size, if icon size is less than 200 byte then it's fail.
 	if exist "%FolderIconName.ico%" for %%S in ("%FolderIconName.ico%") do (
 		if %%~zS GTR 200 echo %TAB%%ESC%%G_%Convert success - %FolderIconName.ico% (%%~zS Bytes)%ESC%%R_%
 		if %%~zS LSS 200 (
@@ -1050,36 +1054,44 @@ for %%I in ("%TemplateSampleImage%") do (
 	)
 if /i "%context%"=="Edit.Template" (
 	echo.
-	echo %TAB%%TAB%%GN_% A%_%  %W_%Global Template Configuration%_%
+	echo %TAB%%GN_% G%_% %W_%Global Template Configuration%_%
 )
 echo.
-echo %G_%%TAB%%TAB%to select, insert the number assosiated to the options, then hit Enter.%_%
+echo %G_%%TAB%  to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
 set "Already=Asked"
 EXIT /B
 
 :FI-Template                      
 title %name% %version% ^| Template
-if /i not	"%referer%"=="FI-Generate" if defined Context cls &echo.&echo.&echo.&echo.
+if /i not	"%referer%"=="FI-Generate" (
+	if defined Context cls
+	if /i "%TemplateAlwaysAsk%"=="yes" (
+		echo %CC_%%I_% %_% %W_%TemplateAlwaysAsk %G_%is %R_%active%G_%
+		echo   choosing any template will be redirected to Test Mode.
+		%P2%
+	)
+	echo.&echo.&echo.&echo.
+)
 if /i		"%referer%"=="FI-Generate" echo.&echo %TAB%  %W_%Choose Template to Generate Folder Icons:%_%&echo %TAB% %G_%^(This will not be saved to the configurations^)%_%
 if /i not	"%referer%"=="FI-Generate" (
-echo %TAB%%TAB%%I_%%CC_%     Template     %-%
+echo                  %W_%%I_%     T E M P L A T E     %_%
+echo.
 echo.
 )
 rem Show current template and descriptions
 if /i not "%referer%"=="FI-Generate" (
 	for %%I in ("%Template%") do (
 		set "TName=%%~nI"
-		echo %TAB%%W_%%U_%Current Template%_%:%ESC%%CC_%%%~nI%ESC%
-		for /f "usebackq tokens=1,2 delims=`" %%I in ("%Template%") do if /i not "%%J"=="" echo %ESC%%%J%ESC%
-		echo %TAB%%_%
-		echo.
+rem		echo   %G_%► Current template:
+		echo  %TAB%%ESC%%CC_%%%~nI%ESC%
+		for /f "usebackq tokens=1,2 delims=`" %%I in ("%Template%") do if /i not "%%J"=="" echo %TAB%%ESC%%G_%%%J%ESC%
 	)
 )
 rem Get template list options
 if /i not	"%referer%"=="FI-Generate" ( 
-	echo.
-	echo %TAB%%TAB%%W_%%U_%     Options     %-%
+	rem echo.
+	rem echo %TAB%%TAB%%W_%%U_%     Options     %-%
 	echo. 
 )
 set "TSelector=GetList"&set "TCount=0"
@@ -1113,16 +1125,16 @@ if /i "%Context%"=="IMG.Choose.Template" (
 		call :FileSize
 	)
 )
+if /i "%TemplateAlwaysAsk%"=="yes" echo %TAB%  %GN_% A%_% %_%Deactivate Always ask template%_%
+if /i not "%TemplateAlwaysAsk%"=="yes" echo %TAB%  %GN_% A%_% %_%Activate Always ask template%_%
 
 if /i "%Context%"=="IMG.Choose.Template" (
-	echo.
-	echo %TAB%%TAB%%GN_% S%_% ^> %W_%See all sample icons, using:%ESC%%C_%%TSampleName%%G_% (%PP_%%size%%G_%)%ESC%
+	echo %TAB%  %GN_% S%_% %_%See all sample icons, using:%ESC%%C_%%TSampleName%%G_% (%PP_%%size%%G_%)%ESC%
 ) else (
-	echo.
-	echo %TAB%%TAB%%GN_% S%_% ^> %W_%See all sample icons%_%
+	echo %TAB%  %GN_% S%_% %_%See all sample icons%_%
 )
 echo.
-echo %G_%%TAB%%TAB%to select, insert the number assosiated to the options, then hit Enter.%_%
+echo %G_%%TAB%  to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
 goto options
 
@@ -1130,12 +1142,19 @@ goto options
 :FI-Template-Input                
 rem Input template options
 set "TemplateChoice=NotSelected"
-set /p "TemplateChoice=%_%%W_%%TAB%%TAB%Select option:%_%%GN_%"
+set /p "TemplateChoice=%_%%TAB%  %G_%%I_%Select option:%_% %GN_%"
 if /i not "%Context%"=="Edit.Template" echo %TAB%%_%  ------------------------------------------------------------------------
 if /i "%TemplateChoice%"=="NotSelected" echo %_%%TAB%   %I_%  CANCELED  %-%&%p2%&goto options
-if /i "%TemplateChoice%"=="r" cls&echo.&echo.&echo.&goto FI-Template
-if /i "%TemplateChoice%"=="a" set "template=%RCFI.templates.ini%"&EXIT /B
-if /i "%TemplateChoice%"=="s" if /i "%refer%"=="Choose.Template" (
+if /i "%TemplateChoice%"=="R" cls&echo.&echo.&echo.&goto FI-Template
+if /i "%TemplateChoice%"=="A" (
+	if /i    "%TemplateAlwaysAsk%"=="yes" set "TemplateAlwaysAsk=no"
+	if /i not "%TemplateAlwaysAsk%"=="yes" set "TemplateAlwaysAsk=yes"
+	call :Config-Save
+	cls
+	goto FI-Template
+)
+if /i "%TemplateChoice%"=="G" set "template=%RCFI.templates.ini%"&EXIT /B
+if /i "%TemplateChoice%"=="S" if /i "%refer%"=="Choose.Template" (
 		set "act=FI-Template-Sample-All"
 		set "FITSA=%TemplateSampleImage%"
 		start "" "%~f0"
@@ -1176,8 +1195,8 @@ EXIT /B
 :FI-Template-Get_List             
 if /i "%Tselector%"=="GetList" if "%TemplateName%"=="%TName%" (set TNameList=%ESC%%CC_%%TName%%_%%ESC%) else set TNameList=%ESC%%_%%TName%%_%%ESC%
 if /i "%Tselector%"=="GetList" (
-	if %TCount% LSS 10 echo %TAB%     %GN_%%TCount%%W_%%TNameList%
-	if %TCount%   GTR 9 echo %TAB%    %GN_%%TCount%%W_%%TNameList%
+	if %TCount% LSS 10 echo %TAB%   %GN_%%TCount%%W_%%TNameList%
+	if %TCount%   GTR 9 echo %TAB%  %GN_%%TCount%%W_%%TNameList%
 	EXIT /B
 	)
 set "_info="
@@ -1214,13 +1233,22 @@ if /i "%TSelector%"=="Select" (
 		)
 	)
 	if /i "%TemplateTestMode%"=="yes" (
-	call :FI-Template-TestMode-TnameX_forfiles_resolver
-	set "Ttest="
-	set "referer=FI-Template"
-	set "InputFile=%TemplateSampleImage%"
-	set "OutputFile=%RCFI%\templates\samples\%TName%.ico"
-	cls
-	goto FI-Template-TestMode
+		call :FI-Template-TestMode-TnameX_forfiles_resolver
+		set "Ttest="
+		set "referer=FI-Template"
+		set "InputFile=%TemplateSampleImage%"
+		set "OutputFile=%RCFI%\templates\samples\%TName%.ico"
+		cls
+		goto FI-Template-TestMode
+	)
+	if /i "%TemplateAlwaysAsk%"=="yes" (
+		call :FI-Template-TestMode-TnameX_forfiles_resolver
+		set "Ttest="
+		set "referer=FI-Template"
+		set "InputFile=%TemplateSampleImage%"
+		set "OutputFile=%RCFI%\templates\samples\%TName%.ico"
+		cls
+		goto FI-Template-TestMode
 	)
 EXIT /B
 
@@ -1425,7 +1453,7 @@ PUSHD "%TPath%"
 POPD
 if /i not "%TemplateTestMode-AutoExecute%"=="yes" goto FI-Template-TestMode
 if /i "%error%"=="detected" echo %I_%Error Detected! Auto execution is PAUSED. Press any key to continue.%_%&pause>nul&set "Error="
-if "%TdateX%"=="%Tdate%" echo The template will be automatically executed when a file modification is detected.&%p2%&cls&goto FI-Template-TestMode-Auto
+if "%TdateX%"=="%Tdate%" echo The template will be automatically executed when a template %GG_%modification%W_% is detected.&%p2%&cls&goto FI-Template-TestMode-Auto
 set "TdateX=%Tdate%"
 set "TestModeAuto=Execute"
 if exist "%OutputFile%" del "%OutputFile%" >nul
@@ -1435,7 +1463,7 @@ goto FI-Template-TestMode-Auto
 :FI-Template-Edit
 echo            %I_%%W_%  Template Configuration  %_%
 echo.
-echo %TAB%    %W_%Choose Template:%_%
+echo %TAB% %W_%Choose Template:%_%
 set "TemplateAlwaysAsk=yes"
 call :FI-Template-AlwaysAsk
 start "" "%TextEditor%" "%Template%"
@@ -1533,6 +1561,7 @@ call :Config-UpdateVar
 echo.&echo.
 echo %W_%%TAB%%G_%%I_% Keywords updated! %_%
 %p2%
+if defined Context cls
 echo.&echo.
 echo %TAB%%_%-------%W_%%I_% Current Status %_%----------------------------------------
 echo %TAB%Directory	:%ESC%%U_%%cd%%-%%ESC%
@@ -2698,7 +2727,7 @@ title  "%foldername%"
 echo.
 echo %TAB%               %I_%%W_%    Done!    %_%
 echo. &echo.
-ping localhost -n 2 >nul
+ping localhost -n 5 >nul
 del "%RCFI%\resources\refresh.RCFI" 2
 ping localhost -n 1 >nul
 exit
@@ -3558,7 +3587,7 @@ PUSHD    "%~dp0"
 	echo TemplateForJPG="insert the template name to use for .jpg files"
 	echo TemplateAlwaysAsk="No"
 	echo TemplateTestMode="No"
-	echo TemplateTestMode-AutoExecute="No"
+	echo TemplateTestMode-AutoExecute="Yes"
 	echo TemplateIconSize="256"
 	echo ExitWait="100"
 	echo IconFileName="foldericon(#ID)"
@@ -3974,6 +4003,7 @@ rem Generating setup_*.reg
 	echo "Icon"="imageres.dll,-5303"
 	echo [%RegExShell%\RCFI.Change.Folder.Icon\command]
 	echo @="%cmd% set \"Context=Change.Folder.Icon\"%RCFIexe% \"%%V\""
+
 	
 	:REG-FI-Select.And.Change.Folder.Icon
 	echo [%RegExShell%\RCFI.Select.And.Change.Folder.Icon]
@@ -3981,6 +4011,13 @@ rem Generating setup_*.reg
 	echo "Icon"="imageres.dll,-148"
 	echo [%RegExShell%\RCFI.Select.And.Change.Folder.Icon\command]
 	echo @="%Scmd% set \"Context=Select.And.Change.Folder.Icon\"%SRCFIexe% \"%%V\""
+	
+	:REG-FI-Choose.from.collections
+	echo [%RegExShell%\RCFI.Choose.from.collections]
+	echo "MUIVerb"="Choose from collections"
+	echo "Icon"="imageres.dll,-5361"
+	echo [%RegExShell%\RCFI.Choose.from.collections\command]
+	echo @="%Scmd% set \"Context=Choose.from.collections\"%SRCFIexe% \"%%V\""
 	
 	:REG-FI.Search.Folder.Icon
 	echo [%RegExShell%\RCFI.Search.Folder.Icon]
@@ -4252,7 +4289,14 @@ rem Generating setup_*.reg
 	echo "CommandFlags"=dword:00000020
 	echo [%RegExShell%\RCFI.More.Context\command]
 	echo @="%cmd% set \"Context=More.Context\"%RCFIexe% \"%%V\""
-	
+
+rem		This one is for v0.5	
+rem 	:REG-Context_Menu-FI-Folder
+rem 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
+rem 	echo "MUIVerb"="Folder Icon Tools"
+rem 	echo "Icon"="imageres.dll,-190"
+rem 	echo "SubCommands"="RCFI.Select.And.Change.Folder.Icon;RCFI.Choose.from.collections;RCFI.RefreshNR;RCFI.DIR.Choose.Template;RCFI.Scan;RCFI.DefKey;RCFI.GenKey;RCFI.GenJPG;RCFI.GenPNG;RCFI.Search.Folder.Icon;RCFI.Search.Poster;RCFI.Search.Icon;RCFI.Move;RCFI.Rename;RCFI.RemFolderIcon;RCFI.ActivateFolderIcon"
+
 	:REG-Context_Menu-FI-Folder
 	echo [%RegExDir%\RCFI.Folder.Icon.Tools]
 	echo "MUIVerb"="Folder Icon Tools"

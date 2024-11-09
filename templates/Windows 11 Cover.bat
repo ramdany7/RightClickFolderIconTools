@@ -271,11 +271,12 @@ exit /b
 
 
 :LAYER-FOLDER_NAME
-if not defined FolderName exit /b
 if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 
 for %%F in ("%cd%") do set "foldername=%%~nxF"
+if not defined foldername set "foldername=%cd:\= %"
+
 set "FolNamShort=%foldername%"
 set "FolNamShortLimit=%FolderNameShort-characters-limit%"
 set /a "FolNamShortLimit=%FolNamShortLimit%+1"

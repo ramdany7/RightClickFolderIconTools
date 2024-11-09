@@ -87,7 +87,7 @@ set "Picture-Position-Y=+20"
 
 set "Picture-Shadow=yes"
 set "Shadow-Color=BLACK"
-set "Shadow-Opacity=20"
+set "Shadow-Opacity=20%"
 set "Shadow-Blur=0.6"
 
 set "ReAdjust-BG-position=yes"
@@ -322,11 +322,12 @@ exit /b
 
 
 :LAYER-FOLDER_NAME
-if not defined FolderName exit /b
 if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 
 for %%F in ("%cd%") do set "foldername=%%~nxF"
+if not defined foldername set "foldername=%cd:\= %"
+
 set "FolNamShort=%foldername%"
 set "FolNamShortLimit=%FolderNameShort-characters-limit%"
 set /a "FolNamShortLimit=%FolNamShortLimit%+1"

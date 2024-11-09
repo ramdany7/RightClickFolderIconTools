@@ -3,9 +3,10 @@
 :: 2024-06-24 Adding Global Config to override template config using RCFI.template.ini.
 :: 2024-06-24 Adding gradient brightness, gradient shadow and bevel shadow. 
 
+
 ::                Template Info
 ::========================================================
-::`  Windows 11 style folder icon.
+::` Windows 11 style folder icon.
 ::` ------------------------------------------------------
 
 
@@ -72,7 +73,6 @@ set "Gradient-Brightness=20"
 set "Gradient-Contrast=10"
 set "Gradient-Exposure=110"
 set "Gradient-Saturation=110"
-
 ::========================================================
 
 
@@ -293,11 +293,12 @@ exit /b
 
 
 :LAYER-FOLDER_NAME
-if not defined FolderName exit /b
 if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 
 for %%F in ("%cd%") do set "foldername=%%~nxF"
+if not defined foldername set "foldername=%cd:\= %"
+
 set "FolNamShort=%foldername%"
 set "FolNamShortLimit=%FolderNameShort-characters-limit%"
 set /a "FolNamShortLimit=%FolNamShortLimit%+1"
