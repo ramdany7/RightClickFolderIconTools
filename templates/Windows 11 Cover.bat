@@ -275,7 +275,7 @@ if /i not "%display-FolderName%"=="yes" exit /b
 if defined CODE-LOGO-IMAGE exit /b
 
 for %%F in ("%cd%") do set "foldername=%%~nxF"
-if not defined foldername set "foldername=%cd:\= %"
+if not defined foldername set "foldername=%cd:\=\\            %"&set "FolderNameLong-characters-limit=0"
 
 set "FolNamShort=%foldername%"
 set "FolNamShortLimit=%FolderNameShort-characters-limit%"

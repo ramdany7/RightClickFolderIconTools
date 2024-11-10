@@ -39,6 +39,8 @@
 ::                   - You can set "TemplateAlwaysAsk" ON or OFF through the 'Choose template' page.
 ::                   - When "TemplateAlwaysAsk" is active, "TemplateTestMode" is also active.
 :: 2024-11-08 Fixed: [Template: Windows 11s] couldn't display folder name.
+:: 2024-11-10 Added: modifications to the 'Search Folder Icon' page.
+
 
 setlocal
 set name=RCFI Tools
@@ -93,6 +95,13 @@ set "referer="
 if defined timestart call :timer-end
 set "timestart="
 if /i "%Context%"=="refresh.NR" exit
+
+IF /i %success_result%	GTR 0 (
+	echo.
+	echo  %AST% %G_%If the  folder icon  doesn’t show up or hasn't changed yet,
+	   echo    %G_%please wait 30-40 seconds then refresh the icon cache.
+)
+
 if defined Context (
 	if %exitwait% GTR 99 (
 		echo.&echo.
@@ -865,7 +874,7 @@ IF /i %G_result%		GTR 0 echo %TAB%%G_%%G_s%%G_result%%_% Folders have no files m
 IF /i %YY_result%		LSS 1 IF /i %success_result%	LSS 1 echo.&echo %TAB% ^(No folders to be processed.^)
 IF NOT "%YY_result%"=="%success_result%" IF %action_result% EQU 0 echo %TAB% ^(No files to be processed.^)
 IF /i %fail_result%	GTR 0 echo %TAB%%fail_s%%R_%%fail_result%%_% Folder icons failed to generate.
-IF /i %success_result%	GTR 1 echo %TAB%%success_s%%CC_%%success_result%%_% Folder icons generated. 
+IF /i %success_result%	GTR 0 echo %TAB%%success_s%%CC_%%success_result%%_% Folder icons generated. 
 echo %TAB%------------------------------------------------------------------------------
 goto options
 
@@ -1482,8 +1491,14 @@ if /i "%Context%"=="FI.Search.Icon" (set "SrcInput=%~nx1"&set "PreAppliedKeyword
 echo.&echo.
 echo                     %G_%    Search folder icon  on Google image search, Just type
 echo                     %G_% in the keyword then hit [Enter],  you will be redirected 
-echo                     %G_% to Google search image results with filters on  so it is 
-echo                     %G_% easier to find.
+echo                     %G_% to Google search  image results with filters on,  making 
+echo                     %G_% it easier to find waht you need.
+echo.
+echo                     %G_% • Insert just  the  keyword to search for a folder icon.
+echo                     %G_% • Insert  keyword+%U_% poster%_%%G_%   to  search  for   a  poster.
+echo                     %G_% • Insert  keyword+%U_% logo%_%%G_%     to  search   for   a   logo.
+echo                     %G_% • Insert  keyword+%U_% icon%_%%G_%    to  search   for   an   icon.
+echo                     %G_% • Drag and drop the image into Explorer to download it.
 echo.&echo.&echo.&echo.
 echo                                       %I_%%W_% SEARCH FOLDER ICON %_%
 echo.
@@ -1493,7 +1508,10 @@ set /p "SrcInput=%_%%W_%                                      %_%%W_%"
 if /i "%SrcInput%"=="0" cls &echo.&echo.&echo.&goto FI-Search
 set SrcInput=%SrcInput:"=%
 set "SrcInput=%SrcInput:#=%"
-if not "%SrcInput%"=="%SrcInput:poster=%" set "SrcInput=%SrcInput:poster=%"&set "PreAppliedKeyword=%PreAppliedKeywordPoster%"
+if not "%SrcInput%"=="%SrcInput: poster=%" set "SrcInput=%SrcInput:poster=%"&set "PreAppliedKeyword=%PreAppliedKeywordPoster%"
+if not "%SrcInput%"=="%SrcInput: icon=%" set "SrcInput=%SrcInput:icon=%"&set "PreAppliedKeyword=%PreAppliedKeywordIcon%"
+if not "%SrcInput%"=="%SrcInput: logo=%" set "SrcInput=%SrcInput:logo=%"&set "PreAppliedKeyword=%PreAppliedKeywordLogo%"
+
 Start "" "https://google.com/search?q=%SrcInput% %PreAppliedKeyword%"
 cls
 if /i not "%Context%"=="" exit
@@ -1558,8 +1576,8 @@ EXIT /B
 call :Config-Save
 call :Config-UpdateVar
 %p1%
-echo.&echo.
-echo %W_%%TAB%%G_%%I_% Keywords updated! %_%
+echo.
+echo %W_%%TAB%%W_%Keywords updated!%_%
 %p2%
 if defined Context cls
 echo.&echo.
@@ -1790,8 +1808,10 @@ call :FI-Rename-GetDir
 Echo.
 echo %TAB%%W_%==============================================================================%_%
 echo %TAB% ^(%GG_%%RenSuccess%%_%^) Icons have been renamed to%ESC%%C_%%NewIconNameDisplay%.ico%_%.%ESC%
+set "success_result=%RenSuccess%"
 set "recursive="
 set "IconFileName=%IconFileName.bkp%"
+
 goto options
 
 :FI-Rename-History
@@ -2141,6 +2161,7 @@ IF %MovMissSuccess% GTR 0 echo %TAB%%MovMissSuccess__%%RR_%%MovMissSuccess%%_% I
 IF %MovFail% GTR 0 echo %TAB%%MovFail__%%R_%%MovFail%%_% Icons failed to moved.
 IF %MovDeny% GTR 0 echo %TAB%%MovAllDeny__%%R_%%MovAllDeny%%_% Icons can't be moved because the icon file extension is not .ico.
 
+set "success_result=%MovSuccess%"
 set "recursive="
 set "MovDestination="
 goto options
@@ -2668,7 +2689,7 @@ goto options
 
 :FI-Refresh-NoRestart             
 @echo off
-set "WaitRefreshDelay=echo.&echo.&echo %G_%  if the folder icon hasn't changed yet, Please&echo   wait for 30-40 seconds then refresh again.%_%"
+set "WaitRefreshDelay=echo.&echo.&echo %G_%  if the folder icon hasn't changed yet, Please&echo   wait  30-40 seconds,  then  refresh again.%_%"
 mode con:cols=50 lines=9
 title  refresh folder icon..
 set refreshCount=0
