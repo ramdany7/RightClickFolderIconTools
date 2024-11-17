@@ -40,6 +40,8 @@
 ::                   - When "TemplateAlwaysAsk" is active, "TemplateTestMode" is also active.
 :: 2024-11-08 Fixed: [Template: Windows 11s] couldn't display folder name.
 :: 2024-11-10 Added: modifications to the 'Search Folder Icon' page.
+:: 2024-11-15 Fixed: 'TemplateTestMode' not working due to the missing "Samples" folder.
+:: 2024-11-17 Fixed: 'Rename icon' incorrectly detects the current icon as a duplicate when the new icon name is the same as the current icon.
 
 
 setlocal
@@ -99,7 +101,8 @@ if /i "%Context%"=="refresh.NR" exit
 IF /i %success_result%	GTR 0 (
 	echo.
 	echo  %AST% %G_%If the  folder icon  doesn’t show up or hasn't changed yet,
-	   echo    %G_%please wait 30-40 seconds then refresh the icon cache.
+	echo    %G_%please wait 30-40 seconds then refresh the icon cache.
+	if not defined Context echo.
 )
 
 if defined Context (
@@ -146,8 +149,8 @@ if not defined OpenFrom set "FolderName=%cd%"
 set "Command=(none)"
 set "FolderName=%FolderName:&=^&%"
 
-if defined OpenFrom echo %W_%┌%YY_%📁 %_%%FolderName%
-if defined OpenFrom set /p "Command=%W_%└%C_%🏞%C_% "
+if defined OpenFrom echo %YY_%📁 %FolderName%
+if defined OpenFrom set /p "Command=%_%%W_%Enter the image path:%_%%C_%"
 
 if not defined OpenFrom echo %G_%%FolderName%
 if not defined OpenFrom set /p "Command=%I_%%GN_% %_%%GN_% "
@@ -1068,6 +1071,9 @@ if /i "%context%"=="Edit.Template" (
 echo.
 echo %G_%%TAB%  to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
+echo %TAB%%_%  ------------------------------------------------------------------------
+echo.
+echo.
 set "Already=Asked"
 EXIT /B
 
@@ -1152,8 +1158,7 @@ goto options
 rem Input template options
 set "TemplateChoice=NotSelected"
 set /p "TemplateChoice=%_%%TAB%  %G_%%I_%Select option:%_% %GN_%"
-if /i not "%Context%"=="Edit.Template" echo %TAB%%_%  ------------------------------------------------------------------------
-if /i "%TemplateChoice%"=="NotSelected" echo %_%%TAB%   %I_%  CANCELED  %-%&%p2%&goto options
+if /i "%TemplateChoice%"=="NotSelected" echo.&echo %_%%TAB%   %I_%  CANCELED  %-%&%p2%&goto options
 if /i "%TemplateChoice%"=="R" cls&echo.&echo.&echo.&goto FI-Template
 if /i "%TemplateChoice%"=="A" (
 	if /i    "%TemplateAlwaysAsk%"=="yes" set "TemplateAlwaysAsk=no"
@@ -1223,8 +1228,8 @@ if /i "%TSelector%"=="Select" (
 				set "TemplateChoice=Selected"
 				if /i not "%Context%"=="IMG-Choose.and.Set.As" call :Config-Save
 			) else (
-				echo.
-				echo.
+				rem echo.
+				rem echo.
 				set "TemplateChoice=Selected"
 				EXIT /B
 			)
@@ -1374,6 +1379,7 @@ set "TnameXfor=%TnameXfor:&=^&%"
 EXIT /B
 
 :FI-Template-TestMode
+if not exist "%RCFI%\templates\samples" md "%RCFI%\templates\samples" >nul
 set "OutputFile=%RCFI%\templates\samples\%TName%.png"
 if /i "%referer%"=="FI-Generate" EXIT /B
 echo.&echo.&echo.
@@ -1488,7 +1494,6 @@ if /i "%Context%"=="FI.Search.Folder.Icon" (set "SrcInput=%~nx1"&goto FI-Search-
 if /i "%Context%"=="FI.Search.Poster" (set "SrcInput=%~nx1"&set "PreAppliedKeyword=%PreAppliedKeywordPoster%"&goto FI-Search-Input)
 if /i "%Context%"=="FI.Search.Logo" (set "SrcInput=%~nx1"&set "PreAppliedKeyword=%PreAppliedKeywordLogo%"&goto FI-Search-Input)
 if /i "%Context%"=="FI.Search.Icon" (set "SrcInput=%~nx1"&set "PreAppliedKeyword=%PreAppliedKeywordIcon%"&goto FI-Search-Input)
-echo.&echo.
 echo                     %G_%    Search folder icon  on Google image search, Just type
 echo                     %G_% in the keyword then hit [Enter],  you will be redirected 
 echo                     %G_% to Google search  image results with filters on,  making 
@@ -1918,8 +1923,12 @@ for %%I in ("%IconResource:"=%") do set "IconName=%%~nI"&set "IconPath=%%~dpI"&s
 echo %TAB%%Y_%📁%ESC%%FolderName%%ESC%
 if defined renID call :FI-Generate-Icon_Name
 if defined renID call set "NewIconName=%%IconFileName:#ID=%FI-ID%%%"
+if /i "%IconName%%IconExt%"=="%NewIconName%.ico" (
+	echo %TAB%%_%Icon:%ESC%%C_%%IconName%%IconExt%%ESC%
+	EXIT /B
+)
 if exist "%IconPath%%NewIconName%.ico" call :FI-Rename-Duplicate
-echo %TAB%%G_%renaming.. %ESC%%G_%%IconName%%IconExt% %GG_%-->%G_% %NewIconName%%RenDup%.ico  %R_%
+echo %TAB%%_%Icon:%ESC%%C_%%NewIconName%%RenDup%.ico %GG_%<--%G_%%IconName%%IconExt%%ESC%  %R_%
 if /i "%CD%\"=="%IconPath%" set "IconPath="
 if /i "%IconExt%"==".ico" (
 	Attrib -s -h -r "%IconPath%%IconName%%IconExt%"
