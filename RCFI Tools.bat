@@ -12,13 +12,12 @@
 :: 2024-07-15 Resolved: Issue #12 – Network drive/UNC paths not supported. [SOLVED]
 :: 2024-07-19 Added: Ability to move the icon's path.
 :: 2024-07-24 Added: Use "#ID" in config 'IconFileName' to generate a random 6-digit string, which helps avoid the icon cache displaying 
-::            the previous icon instead of the newly assigned one (unless you refresh the icon cache by restarting Explorer).
+::                   the previous icon instead of the newly assigned one (unless you refresh the icon cache by restarting Explorer).
 :: 2024-07-30 Added: 'Move' and 'Rename' features to the folder right-click menu.
 :: 2024-07-31 Added: Ability to hide and unhide "icon.ico" and "desktop.ini" files.
 :: 2024-08-14 Fixed: 'Move' and 'Rename' functions to display the correct icon file name and show the proper stats.
 :: 2024-08-24 Added: Ability to 'Define keywords', 'Rename Icons', and 'Move Icons' features to maintain a history of previously inserted values.
 :: 2024-09-20 Removed: [Template: Win11Folderify] "Picture-opacity" option because it caused transparency to render as black. 
-::            (Might fix and add it back later if anyone needs it?)
 :: 2024-09-20 Added: [Template: Win11Folderify] config "Picture-Drawing=original" to display the picture as is. Requested #13
 :: 2024-09-20 Added: [Template: Win11Folderify] config to change the shadow.
 :: 2024-09-30 Added: [Template: Kometa] New template. Requested #11
@@ -42,7 +41,7 @@
 :: 2024-11-10 Added: modifications to the 'Search Folder Icon' page.
 :: 2024-11-15 Fixed: 'TemplateTestMode' not working due to the missing "Samples" folder.
 :: 2024-11-17 Fixed: 'Rename icon' incorrectly detects the current icon as a duplicate when the new icon name is the same as the current icon.
-
+:: 2024-11-24 Checking and preparing for the v0.4 update release!
 
 setlocal
 set name=RCFI Tools
@@ -1072,6 +1071,7 @@ echo.
 echo %G_%%TAB%  to select, insert the number assosiated to the options, then hit Enter.%_%
 call :FI-Template-Input
 echo %TAB%%_%  ------------------------------------------------------------------------
+call :Config-Save
 echo.
 echo.
 set "Already=Asked"
@@ -2042,6 +2042,7 @@ set "MovHis="
 set "MovDestination=(none)"
 set /p "MovDestination=%_%%TAB% %_%%I_%Destination:%_%%YY_% "
 set "MovDestination=%MovDestination:"=%"
+if /i "%MovDestination:~-1%"=="\" set "MovDestination=%MovDestination:~,-1%"
 echo.
 if /i "%MovDestination%"=="(none)" echo.&echo.&echo %_%%TAB%   %G_%       %I_%     Canceled     %_% &goto options
 if /i "%MovDestination%"=="1" set "MovDestination=%MoveDst1%"&set "MovHis=yes"
@@ -2550,34 +2551,28 @@ set "HideAttrib="
 echo.&echo.&echo.&echo.
 echo %_%                     %I_%  Hide or Unhide the "desktop.ini" and "*.ico" files.  %_%
 echo.
-echo %TAB%%G_%You can  always  hide or unhide the  files; it will  not move, remove or delete  anything, 
+echo %TAB%%G_%You can  always  hide or unhide the  files; it will  %R_%not%G_% move, remove or delete  anything, 
 echo %TAB%%G_%nothing scary will happen. just making the files related to the folder icon hidden or not.
 echo.
-echo                           %_%Press %GN_%H%_%%_% to Hide  %G_%^|%_%  Press %GN_%U%_% to Unhide%G_%
-echo                                      %G_%Press %G_%C%G_% to Cancel%BK_%
+echo    %_%Press %GN_%R%_%%_% to Hide as a regular files %G_%^|%_% Press %GN_%U%_% to Unhide %G_%^| %_%Press %GN_%S%_%%_% to Hide as a system files %G_%
+echo                                         %G_%Press %G_%C%G_% to Cancel%BK_%
 echo.
-CHOICE /C:HUC /N
+CHOICE /C:URSC /N
 echo.&echo.&echo.
-if /i "%errorlevel%"=="2" set "HideAct=Unhide"&set "HideAttrib=-h -s"&goto FI-Hide-GetDir
-if /i "%errorlevel%"=="3" echo %TAB%%G_%%I_%  CANCELED  %_%&goto Options
-
-echo %TAB%%_%Hide it as system file%R_%?%_%
-echo %TAB%%G_%adding "system file" attribute to the file will make it extra hidden.
-echo %TAB%%G_%Options: %GN_%Y%G_%/%GN_%N%G_%   ^| Press %GN_%Y%G_% to make it extra hidden.%BK_%
-CHOICE /C:YNC /N
-echo.&echo.&echo.
-if /i "%errorlevel%"=="1" set "HideAct=Hide"&set "HideAttrib=+h +s"&goto FI-Hide-GetDir
-if /i "%errorlevel%"=="2" set "HideAct=Hide"&set "HideAttrib=+h -s"&goto FI-Hide-GetDir 
+if /i "%errorlevel%"=="1" set "HideAct=Unhide"&set "HideAttrib=-h -s"&goto FI-Hide-GetDir
+if /i "%errorlevel%"=="2" set "HideAct=Hide"&set "HideAttrib=+h -s"&goto FI-Hide-GetDir
+if /i "%errorlevel%"=="3" set "HideAct=Hide"&set "HideAttrib=+h +s"&goto FI-Hide-GetDir
+if /i "%errorlevel%"=="4" echo %TAB%%G_%%I_%  CANCELED  %_%&goto Options
 echo %TAB%%G_%%I_%  CANCELED  %_%
 goto options
 
 :FI-Hide-GetDir
-echo %TAB%%GG_%          %I_%%W_%    Hide Icon Files    %-%
+echo %TAB%%GG_%          %I_%%W_%    Hide Folder Icon Files    %-%
 echo.
 if /i "%recursive%"=="yes" echo %TAB%%U_%%W_%RECURSIVE MODE%_%
-set "HideActDisplay=%HideAttrib:-h -s=Unhide%
-set "HideActDisplay=%HideAttrib:+h +s=Hide as sytem files%
-set "HideActDisplay=%HideAttrib:+h -s=Hide%
+if /i "%HideAttrib%"=="-h -s" set "HideActDisplay=Unhide"
+if /i "%HideAttrib%"=="+h -s" set "HideActDisplay=Hide as a regular files"
+if /i "%HideAttrib%"=="+h +s" set "HideActDisplay=Hide as a system files"
 echo %TAB%%W_%Action:%ESC%%CC_%%HideActDisplay%%ESC%
 call :Timer-start
 echo %TAB%%W_%==============================================================================%_%
@@ -2615,6 +2610,7 @@ if /i "%Recursive%"=="yes" (
 	)
 )
 echo %TAB%%W_%==============================================================================%_%
+echo %TAB%%W_%Action:%ESC%%CC_%%HideActDisplay%%ESC%
 echo.
 
 set "num=%Folders%"&call :Spaces
