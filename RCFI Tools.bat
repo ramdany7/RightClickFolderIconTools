@@ -11,12 +11,13 @@
 :: 2024-12-04 Added: Config option to specify the "Collections" folder and the initial directory for the file selection dialog.
 :: 2024-12-04 Added: Config option to specify the template to use for images from the "Collections" folder (including its subfolders).
 :: 2024-12-04 Improved: Logic to skip the "TemplateAlwaysAsk" dialog when conditions for "TemplateFor" are met.
-:: 2024-12-05 Improved: Removed unused lines, reorganized code, and optimized performance (possibly creating some bugs too 😅).
-:: 2024-12-05 Improved: Right-click 'Change Folder Icon' now opens the file selection dialog.
-:: 2024-12-06 Modified: Changed default settings to TemplateAlwaysAsk="Yes", TemplateIconSize="Auto", HideAsSystemFiles="Yes".
+:: 2024-12-05 Improved: Removed unused lines, reorganized code, and optimized performance (possibly introduced a few bugs 😅).
+:: 2024-12-05 Improved: Right-clicking 'Change Folder Icon' now opens the file selection dialog.
+:: 2024-12-06 Modified: Updated default settings to TemplateAlwaysAsk="Yes", TemplateIconSize="Auto", and HideAsSystemFiles="Yes".
 :: 2024-12-07 Fixed: Convert.exe failing to generate icons when using the 'generate' feature.
 :: 2024-12-09 Fixed: Unable to open 'Global Template Configuration' from the Template Configurations menu.
-:: 2024-12-10 Fixed: Some folder names not displaying correctly when generating icons.
+:: 2024-12-10 Fixed: Some folder names not displaying correctly during icon generation.
+:: 2024-12-18 Added: New template — "DualTab Vertical" (Requested in #17).
 
 setlocal
 set name=RCFI Tools
@@ -500,8 +501,9 @@ for /f "tokens=1-12 delims=," %%A in ("%ImageSupport%") do (
 set "fileFilter=Image Files (*.jpg, *.png, *.ico, ...)|%fileFilter%"
 set "OpenFileSelector=Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.OpenFileDialog; $f.InitialDirectory = '%initialDirectory%'; $fileDialog.RestoreDirectory = $true; $f.Filter = '%fileFilter%'; $f.ShowDialog() | Out-Null; $f.FileName; exit"
 if /i "%FS-Trigger%"=="Context" (
-echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.
-echo                     %I_%%G_%     Select a file from the file selection dialog     %_%
+	echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.&echo.
+	echo                     %I_%%G_%     Select a file from the file selection dialog     %_%
+	set "FS-Trigger="
 )
 start /MIN /WAIT "" "%RCFI%\resources\File_Selector.bat"
 
@@ -591,7 +593,7 @@ if not exist "%input%" (
 set "Input=%Input:"=%"
 if /i "%input%"=="1" goto FI-Selected_folder-Separate
 if /i "%input%"=="o" set "FS-referer=Choose.from.collections"&goto FI-File_Selector
-if /i "%input%"=="c" set "initialDirectory=%CollectionsFolder%"&set "FS-Trigger=Context"&set "FS-referer=Change.Folder.Icon"&goto FI-File_Selector
+if /i "%input%"=="c" set "initialDirectory=%CollectionsFolder%"&set "FS-referer=Change.Folder.Icon"&goto FI-File_Selector
 echo.
 if not exist "%Input%" (
 	echo.
@@ -2939,7 +2941,8 @@ ping localhost -n 2 >nul
 EXIT
 
 :FI-Updater
-for /l %%N in (1,1,4) do (
+for /l %%N in (1,1,1) do (
+	%P2%
 	for /f "usebackq tokens=* delims=" %%F in ("%RCFI%\resources\FolderUpdater_list.txt") do (
 		call "%FI-Update%" /f %%F >nul 2>&1 &call |EXIT /B
 	)
